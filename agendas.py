@@ -99,6 +99,8 @@ class AgendaNormalizer:
         
         # Buscar doctor - patrones mejorados
         doctor_patterns = [
+            # Patrón específico para casos con AGENDA BIS - extraer nombre antes de "- AGENDA BIS"
+            r'DR[A]?\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ\s]+?)\s*-\s*AGENDA\s+BIS',
             # Patrón para DRA/DR seguido del nombre - detener antes de palabras clave
             r'\bDRA?\.\s*([A-ZÁÉÍÓÚÑ].+?)(?:\s*-\s*(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
             # Patrón para DOCTOR/DOCTORA seguido del nombre
@@ -115,10 +117,10 @@ class AgendaNormalizer:
             r'\bLIC\.\s*EN\s+NUTRICION\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+)*)',
             # Patrón general para LIC. seguido directamente del nombre (sin especialidad)
             r'\bLIC\.\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)',
-            # Patrón para nombres al final después de guión
-            r'[-\s]+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)$',
             # Patrón específico para "ESPECIALIDAD - NOMBRE APELLIDO - TIPO"
             r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS|PEDIATRIA|INFANTIL)?\s*-\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*-\s*(?:ESPONTANEA|PROGRAMADA)',
+            # Patrón para nombres al final después de guión (pero NO si termina con AGENDA BIS)
+            r'[-\s]+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)(?!\s*-?\s*AGENDA\s+BIS)$',
         ]
         
         for pattern in doctor_patterns:
@@ -131,14 +133,14 @@ class AgendaNormalizer:
                     'TRATAMIENTO', 'GENERAL', 'PAP', 'ESPONTANEA', 'PROGRAMADA',
                     'EN PSICOLOGIA', 'EN NUTRICION', 'EN TRABAJO', 'EN KINESIOLOGIA',
                     'LICENCIADA', 'LICENCIADO', 'MEDICO', 'MEDICA', 'AGENDA SÁBADOS',
-                    'AGENDA SABADOS', 'RESIDENTE', 'AGENDA', 'ESPONTANEA'
+                    'AGENDA SABADOS', 'RESIDENTE', 'AGENDA', 'ESPONTANEA', 'AGENDA BIS'
                 ]
                 # Solo excluir si el nombre candidato es exactamente una de estas palabras o si es muy corto
                 if nombre_candidato.strip() and len(nombre_candidato.strip()) > 2:
                     if not any(nombre_candidato.upper().strip() == palabra for palabra in palabras_excluir):
                         # Limpiar palabras específicas del final del nombre
-                        nombre_limpio = re.sub(r'\s*-\s*(DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)\s*$', '', nombre_candidato, flags=re.IGNORECASE)
-                        doctor = nombre_limpio.strip()
+                        nombre_candidato_limpio = re.sub(r'\s*-\s*(DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)\s*$', '', nombre_candidato, flags=re.IGNORECASE)
+                        doctor = nombre_candidato_limpio.strip()
                         break
         
         # Buscar tipo de turno - patrones mejorados
@@ -208,13 +210,38 @@ class AgendaNormalizer:
         
         primera_celda = str(row.iloc[0]).strip()
         
-        # Si la primera celda contiene palabras clave médicas
+        # Si la primera celda contiene palabras clave médicas (doctores/profesionales)
         palabras_medicas = ['PEDIATRIA', 'DR.', 'DRA.', 'DOCTOR', 'DOCTORA', 'LIC.', 'MEDICO', 'CLINICO']
         if any(palabra in primera_celda.upper() for palabra in palabras_medicas):
             return True
         
         # Si contiene "PERFIL PROFESIONAL" (formato HCSI)
         if 'PERFIL PROFESIONAL' in primera_celda.upper():
+            return True
+        
+        # Detectar especialidades médicas sin doctor específico
+        especialidades_medicas = [
+            'CARDIOLOGIA', 'NEUROLOGIA', 'DERMATOLOGIA', 'GINECOLOGIA', 'OBSTETRICIA',
+            'TRAUMATOLOGIA', 'OFTALMOLOGIA', 'OTORRINOLARINGOLOGIA', 'UROLOGIA',
+            'NEUMOLOGIA', 'HEMATOLOGIA', 'ONCOLOGIA', 'REUMATOLOGIA', 'INFECTOLOGIA',
+            'NEFROLOGIA', 'CLINICA MEDICA', 'MEDICINA INTERNA', 'CIRUGIA',
+            'ANESTESIOLOGIA', 'PSIQUIATRIA', 'HEMOTERAPIA', 'KINESIOLOGIA',
+            'LABORATORIO', 'NUTRICION', 'NEUROCIRUGÍA', 'MEDICINA LABORAL',
+            'SERVICIO SOCIAL', 'DIABETOLOGIA', 'GUARDIA MEDICA', 'DIRECCION MEDICA',
+            'ANATOMIA PATOLOGICA', 'CIRUGIA VASCULAR', 'NEUMONOLOGIA', 'ODONTOLOGIA',
+            'ADOLESCENCIA', 'RADIOLOGIA', 'ENDODONCIA', 'PROTESIS',
+            'ESTIMULACION TEMPRANA', 'FONOAUDIOLOGIA', 'TERAPIA OCUPACIONAL',
+            'PSICOPEDAGOGIA', 'MUSICOTERAPIA', 'SALUD SEXUAL', 'MEDICINA PREVENTIVA',
+            'RONDA SANITARIA', 'ENFERMERIA', 'VACUNACION', 'ECOGRAFIA', 'FARMACIA',
+            'ESTADISTICA', 'TRABAJO SOCIAL', 'ADMINISTRACION', 'DIRECCION',
+            'COORDINACION', 'SECRETARIA', 'ARCHIVO', 'INFORMES', 'CONSULTORIOS',
+            'CONTROL', 'POST ALTA', 'DEMANDA', 'MEDICINA', 'CIRUGIA MAXILOFACIAL',
+            'CIRUGIA PLASTICA', 'MEDICINA FAMILIAR', 'ATENCION', 'CONSULTORIO',
+            'UNIDAD', 'SALA', 'TURNO', 'AGENDA', 'GUARDIA', 'EMERGENCIA'
+        ]
+        
+        texto_upper = primera_celda.upper()
+        if any(especialidad in texto_upper for especialidad in especialidades_medicas):
             return True
         
         return False

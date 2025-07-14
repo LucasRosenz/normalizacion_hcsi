@@ -129,7 +129,7 @@ with col4:
 st.markdown("---")
 
 # Layout principal con tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión"])
 
 with tab1:
     st.header("Resumen general")
@@ -139,51 +139,59 @@ with tab1:
     with col1:
         # Gráfico de agendas únicas por área médica
         df_areas = df_filtrado[df_filtrado['area'] != 'Sin área']
-        areas_count = df_areas.groupby(['nombre_original_agenda', 'efector', 'area']).ngroups
-        areas_count_series = df_areas.groupby('area').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
-        
-        fig_areas = px.bar(
-            x=areas_count_series.values,
-            y=areas_count_series.index,
-            orientation='h',
-            title="Top 10 especialidades por número de agendas",
-            labels={'x': 'Número de agendas', 'y': 'Especialidad'},
-            color=areas_count_series.values,
-            color_continuous_scale='viridis'
-        )
-        fig_areas.update_layout(height=400, showlegend=False)
-        st.plotly_chart(fig_areas, use_container_width=True)
+        if not df_areas.empty:
+            areas_count_series = df_areas.groupby('area').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
+            
+            fig_areas = px.bar(
+                x=areas_count_series.values,
+                y=areas_count_series.index,
+                orientation='h',
+                title="Top 10 especialidades por número de agendas",
+                labels={'x': 'Número de agendas', 'y': 'Especialidad'},
+                color=areas_count_series.values,
+                color_continuous_scale='viridis'
+            )
+            fig_areas.update_layout(height=400, showlegend=False)
+            st.plotly_chart(fig_areas, use_container_width=True)
+        else:
+            st.info("No hay especialidades disponibles con los filtros aplicados.")
     
     with col2:
         # Gráfico de agendas únicas por día de la semana
-        dias_count = df_filtrado.groupby('dia').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups)
-        
-        fig_dias = px.pie(
-            values=dias_count.values,
-            names=dias_count.index,
-            title="Distribución de agendas por día de la semana"
-        )
-        fig_dias.update_traces(textposition='inside', textinfo='percent+label')
-        fig_dias.update_layout(height=400)
-        st.plotly_chart(fig_dias, use_container_width=True)
+        if not df_filtrado.empty:
+            dias_count = df_filtrado.groupby('dia').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups)
+            
+            fig_dias = px.pie(
+                values=dias_count.values,
+                names=dias_count.index,
+                title="Distribución de agendas por día de la semana"
+            )
+            fig_dias.update_traces(textposition='inside', textinfo='percent+label')
+            fig_dias.update_layout(height=400)
+            st.plotly_chart(fig_dias, use_container_width=True)
+        else:
+            st.info("No hay datos disponibles con los filtros aplicados.")
     
     # Gráfico de agendas únicas por efector
-    efectores_count = df_filtrado.groupby('efector').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups)
-    
-    fig_efectores = px.bar(
-        x=efectores_count.index,
-        y=efectores_count.values,
-        title="Número de agendas por centro de salud",
-        labels={'x': 'Centro de salud', 'y': 'Número de agendas'},
-        color=efectores_count.values,
-        color_continuous_scale='plasma'
-    )
-    fig_efectores.update_layout(
-        height=400,
-        xaxis_tickangle=-45,
-        showlegend=False
-    )
-    st.plotly_chart(fig_efectores, use_container_width=True)
+    if not df_filtrado.empty:
+        efectores_count = df_filtrado.groupby('efector').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups)
+        
+        fig_efectores = px.bar(
+            x=efectores_count.index,
+            y=efectores_count.values,
+            title="Número de agendas por centro de salud",
+            labels={'x': 'Centro de salud', 'y': 'Número de agendas'},
+            color=efectores_count.values,
+            color_continuous_scale='plasma'
+        )
+        fig_efectores.update_layout(
+            height=400,
+            xaxis_tickangle=-45,
+            showlegend=False
+        )
+        st.plotly_chart(fig_efectores, use_container_width=True)
+    else:
+        st.info("No hay datos disponibles con los filtros aplicados.")
 
 with tab2:
     st.header("Análisis de horarios por día")
@@ -225,17 +233,20 @@ with tab2:
         with col2:
             # Top médicos del día (agendas únicas)
             df_medicos_dia = df_dia[df_dia['doctor'] != 'Sin asignar']
-            medicos_dia = df_medicos_dia.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
+            if not df_medicos_dia.empty:
+                medicos_dia = df_medicos_dia.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
 
-            fig_medicos = px.bar(
-                x=medicos_dia.values,
-                y=medicos_dia.index,
-                orientation='h',
-                title=f"Top médicos - {dia_analisis}",
-                labels={'x': 'Número de agendas', 'y': 'Médico'}
-            )
-            fig_medicos.update_layout(height=400)
-            st.plotly_chart(fig_medicos, use_container_width=True)
+                fig_medicos = px.bar(
+                    x=medicos_dia.values,
+                    y=medicos_dia.index,
+                    orientation='h',
+                    title=f"Top médicos - {dia_analisis}",
+                    labels={'x': 'Número de agendas', 'y': 'Médico'}
+                )
+                fig_medicos.update_layout(height=400)
+                st.plotly_chart(fig_medicos, use_container_width=True)
+            else:
+                st.info(f"No hay médicos con agendas disponibles para {dia_analisis}.")
 
         # Tabla detallada del día
         st.subheader(f"Detalle de agendas - {dia_analisis}")
@@ -298,14 +309,21 @@ with tab4:
     st.header("Comparativa entre centros de salud")
     
     # Comparativa de métricas por efector
+    def contar_agendas_unicas_por_efector(x):
+        return x.groupby(['nombre_original_agenda', 'efector']).ngroups
+    
     metricas_efector = df_filtrado.groupby('efector').agg({
         'doctor': lambda x: x[x != 'Sin asignar'].nunique(),
-        'area': lambda x: x[x != 'Sin área'].nunique(),
-        'nombre_original_agenda': lambda x: len(x.groupby(['nombre_original_agenda', 'efector']).groups)
-    }).rename(columns={
+        'area': lambda x: x[x != 'Sin área'].nunique()
+    })
+    
+    # Calcular agendas únicas por separado
+    agendas_por_efector = df_filtrado.groupby('efector').apply(contar_agendas_unicas_por_efector)
+    metricas_efector['Total agendas'] = agendas_por_efector
+    
+    metricas_efector = metricas_efector.rename(columns={
         'doctor': 'Médicos',
-        'area': 'Especialidades',
-        'nombre_original_agenda': 'Total agendas'
+        'area': 'Especialidades'
     }).reset_index()
     
     # Gráfico comparativo
@@ -477,21 +495,31 @@ with tab5:
             # Top 5 médicos en la vista actual (agendas únicas)
             if 'doctor' in df_mostrar.columns:
                 df_medicos_vista = df_mostrar[df_mostrar['doctor'] != 'Sin asignar']
-                top_doctores = df_medicos_vista.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(5)
-                if not top_doctores.empty:
-                    st.write("**Top 5 médicos:**")
-                    for i, (doctor, count) in enumerate(top_doctores.items(), 1):
-                        st.write(f"{i}. {doctor}: {count} agendas")
+                if not df_medicos_vista.empty:
+                    top_doctores = df_medicos_vista.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(5)
+                    if not top_doctores.empty:
+                        st.write("**Top 5 médicos:**")
+                        for i, (doctor, count) in enumerate(top_doctores.items(), 1):
+                            st.write(f"{i}. {doctor}: {count} agendas")
+                    else:
+                        st.info("No hay médicos disponibles.")
+                else:
+                    st.info("No hay médicos con agendas disponibles.")
         
         with col2:
             # Top 5 especialidades en la vista actual (agendas únicas)
             if 'area' in df_mostrar.columns:
                 df_areas_vista = df_mostrar[df_mostrar['area'] != 'Sin área']
-                top_areas = df_areas_vista.groupby('area').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(5)
-                if not top_areas.empty:
-                    st.write("**Top 5 especialidades:**")
-                    for i, (area, count) in enumerate(top_areas.items(), 1):
-                        st.write(f"{i}. {area}: {count} agendas")
+                if not df_areas_vista.empty:
+                    top_areas = df_areas_vista.groupby('area').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(5)
+                    if not top_areas.empty:
+                        st.write("**Top 5 especialidades:**")
+                        for i, (area, count) in enumerate(top_areas.items(), 1):
+                            st.write(f"{i}. {area}: {count} agendas")
+                    else:
+                        st.info("No hay especialidades disponibles.")
+                else:
+                    st.info("No hay especialidades con agendas disponibles.")
 
 with tab6:
     st.header("Vista calendario - agenda semanal")
@@ -695,20 +723,23 @@ with tab6:
         # Tabla resumen por médico
         st.subheader("Resumen por médico")
         
-        resumen_doctores = df_calendario.groupby('doctor').agg({
-            'dia': lambda x: ', '.join(sorted(set(x))),
-            'hora_inicio': lambda x: f"{min(x)} - {max(x)}",
-            'tipo_turno': lambda x: ', '.join(set(x.dropna()))
-        }).rename(columns={
-            'dia': 'Días que atiende',
-            'hora_inicio': 'Rango horario',
-            'tipo_turno': 'Tipos de agenda'
-        })
-        
-        # Contar agendas únicas por médico
-        resumen_doctores['Total agendas'] = df_calendario.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups)
-        
-        st.dataframe(resumen_doctores, use_container_width=True)
+        if not df_calendario.empty:
+            resumen_doctores = df_calendario.groupby('doctor').agg({
+                'dia': lambda x: ', '.join(sorted(set(x))),
+                'hora_inicio': lambda x: f"{min(x)} - {max(x)}",
+                'tipo_turno': lambda x: ', '.join(set(x.dropna()))
+            }).rename(columns={
+                'dia': 'Días que atiende',
+                'hora_inicio': 'Rango horario',
+                'tipo_turno': 'Tipos de agenda'
+            })
+            
+            # Contar agendas únicas por médico
+            resumen_doctores['Total agendas'] = df_calendario.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups)
+            
+            st.dataframe(resumen_doctores, use_container_width=True)
+        else:
+            st.info("No hay datos disponibles para mostrar el resumen por médico.")
         
         # Leyenda de colores para tipos de turno
         st.subheader("Leyenda de colores")
@@ -729,12 +760,295 @@ with tab6:
         st.warning(f"No se encontraron agendas para **{area_calendario}** en **{efector_calendario}**")
         st.info("Intenta seleccionar otra combinación de hospital y especialidad.")
 
+with tab7:
+    st.header("Gestión")
+    
+    # Sistema de autenticación
+    if 'authenticated_gerencial' not in st.session_state:
+        st.session_state.authenticated_gerencial = False
+    
+    if not st.session_state.authenticated_gerencial:
+        st.info("Esta sección requiere autenticación")
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            password_input = st.text_input(
+                "Contraseña:", 
+                type="password",
+                key="password_gerencial"
+            )
+            
+            col_btn1, col_btn2 = st.columns(2)
+            with col_btn1:
+                if st.button("Ingresar", type="primary", use_container_width=True):
+                    # Contraseña
+                    if password_input == "maxisalas":
+                        st.session_state.authenticated_gerencial = True
+                        st.rerun()
+                    else:
+                        st.error("Contraseña incorrecta")
+            
+            with col_btn2:
+                if st.button("Cancelar", use_container_width=True):
+                    st.session_state.password_gerencial = ""
+        
+        
+    else:
+        # Botón de logout
+        col1, col2, col3 = st.columns([4, 1, 1])
+        with col3:
+            if st.button("Cerrar sesión"):
+                st.session_state.authenticated_gerencial = False
+                st.rerun()
+        
+        st.success("Acceso autorizado")
+        
+        # Filtros específicos para gestión gerencial
+        st.subheader("Filtros de análisis")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            # Filtro por médico específico
+            medicos_gerencial = ['Todos'] + sorted(df[df['doctor'] != 'Sin asignar']['doctor'].unique().tolist())
+            medico_gerencial = st.selectbox(
+                "Médico específico:",
+                medicos_gerencial,
+                key="medico_gerencial"
+            )
+        
+        with col2:
+            # Filtro por área médica para gestión
+            areas_gerencial = ['Todas'] + sorted(df[df['area'] != 'Sin área']['area'].unique().tolist())
+            area_gerencial = st.selectbox(
+                "Área médica:",
+                areas_gerencial,
+                key="area_gerencial"
+            )
+        
+        with col3:
+            # Filtro por día para gestión
+            dias_gerencial = ['Todos'] + sorted(df['dia'].unique().tolist())
+            dia_gerencial = st.selectbox(
+                "Día de análisis:",
+                dias_gerencial,
+                key="dia_gerencial"
+            )
+        
+        # Aplicar filtros
+        df_gerencial = df.copy()
+        
+        if medico_gerencial != 'Todos':
+            df_gerencial = df_gerencial[df_gerencial['doctor'] == medico_gerencial]
+        
+        if area_gerencial != 'Todas':
+            df_gerencial = df_gerencial[df_gerencial['area'] == area_gerencial]
+        
+        if dia_gerencial != 'Todos':
+            df_gerencial = df_gerencial[df_gerencial['dia'] == dia_gerencial]
+        
+        # Selector de día específico para análisis detallado (igual que la solapa original)
+        st.subheader("Análisis de horarios por día")
+        
+        dias_orden = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+        dia_analisis_ger = st.selectbox(
+            "Día para análisis detallado:",
+            dias_orden,
+            key="dia_analisis_gerencial"
+        )
+        
+        df_dia_ger = df_gerencial[df_gerencial['dia'] == dia_analisis_ger]
+        
+        if not df_dia_ger.empty:
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Heatmap de horarios (similar al original)
+                if 'hora_inicio' in df_dia_ger.columns:
+                    df_dia_copy_ger = df_dia_ger.copy()
+                    df_dia_copy_ger['hora_inicio_num'] = pd.to_datetime(df_dia_copy_ger['hora_inicio'], format='%H:%M', errors='coerce').dt.hour
+                    
+                    heatmap_data_ger = df_dia_copy_ger.groupby(['efector', 'hora_inicio_num']).size().reset_index(name='count')
+                    
+                    if not heatmap_data_ger.empty:
+                        fig_heatmap_ger = px.density_heatmap(
+                            heatmap_data_ger,
+                            x='hora_inicio_num',
+                            y='efector',
+                            z='count',
+                            title=f"Intensidad de agendas - {dia_analisis_ger} (Vista gerencial)",
+                            labels={'hora_inicio_num': 'Hora', 'efector': 'Centro de salud', 'count': 'Número de agendas'}
+                        )
+                        fig_heatmap_ger.update_layout(height=400)
+                        st.plotly_chart(fig_heatmap_ger, use_container_width=True)
+            
+            with col2:
+                # Top médicos del día (agendas únicas)
+                df_medicos_dia_ger = df_dia_ger[df_dia_ger['doctor'] != 'Sin asignar']
+                if not df_medicos_dia_ger.empty:
+                    medicos_dia_ger = df_medicos_dia_ger.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
+
+                    fig_medicos_ger = px.bar(
+                        x=medicos_dia_ger.values,
+                        y=medicos_dia_ger.index,
+                        orientation='h',
+                        title=f"Top médicos - {dia_analisis_ger} (Vista gerencial)",
+                        labels={'x': 'Número de agendas', 'y': 'Médico'}
+                    )
+                    fig_medicos_ger.update_layout(height=400)
+                    st.plotly_chart(fig_medicos_ger, use_container_width=True)
+                else:
+                    st.info(f"No hay médicos con agendas disponibles para {dia_analisis_ger}.")
+
+            # Tabla detallada del día (similar al original)
+            st.subheader(f"Detalle de agendas - {dia_analisis_ger}")
+            
+            df_mostrar_ger = df_dia_ger[['efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
+            df_mostrar_ger = df_mostrar_ger.sort_values(['efector', 'hora_inicio'])
+            
+            st.dataframe(
+                df_mostrar_ger,
+                use_container_width=True,
+                height=300
+            )
+        else:
+            st.warning(f"No hay datos disponibles para {dia_analisis_ger} con los filtros aplicados.")
+        
+        # NUEVA FUNCIONALIDAD: Análisis de superposición de horarios
+        st.markdown("---")
+        st.subheader("Superposición de horarios")
+        
+        def detectar_superposiciones(df_analisis):
+            """Detecta médicos con horarios superpuestos"""
+            superposiciones = []
+            
+            # Agrupar por médico
+            medicos_horarios = df_analisis[df_analisis['doctor'] != 'Sin asignar'].groupby('doctor')
+            
+            for medico, datos_medico in medicos_horarios:
+                # Convertir horas a formato datetime para comparación
+                datos_medico = datos_medico.copy()
+                datos_medico['hora_inicio_dt'] = pd.to_datetime(datos_medico['hora_inicio'], format='%H:%M', errors='coerce')
+                datos_medico['hora_fin_dt'] = pd.to_datetime(datos_medico['hora_fin'], format='%H:%M', errors='coerce')
+                
+                # Agrupar por día
+                dias_medico = datos_medico.groupby('dia')
+                
+                for dia, horarios_dia in dias_medico:
+                    horarios_dia = horarios_dia.sort_values('hora_inicio_dt')
+                    
+                    # Comparar horarios del mismo día
+                    for i, (idx1, row1) in enumerate(horarios_dia.iterrows()):
+                        for idx2, row2 in horarios_dia.iloc[i+1:].iterrows():
+                            # Verificar superposición
+                            if (row1['hora_inicio_dt'] < row2['hora_fin_dt'] and 
+                                row1['hora_fin_dt'] > row2['hora_inicio_dt']):
+                                
+                                superposiciones.append({
+                                    'medico': medico,
+                                    'dia': dia,
+                                    'centro_1': row1['efector'],
+                                    'area_1': row1['area'],
+                                    'horario_1': f"{row1['hora_inicio']} - {row1['hora_fin']}",
+                                    'centro_2': row2['efector'],
+                                    'area_2': row2['area'],
+                                    'horario_2': f"{row2['hora_inicio']} - {row2['hora_fin']}",
+                                    'tipo_conflicto': 'Mismo centro' if row1['efector'] == row2['efector'] else 'Centros diferentes'
+                                })
+            
+            return pd.DataFrame(superposiciones)
+        
+        # Detectar superposiciones en los datos filtrados
+        df_superposiciones = detectar_superposiciones(df_gerencial)
+        
+        if not df_superposiciones.empty:
+            # Métricas de superposiciones
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                medicos_con_conflictos = df_superposiciones['medico'].nunique()
+                st.metric("Médicos con conflictos", medicos_con_conflictos)
+            
+            with col2:
+                total_conflictos = len(df_superposiciones)
+                st.metric("Total conflictos", total_conflictos)
+            
+            with col3:
+                conflictos_mismo_centro = len(df_superposiciones[df_superposiciones['tipo_conflicto'] == 'Mismo centro'])
+                st.metric("Conflictos mismo centro", conflictos_mismo_centro)
+            
+            with col4:
+                conflictos_centros_diferentes = len(df_superposiciones[df_superposiciones['tipo_conflicto'] == 'Centros diferentes'])
+                st.metric("Conflictos entre centros", conflictos_centros_diferentes)
+            
+            # Tabla de conflictos
+            st.subheader("Detalle de conflictos de horarios")
+            
+            # Aplicar colores según el tipo de conflicto
+            def color_conflictos(val):
+                if val == 'Mismo centro':
+                    return 'background-color: #ffebee'  # Rojo claro
+                elif val == 'Centros diferentes':
+                    return 'background-color: #fff3e0'  # Naranja claro
+                return ''
+            
+            # Renombrar columnas para mejor visualización
+            df_superposiciones_display = df_superposiciones.rename(columns={
+                'medico': 'Médico',
+                'dia': 'Día',
+                'centro_1': 'Centro 1',
+                'area_1': 'Área 1',
+                'horario_1': 'Horario 1',
+                'centro_2': 'Centro 2',
+                'area_2': 'Área 2',
+                'horario_2': 'Horario 2',
+                'tipo_conflicto': 'Tipo de conflicto'
+            })
+            
+            st.dataframe(
+                df_superposiciones_display,
+                use_container_width=True,
+                height=400
+            )
+            
+            # Resumen por médico
+            st.subheader("Resumen de conflictos por médico")
+            resumen_conflictos = df_superposiciones.groupby('medico').agg({
+                'dia': lambda x: ', '.join(sorted(set(x))),
+                'tipo_conflicto': lambda x: ', '.join(set(x))
+            }).rename(columns={
+                'dia': 'Días con conflictos',
+                'tipo_conflicto': 'Tipos de conflicto'
+            })
+            resumen_conflictos['Total conflictos'] = df_superposiciones['medico'].value_counts()
+            
+            st.dataframe(resumen_conflictos, use_container_width=True)
+            
+            # Gráfico de conflictos por día
+            if len(df_superposiciones) > 0:
+                conflictos_por_dia = df_superposiciones['dia'].value_counts()
+                
+                fig_conflictos = px.bar(
+                    x=conflictos_por_dia.index,
+                    y=conflictos_por_dia.values,
+                    title="Conflictos de horarios por día de la semana",
+                    labels={'x': 'Día', 'y': 'Número de conflictos'},
+                    color=conflictos_por_dia.values,
+                    color_continuous_scale='Reds'
+                )
+                fig_conflictos.update_layout(height=400, showlegend=False)
+                st.plotly_chart(fig_conflictos, use_container_width=True)
+            
+        else:
+            st.success("✅ No se detectaron conflictos de horarios en los datos filtrados.")
+            st.info("Todos los médicos tienen horarios sin superposiciones.")
+
 # Footer
 st.markdown("---")
 st.markdown(
     """
     <div style='text-align: center'>
-        <p>Desarrollado por Lucas Rosenzvit</p>
+        <p>Desarrollado por Lucas Rosenzvit - lrosenzvit@sanisidro.gob.ar</p>
     </div>
     """,
     unsafe_allow_html=True
