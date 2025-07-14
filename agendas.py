@@ -32,7 +32,7 @@ class AgendaNormalizer:
         
         # Patrones para identificar áreas médicas
         areas_patterns = {
-            'PEDIATRIA': r'\bPEDIATRIA\b',
+            'PEDIATRIA': r'\bPEDIATR[A-ZÁÉÍÓÚÑÃñã_x0-9]*A\b|\bDESARROLLO\b|\bSUPERVISION\s+DE\s+TRATAMIENTO\b|\bEVALUACION\s+DEL\s+DESARROLLO\b',
             'CARDIOLOGIA': r'\bCARDIOLOGIA\b',
             'NEUROLOGIA': r'\bNEUROLOGIA\b',
             'GINECOLOGIA': r'\bGINECOLOGIA\b',
