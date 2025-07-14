@@ -37,18 +37,6 @@ def cargar_datos():
     except Exception as e:
         st.error(f"Error cargando datos: {e}")
         return pd.DataFrame()
-            st.markdown("🟢 **SOBRETURNO**")r'].fillna('Sin asignar')
-        df['area'] = df['area'].fillna('Sin área')
-        df['tipo_turno'] = df['tipo_turno'].fillna('No especificado')
-        
-        # Convertir horas a datetime para mejor manejo
-        df['hora_inicio_dt'] = pd.to_datetime(df['hora_inicio'], format='%H:%M', errors='coerce').dt.time
-        df['hora_fin_dt'] = pd.to_datetime(df['hora_fin'], format='%H:%M', errors='coerce').dt.time
-        
-        return df
-    except Exception as e:
-        st.error(f"Error cargando datos: {e}")
-        return pd.DataFrame()
 
 # Cargar datos
 df = cargar_datos()
@@ -70,14 +58,14 @@ efector_seleccionado = st.sidebar.selectbox(
 # Filtro por área médica
 areas_disponibles = ['Todas'] + sorted(df[df['area'] != 'Sin área']['area'].unique().tolist())
 area_seleccionada = st.sidebar.selectbox(
-    "Área médica:",
+    "Área:",
     areas_disponibles
 )
 
 # Filtro por día de la semana
 dias_disponibles = ['Todos'] + sorted(df['dia'].unique().tolist())
 dia_seleccionado = st.sidebar.selectbox(
-    "Día de la semana:",
+    "Día:",
     dias_disponibles
 )
 
@@ -117,14 +105,14 @@ with col1:
 with col2:
     doctores_unicos = df_filtrado[df_filtrado['doctor'] != 'Sin asignar']['doctor'].nunique()
     st.metric(
-        label="Doctores activos",
+        label="Médicos activos",
         value=doctores_unicos
     )
 
 with col3:
     areas_unicas = df_filtrado[df_filtrado['area'] != 'Sin área']['area'].nunique()
     st.metric(
-        label="Especialidades médicas",
+        label="Especialidades",
         value=areas_unicas
     )
 
@@ -139,7 +127,7 @@ with col4:
 st.markdown("---")
 
 # Layout principal con tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Resumen general", "Horarios por día", "Análisis por doctor", "Comparativa centros", "Tabla completa", "Calendario"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario"])
 
 with tab1:
     st.header("Resumen general")
@@ -231,19 +219,19 @@ with tab2:
                     st.plotly_chart(fig_heatmap, use_container_width=True)
         
         with col2:
-            # Top doctores del día
-            doctores_dia = df_dia[df_dia['doctor'] != 'Sin asignar']['doctor'].value_counts().head(10)
-            
-            fig_doctores = px.bar(
-                x=doctores_dia.values,
-                y=doctores_dia.index,
+            # Top médicos del día
+            medicos_dia = df_dia[df_dia['doctor'] != 'Sin asignar']['doctor'].value_counts().head(10)
+
+            fig_medicos = px.bar(
+                x=medicos_dia.values,
+                y=medicos_dia.index,
                 orientation='h',
-                title=f"Top doctores - {dia_analisis}",
-                labels={'x': 'Número de agendas', 'y': 'Doctor'}
+                title=f"Top médicos - {dia_analisis}",
+                labels={'x': 'Número de agendas', 'y': 'Médico'}
             )
-            fig_doctores.update_layout(height=400)
-            st.plotly_chart(fig_doctores, use_container_width=True)
-        
+            fig_medicos.update_layout(height=400)
+            st.plotly_chart(fig_medicos, use_container_width=True)
+
         # Tabla detallada del día
         st.subheader(f"Detalle de agendas - {dia_analisis}")
         
@@ -259,14 +247,14 @@ with tab2:
         st.warning(f"No hay datos disponibles para {dia_analisis} con los filtros aplicados.")
 
 with tab3:
-    st.header("Análisis por doctor")
+    st.header("Análisis por médico")
     
     # Selector de doctor
     doctores_disponibles = sorted(df_filtrado[df_filtrado['doctor'] != 'Sin asignar']['doctor'].unique().tolist())
     
     if doctores_disponibles:
         doctor_seleccionado = st.selectbox(
-            "Seleccionar doctor:",
+            "Médico:",
             doctores_disponibles
         )
         
@@ -275,11 +263,11 @@ with tab3:
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.metric("Total de agendas", len(df_doctor))
+            st.metric("Total de Agendas", len(df_doctor))
         
         with col2:
             especialidades_doctor = df_doctor['area'].nunique()
-            st.metric("Especialidades médicas", especialidades_doctor)
+            st.metric("Especialidades", especialidades_doctor)
         
         with col3:
             centros_doctor = df_doctor['efector'].nunique()
@@ -297,7 +285,7 @@ with tab3:
         st.dataframe(horarios_doctor, use_container_width=True)
         
     else:
-        st.warning("No hay doctores disponibles con los filtros aplicados.")
+        st.warning("No hay médicos disponibles con los filtros aplicados.")
 
 with tab4:
     st.header("Comparativa entre centros de salud")
@@ -308,7 +296,7 @@ with tab4:
         'area': lambda x: x[x != 'Sin área'].nunique(),
         'dia': 'count'
     }).rename(columns={
-        'doctor': 'Doctores',
+        'doctor': 'Médicos',
         'area': 'Especialidades',
         'dia': 'Total agendas'
     }).reset_index()
@@ -316,12 +304,12 @@ with tab4:
     # Gráfico comparativo
     fig_comparativa = make_subplots(
         rows=1, cols=3,
-        subplot_titles=('Doctores', 'Especialidades', 'Total agendas'),
+        subplot_titles=('Médicos', 'Especialidades', 'Total agendas'),
         specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]]
     )
     
     fig_comparativa.add_trace(
-        go.Bar(x=metricas_efector['efector'], y=metricas_efector['Doctores'], name='Doctores'),
+        go.Bar(x=metricas_efector['efector'], y=metricas_efector['Médicos'], name='Médicos'),
         row=1, col=1
     )
     
@@ -423,7 +411,7 @@ with tab5:
             df_mostrar = df_mostrar.iloc[inicio:fin]
     
     # Mostrar tabla con formato mejorado
-    st.subheader(f"Registros de agendas")
+    st.subheader(f"Registros de Agendas")
     
     # Aplicar estilos a la tabla
     def highlight_rows(val):
@@ -434,8 +422,8 @@ with tab5:
     nombres_columnas = {
         'nombre_original_agenda': 'Nombre original de agenda',
         'efector': 'Centro de salud',
-        'area': 'Especialidad médica',
-        'doctor': 'Doctor',
+        'area': 'Especialidad',
+        'doctor': 'Médico',
         'tipo_turno': 'Tipo de agenda',
         'dia': 'Día',
         'hora_inicio': 'Hora inicio',
@@ -457,19 +445,19 @@ with tab5:
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Registros Mostrados", len(df_mostrar))
+        st.metric("Registros mostrados", len(df_mostrar))
     
     with col2:
         doctores_tabla = df_mostrar[df_mostrar['doctor'] != 'Sin asignar']['doctor'].nunique()
-        st.metric("Doctores", doctores_tabla)
+        st.metric("Médicos", doctores_tabla)
     
     with col3:
         areas_tabla = df_mostrar[df_mostrar['area'] != 'Sin área']['area'].nunique()
-        st.metric("Especialidades médicas", areas_tabla)
+        st.metric("Especialidades", areas_tabla)
     
     with col4:
         efectores_tabla = df_mostrar['efector'].nunique()
-        st.metric("Centros de salud", efectores_tabla)
+        st.metric("Centros", efectores_tabla)
     
     # Estadísticas adicionales
     if len(df_mostrar) > 0:
@@ -482,7 +470,7 @@ with tab5:
             if 'doctor' in df_mostrar.columns:
                 top_doctores = df_mostrar[df_mostrar['doctor'] != 'Sin asignar']['doctor'].value_counts().head(5)
                 if not top_doctores.empty:
-                    st.write("**Top 5 doctores:**")
+                    st.write("**Top 5 médicos:**")
                     for i, (doctor, count) in enumerate(top_doctores.items(), 1):
                         st.write(f"{i}. {doctor}: {count} agendas")
         
@@ -491,7 +479,7 @@ with tab5:
             if 'area' in df_mostrar.columns:
                 top_areas = df_mostrar[df_mostrar['area'] != 'Sin área']['area'].value_counts().head(5)
                 if not top_areas.empty:
-                    st.write("**Top 5 especialidades médicas:**")
+                    st.write("**Top 5 especialidades:**")
                     for i, (area, count) in enumerate(top_areas.items(), 1):
                         st.write(f"{i}. {area}: {count} agendas")
 
@@ -519,7 +507,7 @@ with tab6:
         
         if areas_calendario:
             area_calendario = st.selectbox(
-                "Especialidad médica:",
+                "Especialidad:",
                 areas_calendario,
                 key="area_calendario"
             )
@@ -542,7 +530,7 @@ with tab6:
         
         with col2:
             doctores_calendario = df_calendario[df_calendario['doctor'] != 'Sin asignar']['doctor'].nunique()
-            st.metric("Doctores", doctores_calendario)
+            st.metric("Médicos", doctores_calendario)
         
         with col3:
             dias_calendario = df_calendario['dia'].nunique()
@@ -631,7 +619,7 @@ with tab6:
         st.markdown("---")
         
         # Vista de timeline (alternativa visual)
-        st.subheader("Timeline de Horarios")
+        st.subheader("Timeline de horarios")
         
         # Preparar datos para el timeline
         df_timeline = df_calendario.copy()
@@ -692,8 +680,8 @@ with tab6:
         
         st.plotly_chart(fig_timeline, use_container_width=True)
         
-        # Tabla resumen por doctor
-        st.subheader("Resumen por doctor")
+        # Tabla resumen por médico
+        st.subheader("Resumen por médico")
         
         resumen_doctores = df_calendario.groupby('doctor').agg({
             'dia': lambda x: ', '.join(sorted(set(x))),
@@ -710,7 +698,7 @@ with tab6:
         st.dataframe(resumen_doctores, use_container_width=True)
         
         # Leyenda de colores para tipos de turno
-        st.subheader("Leyenda de Colores")
+        st.subheader("Leyenda de colores")
         col1, col2, col3, col4, col5 = st.columns(5)
         
         with col1:
