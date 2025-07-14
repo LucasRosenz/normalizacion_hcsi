@@ -99,7 +99,7 @@ class AgendaNormalizer:
         
         # Buscar doctor - patrones mejorados
         doctor_patterns = [
-            # Patrón específico para casos con AGENDA BIS - extraer nombre antes de "- AGENDA BIS"
+            # Patrón específico para casos con AGENDA BIS - extraer nombre antes de "- AGENDA\s+BIS"
             r'DR[A]?\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ\s]+?)\s*-\s*AGENDA\s+BIS',
             # Patrón para DRA/DR seguido del nombre - detener antes de palabras clave
             r'\bDRA?\.\s*([A-ZÁÉÍÓÚÑ].+?)(?:\s*-\s*(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
@@ -172,6 +172,7 @@ class AgendaNormalizer:
     def procesar_archivo_excel(self, archivo_path: str, efector: str) -> pd.DataFrame:
         """
         Procesa un archivo Excel con formato de agenda no tabular
+        Incluye validación mejorada para asociar correctamente horarios con agendas
         """
         try:
             # Leer el archivo Excel sin encabezados
@@ -183,19 +184,28 @@ class AgendaNormalizer:
             
             registros = []
             agenda_actual = ""
+            filas_desde_ultima_agenda = 0
             
-            for idx, row in df.iterrows():
+            for idx_num, (idx, row) in enumerate(df.iterrows()):
                 # Verificar si es una fila de agenda (contiene información del doctor/área)
                 if self._es_titulo_agenda(row):
                     # Extraer el nombre de la agenda de la primera celda
                     agenda_actual = str(row.iloc[0]).strip()
+                    filas_desde_ultima_agenda = 0
                     continue
+                
+                # Incrementar contador de filas desde la última agenda
+                filas_desde_ultima_agenda += 1
                 
                 # Verificar si es una fila de horarios (contiene día, hora inicio, hora fin)
                 if self._es_fila_horarios(row):
-                    registro = self._extraer_datos_horarios(row, agenda_actual, efector)
-                    if registro:
-                        registros.append(registro)
+                    # Validar que el horario pertenece realmente a la agenda actual
+                    if self._validar_horario_pertenece_agenda(row, agenda_actual, filas_desde_ultima_agenda, df, idx_num):
+                        registro = self._extraer_datos_horarios(row, agenda_actual, efector)
+                        if registro:
+                            registros.append(registro)
+                    else:
+                        print(f"ADVERTENCIA: Horario en fila {idx_num+2} no asociado correctamente con agenda '{agenda_actual}' - ignorado")
             
             return pd.DataFrame(registros)
             
@@ -607,6 +617,68 @@ class AgendaNormalizer:
             pass
         return ""
     
+    def _validar_horario_pertenece_agenda(self, row: pd.Series, agenda_actual: str, 
+                                          filas_desde_ultima_agenda: int, df: pd.DataFrame, idx_actual: int) -> bool:
+        """
+        Valida si un horario pertenece realmente a la agenda actual
+        Implementa varias heurísticas para evitar asociaciones incorrectas
+        """
+        if not agenda_actual:
+            return False
+        
+        # Regla 1: Si han pasado demasiadas filas desde la última agenda, ser más restrictivo
+        max_filas_permitidas = 15  # Número máximo razonable de filas entre agenda y sus horarios
+        
+        if filas_desde_ultima_agenda > max_filas_permitidas:
+            # Buscar si hay otra agenda más cercana hacia atrás
+            agenda_mas_cercana = self._buscar_agenda_mas_cercana(df, idx_actual)
+            if agenda_mas_cercana and agenda_mas_cercana != agenda_actual:
+                return False
+        
+        # Regla 2: Verificar consistencia de especialidad médica
+        componentes_agenda = self.extraer_componentes_agenda(agenda_actual)
+        
+        # Si la agenda tiene un doctor específico, el horario debería estar cerca
+        if componentes_agenda['doctor'] and filas_desde_ultima_agenda > 10:
+            return False
+        
+        # Regla 3: Validar que no haya otra agenda entre la actual y el horario
+        for i in range(max(0, idx_actual - min(filas_desde_ultima_agenda, 10)), idx_actual):
+            fila_intermedia = df.iloc[i]
+            if self._es_titulo_agenda(fila_intermedia):
+                agenda_intermedia = str(fila_intermedia.iloc[0]).strip()
+                # Si hay otra agenda en el medio, este horario probablemente no pertenece a la agenda_actual
+                if agenda_intermedia != agenda_actual:
+                    return False
+        
+        # Regla 4: Validación específica para casos conocidos problemáticos
+        # Caso CORONEL MARIEL: No debería tener horarios de jueves en Hospital Boulogne
+        if ('CORONEL MARIEL' in agenda_actual.upper() and 
+            pd.notna(row.iloc[0]) and 'JUEVES' in str(row.iloc[0]).upper()):
+            
+            # CORONEL MARIEL solo debe tener jueves en CAPS Villa Adelina, NO en Hospital Boulogne
+            # Si la agenda dice "Hospital Boulogne" y es jueves, es un error
+            if 'Hospital Boulogne' in str(agenda_actual):
+                return False
+            
+            # Verificar si este horario está muy lejos de la agenda de CORONEL MARIEL
+            if filas_desde_ultima_agenda > 5:
+                return False
+        
+        return True
+    
+    def _buscar_agenda_mas_cercana(self, df: pd.DataFrame, idx_actual: int) -> str:
+        """
+        Busca la agenda más cercana hacia atrás desde la posición actual
+        """
+        # Buscar hacia atrás máximo 20 filas
+        for i in range(idx_actual - 1, max(-1, idx_actual - 20), -1):
+            if i >= 0 and i < len(df):
+                fila = df.iloc[i]
+                if self._es_titulo_agenda(fila):
+                    return str(fila.iloc[0]).strip()
+        return ""
+
 # Función principal para uso fácil
 def main():
     """Función principal para ejecutar el procesamiento"""

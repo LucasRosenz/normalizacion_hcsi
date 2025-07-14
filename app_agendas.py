@@ -76,6 +76,13 @@ tipo_turno_seleccionado = st.sidebar.selectbox(
     tipos_turno_disponibles
 )
 
+# Filtro por médico
+medicos_disponibles = ['Todos'] + sorted(df[df['doctor'] != 'Sin asignar']['doctor'].unique().tolist())
+medico_seleccionado = st.sidebar.selectbox(
+    "Médico:",
+    medicos_disponibles
+)
+
 # Aplicar filtros
 df_filtrado = df.copy()
 
@@ -90,6 +97,9 @@ if dia_seleccionado != 'Todos':
 
 if tipo_turno_seleccionado != 'Todos':
     df_filtrado = df_filtrado[df_filtrado['tipo_turno'] == tipo_turno_seleccionado]
+
+if medico_seleccionado != 'Todos':
+    df_filtrado = df_filtrado[df_filtrado['doctor'] == medico_seleccionado]
 
 # Métricas principales
 col1, col2, col3, col4 = st.columns(4)
@@ -129,7 +139,7 @@ with col4:
 st.markdown("---")
 
 # Layout principal con tabs
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Resumen general", "Horarios por día", "Comparativa centros", "Tabla completa", "Calendario", "Gestión"])
 
 with tab1:
     st.header("Resumen general")
@@ -263,49 +273,6 @@ with tab2:
         st.warning(f"No hay datos disponibles para {dia_analisis} con los filtros aplicados.")
 
 with tab3:
-    st.header("Análisis por médico")
-    
-    # Selector de doctor
-    doctores_disponibles = sorted(df_filtrado[df_filtrado['doctor'] != 'Sin asignar']['doctor'].unique().tolist())
-    
-    if doctores_disponibles:
-        doctor_seleccionado = st.selectbox(
-            "Médico:",
-            doctores_disponibles
-        )
-        
-        df_doctor = df_filtrado[df_filtrado['doctor'] == doctor_seleccionado]
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            # Contar agendas únicas del médico
-            agendas_unicas_doctor = df_doctor.groupby(['nombre_original_agenda', 'efector']).ngroups
-            st.metric("Total de agendas", agendas_unicas_doctor)
-        
-        with col2:
-            especialidades_doctor = df_doctor['area'].nunique()
-            st.metric("Especialidades", especialidades_doctor)
-        
-        with col3:
-            centros_doctor = df_doctor['efector'].nunique()
-            st.metric("Centros de salud", centros_doctor)
-        
-        # Horarios del doctor por día
-        horarios_doctor = df_doctor.groupby('dia').agg({
-            'hora_inicio': lambda x: ', '.join(sorted(set(x.astype(str)))),
-            'hora_fin': lambda x: ', '.join(sorted(set(x.astype(str)))),
-            'efector': lambda x: ', '.join(set(x)),
-            'area': lambda x: ', '.join(set(x))
-        }).reset_index()
-        
-        st.subheader(f"Horarios de {doctor_seleccionado}")
-        st.dataframe(horarios_doctor, use_container_width=True)
-        
-    else:
-        st.warning("No hay médicos disponibles con los filtros aplicados.")
-
-with tab4:
     st.header("Comparativa entre centros de salud")
     
     # Comparativa de métricas por efector
@@ -364,7 +331,7 @@ with tab4:
     metricas_efector_sorted = metricas_efector.sort_values('Total agendas', ascending=False)
     st.dataframe(metricas_efector_sorted, use_container_width=True)
 
-with tab5:
+with tab4:
     st.header("Tabla completa de agendas")
     
     # Información sobre los datos mostrados
@@ -521,7 +488,7 @@ with tab5:
                 else:
                     st.info("No hay especialidades con agendas disponibles.")
 
-with tab6:
+with tab5:
     st.header("Vista calendario - agenda semanal")
     
     # Selectores específicos para la vista calendario
@@ -760,12 +727,42 @@ with tab6:
         st.warning(f"No se encontraron agendas para **{area_calendario}** en **{efector_calendario}**")
         st.info("Intenta seleccionar otra combinación de hospital y especialidad.")
 
-with tab7:
+with tab6:
     st.header("Gestión")
     
-    # Sistema de autenticación
-    if 'authenticated_gerencial' not in st.session_state:
+    # Sistema de autenticación con persistencia
+    def inicializar_autenticacion():
+        """Inicializa el estado de autenticación verificando si hay una sesión guardada"""
+        if 'authenticated_gerencial' not in st.session_state:
+            st.session_state.authenticated_gerencial = False
+        
+        # Verificar si hay una autenticación persistente guardada
+        if 'auth_timestamp' not in st.session_state:
+            st.session_state.auth_timestamp = None
+        
+        # Verificar si la autenticación no ha expirado (24 horas)
+        if (st.session_state.auth_timestamp and 
+            (datetime.datetime.now() - st.session_state.auth_timestamp).total_seconds() < 86400):
+            st.session_state.authenticated_gerencial = True
+        elif st.session_state.auth_timestamp:
+            # Si ha expirado, limpiar la autenticación
+            st.session_state.authenticated_gerencial = False
+            st.session_state.auth_timestamp = None
+    
+    # Función para autenticar y guardar timestamp
+    def autenticar_usuario():
+        """Autentica al usuario y guarda el timestamp"""
+        st.session_state.authenticated_gerencial = True
+        st.session_state.auth_timestamp = datetime.datetime.now()
+    
+    # Función para cerrar sesión
+    def cerrar_sesion():
+        """Cierra la sesión y limpia la autenticación"""
         st.session_state.authenticated_gerencial = False
+        st.session_state.auth_timestamp = None
+    
+    # Inicializar autenticación
+    inicializar_autenticacion()
     
     if not st.session_state.authenticated_gerencial:
         st.info("Esta sección requiere autenticación")
@@ -783,10 +780,11 @@ with tab7:
                 if st.button("Ingresar", type="primary", use_container_width=True):
                     # Contraseña
                     if password_input == "maxisalas":
-                        st.session_state.authenticated_gerencial = True
+                        autenticar_usuario()
+                        st.success("✅ Sesión iniciada correctamente")
                         st.rerun()
                     else:
-                        st.error("Contraseña incorrecta")
+                        st.error("❌ Contraseña incorrecta")
             
             with col_btn2:
                 if st.button("Cancelar", use_container_width=True):
@@ -794,14 +792,30 @@ with tab7:
         
         
     else:
-        # Botón de logout
-        col1, col2, col3 = st.columns([4, 1, 1])
-        with col3:
-            if st.button("Cerrar sesión"):
-                st.session_state.authenticated_gerencial = False
+        # Información de sesión y botón de logout
+        col1, col2, col3 = st.columns([3, 1, 1])
+        
+        with col1:
+            if st.session_state.auth_timestamp:
+                tiempo_sesion = datetime.datetime.now() - st.session_state.auth_timestamp
+                horas_sesion = int(tiempo_sesion.total_seconds() // 3600)
+                minutos_sesion = int((tiempo_sesion.total_seconds() % 3600) // 60)
+                st.info(f"🔐 Sesión activa desde hace {horas_sesion}h {minutos_sesion}m")
+        
+        with col2:
+            # Botón para extender sesión
+            if st.button("Extender sesión", use_container_width=True):
+                st.session_state.auth_timestamp = datetime.datetime.now()
+                st.success("✅ Sesión extendida por 24 horas más")
                 st.rerun()
         
-        st.success("Acceso autorizado")
+        with col3:
+            if st.button("Cerrar sesión", use_container_width=True):
+                cerrar_sesion()
+                st.success("✅ Sesión cerrada correctamente")
+                st.rerun()
+        
+        st.success("🔓 Acceso autorizado - Sesión persistente activa")
         
         # Filtros específicos para gestión gerencial
         st.subheader("Filtros de análisis")
@@ -846,73 +860,6 @@ with tab7:
         
         if dia_gerencial != 'Todos':
             df_gerencial = df_gerencial[df_gerencial['dia'] == dia_gerencial]
-        
-        # Selector de día específico para análisis detallado (igual que la solapa original)
-        st.subheader("Análisis de horarios por día")
-        
-        dias_orden = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-        dia_analisis_ger = st.selectbox(
-            "Día para análisis detallado:",
-            dias_orden,
-            key="dia_analisis_gerencial"
-        )
-        
-        df_dia_ger = df_gerencial[df_gerencial['dia'] == dia_analisis_ger]
-        
-        if not df_dia_ger.empty:
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                # Heatmap de horarios (similar al original)
-                if 'hora_inicio' in df_dia_ger.columns:
-                    df_dia_copy_ger = df_dia_ger.copy()
-                    df_dia_copy_ger['hora_inicio_num'] = pd.to_datetime(df_dia_copy_ger['hora_inicio'], format='%H:%M', errors='coerce').dt.hour
-                    
-                    heatmap_data_ger = df_dia_copy_ger.groupby(['efector', 'hora_inicio_num']).size().reset_index(name='count')
-                    
-                    if not heatmap_data_ger.empty:
-                        fig_heatmap_ger = px.density_heatmap(
-                            heatmap_data_ger,
-                            x='hora_inicio_num',
-                            y='efector',
-                            z='count',
-                            title=f"Intensidad de agendas - {dia_analisis_ger} (Vista gerencial)",
-                            labels={'hora_inicio_num': 'Hora', 'efector': 'Centro de salud', 'count': 'Número de agendas'}
-                        )
-                        fig_heatmap_ger.update_layout(height=400)
-                        st.plotly_chart(fig_heatmap_ger, use_container_width=True)
-            
-            with col2:
-                # Top médicos del día (agendas únicas)
-                df_medicos_dia_ger = df_dia_ger[df_dia_ger['doctor'] != 'Sin asignar']
-                if not df_medicos_dia_ger.empty:
-                    medicos_dia_ger = df_medicos_dia_ger.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
-
-                    fig_medicos_ger = px.bar(
-                        x=medicos_dia_ger.values,
-                        y=medicos_dia_ger.index,
-                        orientation='h',
-                        title=f"Top médicos - {dia_analisis_ger} (Vista gerencial)",
-                        labels={'x': 'Número de agendas', 'y': 'Médico'}
-                    )
-                    fig_medicos_ger.update_layout(height=400)
-                    st.plotly_chart(fig_medicos_ger, use_container_width=True)
-                else:
-                    st.info(f"No hay médicos con agendas disponibles para {dia_analisis_ger}.")
-
-            # Tabla detallada del día (similar al original)
-            st.subheader(f"Detalle de agendas - {dia_analisis_ger}")
-            
-            df_mostrar_ger = df_dia_ger[['efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
-            df_mostrar_ger = df_mostrar_ger.sort_values(['efector', 'hora_inicio'])
-            
-            st.dataframe(
-                df_mostrar_ger,
-                use_container_width=True,
-                height=300
-            )
-        else:
-            st.warning(f"No hay datos disponibles para {dia_analisis_ger} con los filtros aplicados.")
         
         # NUEVA FUNCIONALIDAD: Análisis de superposición de horarios
         st.markdown("---")

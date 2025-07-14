@@ -16,8 +16,8 @@
 14,CARRIERI NICOLAS,Lunes,CAPS Beccar,CLINICA MEDICA,08:00 - 16:00,CAPS Beccar,CLINICA MEDICA,08:00 - 10:00,Mismo centro
 15,CARRIERI NICOLAS,Miércoles,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,Mismo centro
 16,CARRIERI NICOLAS,Viernes,CAPS Beccar,CLINICA MEDICA,08:00 - 12:30,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,Centros diferentes
-17,CONDE,Jueves,Centro El Nido,Sin área,08:00 - 14:00,Centro El Nido,Sin área,08:00 - 14:00,Mismo centro
-18,CONDE,Viernes,Centro El Nido,Sin área,08:00 - 14:00,Centro El Nido,Sin área,08:00 - 14:00,Mismo centro
+17,CONDE,Jueves,Centro El Nido,PEDIATRIA,08:00 - 14:00,Centro El Nido,PEDIATRIA,08:00 - 14:00,Mismo centro
+18,CONDE,Viernes,Centro El Nido,PEDIATRIA,08:00 - 14:00,Centro El Nido,PEDIATRIA,08:00 - 14:00,Mismo centro
 19,CORONEL MARIEL,Jueves,CAPS Villa Adelina,NUTRICION,14:00 - 15:30,Hospital Boulogne,NUTRICION,15:00 - 16:00,Centros diferentes
 20,CORONEL MARIEL,Jueves,Hospital Boulogne,NUTRICION,15:00 - 16:00,CAPS Villa Adelina,NUTRICION,15:30 - 17:00,Centros diferentes
 21,COVELLI DANIELA EUGENIA,Lunes,Hospital Materno,NUTRICION,08:00 - 23:00,Hospital Materno,NUTRICION,08:40 - 12:00,Mismo centro
