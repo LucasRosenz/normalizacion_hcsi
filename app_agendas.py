@@ -721,7 +721,7 @@ st.markdown("---")
 st.markdown(
     """
     <div style='text-align: center'>
-        <p>Sistema de visualización | Desarrollado por Lucas Rosenzvit con Streamlit</p>
+        <p>Desarrollado por Lucas Rosenzvit</p>
     </div>
     """,
     unsafe_allow_html=True
