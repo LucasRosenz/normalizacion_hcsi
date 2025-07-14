@@ -95,11 +95,13 @@ if tipo_turno_seleccionado != 'Todos':
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    total_turnos = len(df_filtrado)
+    # Contar agendas únicas (combinación de nombre_original_agenda + efector)
+    total_agendas_unicas = df_filtrado.groupby(['nombre_original_agenda', 'efector']).ngroups
+    total_registros = len(df_filtrado)
     st.metric(
-        label="Total de Agendas",
-        value=f"{total_turnos:,}",
-        delta=f"{len(df)} total" if total_turnos != len(df) else None
+        label="Total de agendas",
+        value=f"{total_agendas_unicas:,}",
+        delta=f"{total_registros:,} horarios" if total_agendas_unicas != total_registros else None
     )
 
 with col2:
@@ -135,24 +137,26 @@ with tab1:
     col1, col2 = st.columns(2)
     
     with col1:
-        # Gráfico de turnos por área médica
-        areas_count = df_filtrado[df_filtrado['area'] != 'Sin área']['area'].value_counts().head(10)
+        # Gráfico de agendas únicas por área médica
+        df_areas = df_filtrado[df_filtrado['area'] != 'Sin área']
+        areas_count = df_areas.groupby(['nombre_original_agenda', 'efector', 'area']).ngroups
+        areas_count_series = df_areas.groupby('area').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
         
         fig_areas = px.bar(
-            x=areas_count.values,
-            y=areas_count.index,
+            x=areas_count_series.values,
+            y=areas_count_series.index,
             orientation='h',
             title="Top 10 especialidades por número de agendas",
             labels={'x': 'Número de agendas', 'y': 'Especialidad'},
-            color=areas_count.values,
+            color=areas_count_series.values,
             color_continuous_scale='viridis'
         )
         fig_areas.update_layout(height=400, showlegend=False)
         st.plotly_chart(fig_areas, use_container_width=True)
     
     with col2:
-        # Gráfico de turnos por día de la semana
-        dias_count = df_filtrado['dia'].value_counts()
+        # Gráfico de agendas únicas por día de la semana
+        dias_count = df_filtrado.groupby('dia').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups)
         
         fig_dias = px.pie(
             values=dias_count.values,
@@ -163,8 +167,8 @@ with tab1:
         fig_dias.update_layout(height=400)
         st.plotly_chart(fig_dias, use_container_width=True)
     
-    # Gráfico de turnos por efector
-    efectores_count = df_filtrado['efector'].value_counts()
+    # Gráfico de agendas únicas por efector
+    efectores_count = df_filtrado.groupby('efector').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups)
     
     fig_efectores = px.bar(
         x=efectores_count.index,
@@ -219,8 +223,9 @@ with tab2:
                     st.plotly_chart(fig_heatmap, use_container_width=True)
         
         with col2:
-            # Top médicos del día
-            medicos_dia = df_dia[df_dia['doctor'] != 'Sin asignar']['doctor'].value_counts().head(10)
+            # Top médicos del día (agendas únicas)
+            df_medicos_dia = df_dia[df_dia['doctor'] != 'Sin asignar']
+            medicos_dia = df_medicos_dia.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
 
             fig_medicos = px.bar(
                 x=medicos_dia.values,
@@ -263,7 +268,9 @@ with tab3:
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.metric("Total de Agendas", len(df_doctor))
+            # Contar agendas únicas del médico
+            agendas_unicas_doctor = df_doctor.groupby(['nombre_original_agenda', 'efector']).ngroups
+            st.metric("Total de agendas", agendas_unicas_doctor)
         
         with col2:
             especialidades_doctor = df_doctor['area'].nunique()
@@ -294,11 +301,11 @@ with tab4:
     metricas_efector = df_filtrado.groupby('efector').agg({
         'doctor': lambda x: x[x != 'Sin asignar'].nunique(),
         'area': lambda x: x[x != 'Sin área'].nunique(),
-        'dia': 'count'
+        'nombre_original_agenda': lambda x: len(x.groupby(['nombre_original_agenda', 'efector']).groups)
     }).rename(columns={
         'doctor': 'Médicos',
         'area': 'Especialidades',
-        'dia': 'Total agendas'
+        'nombre_original_agenda': 'Total agendas'
     }).reset_index()
     
     # Gráfico comparativo
@@ -445,7 +452,8 @@ with tab5:
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Registros mostrados", len(df_mostrar))
+        agendas_mostradas = df_mostrar.groupby(['nombre_original_agenda', 'efector']).ngroups
+        st.metric("Agendas mostradas", agendas_mostradas, delta=f"{len(df_mostrar)} horarios")
     
     with col2:
         doctores_tabla = df_mostrar[df_mostrar['doctor'] != 'Sin asignar']['doctor'].nunique()
@@ -466,18 +474,20 @@ with tab5:
         col1, col2 = st.columns(2)
         
         with col1:
-            # Top 5 doctores en la vista actual
+            # Top 5 médicos en la vista actual (agendas únicas)
             if 'doctor' in df_mostrar.columns:
-                top_doctores = df_mostrar[df_mostrar['doctor'] != 'Sin asignar']['doctor'].value_counts().head(5)
+                df_medicos_vista = df_mostrar[df_mostrar['doctor'] != 'Sin asignar']
+                top_doctores = df_medicos_vista.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(5)
                 if not top_doctores.empty:
                     st.write("**Top 5 médicos:**")
                     for i, (doctor, count) in enumerate(top_doctores.items(), 1):
                         st.write(f"{i}. {doctor}: {count} agendas")
         
         with col2:
-            # Top 5 especialidades en la vista actual
+            # Top 5 especialidades en la vista actual (agendas únicas)
             if 'area' in df_mostrar.columns:
-                top_areas = df_mostrar[df_mostrar['area'] != 'Sin área']['area'].value_counts().head(5)
+                df_areas_vista = df_mostrar[df_mostrar['area'] != 'Sin área']
+                top_areas = df_areas_vista.groupby('area').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(5)
                 if not top_areas.empty:
                     st.write("**Top 5 especialidades:**")
                     for i, (area, count) in enumerate(top_areas.items(), 1):
@@ -525,8 +535,10 @@ with tab6:
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            total_turnos_calendario = len(df_calendario)
-            st.metric("Total Agendas", total_turnos_calendario)
+            # Contar agendas únicas en el calendario
+            total_agendas_calendario = df_calendario.groupby(['nombre_original_agenda', 'efector']).ngroups
+            total_horarios_calendario = len(df_calendario)
+            st.metric("Total agendas", total_agendas_calendario, delta=f"{total_horarios_calendario} horarios")
         
         with col2:
             doctores_calendario = df_calendario[df_calendario['doctor'] != 'Sin asignar']['doctor'].nunique()
@@ -693,7 +705,8 @@ with tab6:
             'tipo_turno': 'Tipos de agenda'
         })
         
-        resumen_doctores['Total agendas'] = df_calendario['doctor'].value_counts()
+        # Contar agendas únicas por médico
+        resumen_doctores['Total agendas'] = df_calendario.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups)
         
         st.dataframe(resumen_doctores, use_container_width=True)
         
