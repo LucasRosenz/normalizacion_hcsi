@@ -1,313 +1,84 @@
 ﻿,Médico,Día,Centro 1,Área 1,Horario 1,Centro 2,Área 2,Horario 2,Tipo de conflicto
 0,AMURRI HORACIO,Lunes,Hospital Boulogne,NEUROLOGIA,12:00 - 15:00,Hospital Boulogne,NEUROLOGIA,12:00 - 15:00,Mismo centro
-1,AMURRI HORACIO,Miércoles,Hospital Boulogne,NEUROLOGIA,13:30 - 15:00,Hospital Boulogne,NEUROLOGIA,13:30 - 15:00,Mismo centro
-2,AMURRI HORACIO,Viernes,Hospital Boulogne,NEUROLOGIA,12:00 - 15:00,Hospital Boulogne,NEUROLOGIA,12:00 - 15:00,Mismo centro
-3,ASTIGUETA MARIANO,Martes,Hospital Odontológico,CIRUGIA,08:00 - 12:00,Hospital Odontológico,CIRUGIA,08:00 - 12:00,Mismo centro
-4,ASTIGUETA MARIANO,Martes,Hospital Odontológico,CIRUGIA,13:00 - 14:30,Hospital Odontológico,CIRUGIA,13:00 - 15:00,Mismo centro
-5,ASTIGUETA MARIANO,Miércoles,Hospital Odontológico,CIRUGIA,08:00 - 12:00,Hospital Odontológico,CIRUGIA,08:00 - 12:00,Mismo centro
-6,ASTIGUETA MARIANO,Miércoles,Hospital Odontológico,CIRUGIA,13:00 - 14:30,Hospital Odontológico,CIRUGIA,13:00 - 15:00,Mismo centro
-7,BRINNAND MARIA,Lunes,CAPS La Ribera,PEDIATRIA,08:00 - 13:40,CAPS Beccar,PEDIATRIA,12:20 - 14:00,Centros diferentes
-8,BRUNO CECILIA,Jueves,CAPS San Pantaleón,NUTRICION,08:00 - 12:00,CAPS San Pantaleón,NUTRICION,09:00 - 18:00,Mismo centro
-9,BRUNO CECILIA,Jueves,CAPS San Pantaleón,NUTRICION,09:00 - 18:00,CAPS San Pantaleón,NUTRICION,13:00 - 15:00,Mismo centro
-10,BRUNO CECILIA,Lunes,CAPS San Pantaleón,NUTRICION,08:00 - 12:00,CAPS San Pantaleón,NUTRICION,09:00 - 18:00,Mismo centro
-11,BRUNO CECILIA,Miércoles,CAPS San Pantaleón,NUTRICION,08:00 - 12:00,CAPS San Pantaleón,NUTRICION,09:00 - 18:00,Mismo centro
-12,CALORINA VARGAS,Jueves,CAPS San Isidro Labrador,ODONTOLOGIA,08:00 - 11:40,CAPS San Isidro Labrador,ODONTOLOGIA,08:00 - 11:20,Mismo centro
-13,CARRIERI NICOLAS,Jueves,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,Mismo centro
-14,CARRIERI NICOLAS,Lunes,CAPS Beccar,CLINICA MEDICA,08:00 - 16:00,CAPS Beccar,CLINICA MEDICA,08:00 - 10:00,Mismo centro
-15,CARRIERI NICOLAS,Miércoles,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,Mismo centro
-16,CARRIERI NICOLAS,Viernes,CAPS Beccar,CLINICA MEDICA,08:00 - 12:30,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,Centros diferentes
-17,CONDE,Jueves,Centro El Nido,PEDIATRIA,08:00 - 14:00,Centro El Nido,PEDIATRIA,08:00 - 14:00,Mismo centro
-18,CONDE,Viernes,Centro El Nido,PEDIATRIA,08:00 - 14:00,Centro El Nido,PEDIATRIA,08:00 - 14:00,Mismo centro
-19,CORONEL MARIEL,Jueves,CAPS Villa Adelina,NUTRICION,14:00 - 15:30,Hospital Boulogne,NUTRICION,15:00 - 16:00,Centros diferentes
-20,CORONEL MARIEL,Jueves,Hospital Boulogne,NUTRICION,15:00 - 16:00,CAPS Villa Adelina,NUTRICION,15:30 - 17:00,Centros diferentes
-21,COVELLI DANIELA EUGENIA,Lunes,Hospital Materno,NUTRICION,08:00 - 23:00,Hospital Materno,NUTRICION,08:40 - 12:00,Mismo centro
-22,COVELLI DANIELA EUGENIA,Martes,Hospital Materno,NUTRICION,08:00 - 23:00,Hospital Materno,NUTRICION,08:40 - 12:00,Mismo centro
-23,COVELLI DANIELA EUGENIA,Miércoles,Hospital Materno,NUTRICION,08:00 - 23:00,Hospital Materno,NUTRICION,08:40 - 12:00,Mismo centro
-24,CYNTHIA GISELA MENENDEZ,Martes,Hospital Materno,TRACTO GENITAL INFERIOR,08:30 - 12:30,Hospital Materno,TRACTO GENITAL INFERIOR,09:00 - 15:00,Mismo centro
-25,DIEGUEZ GABRIELA,Lunes,CAPS Barrio Obrero,CLINICA MEDICA,12:40 - 16:00,CAPS Barrio Obrero,CLINICA MEDICA,13:00 - 14:00,Mismo centro
-26,DIEGUEZ GABRIELA,Lunes,CAPS Barrio Obrero,CLINICA MEDICA,12:40 - 16:00,CAPS Barrio Obrero,CLINICA MEDICA,14:00 - 16:00,Mismo centro
-27,DRA TROTTA,Martes,Hospital Boulogne,DERMATOLOGIA,08:00 - 13:00,Hospital Boulogne,DERMATOLOGIA,09:00 - 13:00,Mismo centro
-28,ECG EMBARAZADAS,Viernes,Hospital Materno,OBSTETRICIA,08:00 - 12:00,Hospital Materno,OBSTETRICIA,11:15 - 13:15,Mismo centro
-29,ECG PROGRAMADA,Jueves,CAPS San Isidro Labrador,CARDIOLOGIA,08:00 - 14:30,CAPS Bajo Boulogne,CARDIOLOGIA,09:30 - 11:30,Centros diferentes
-30,ECG PROGRAMADA,Martes,CAPS San Isidro Labrador,CARDIOLOGIA,08:00 - 14:30,CAPS Bajo Boulogne,CARDIOLOGIA,09:30 - 11:30,Centros diferentes
-31,GRZONA MAGDALENA,Lunes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,Mismo centro
-32,GRZONA MAGDALENA,Lunes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
-33,GRZONA MAGDALENA,Lunes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
-34,GRZONA MAGDALENA,Lunes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
-35,GRZONA MAGDALENA,Lunes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
-36,GRZONA MAGDALENA,Lunes,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
-37,GRZONA MAGDALENA,Martes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
-38,GRZONA MAGDALENA,Martes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
-39,GRZONA MAGDALENA,Martes,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
-40,GRZONA MAGDALENA,Miércoles,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 09:00,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 09:00,Mismo centro
-41,JULIETA DE VICTOR,Lunes,Hospital Materno,GENETICA,09:30 - 12:45,Hospital Materno,OBSTETRICIA,11:30 - 12:45,Mismo centro
-42,LOBOSCO LAURA,Jueves,Hospital Odontológico,ODONTOLOGIA,08:00 - 12:00,Hospital Odontológico,ODONTOLOGIA,08:00 - 12:00,Mismo centro
-43,LOBOSCO LAURA,Jueves,Hospital Odontológico,ODONTOLOGIA,13:00 - 15:00,Hospital Odontológico,ODONTOLOGIA,13:00 - 15:00,Mismo centro
-44,LOBOSCO LAURA,Lunes,Hospital Odontológico,ODONTOLOGIA,08:00 - 12:00,Hospital Odontológico,ODONTOLOGIA,08:00 - 12:00,Mismo centro
-45,LOBOSCO LAURA,Lunes,Hospital Odontológico,ODONTOLOGIA,13:00 - 15:00,Hospital Odontológico,ODONTOLOGIA,13:00 - 15:00,Mismo centro
-46,LOWCEWICZ BARBARA,Jueves,Hospital Boulogne,GINECOLOGIA,08:00 - 12:00,Hospital Boulogne,GINECOLOGIA,08:00 - 10:00,Mismo centro
-47,LOWCEWICZ BARBARA,Jueves,Hospital Boulogne,GINECOLOGIA,08:00 - 12:00,Hospital Boulogne,GINECOLOGIA,10:00 - 14:00,Mismo centro
-48,LOWCEWICZ BARBARA,Martes,Hospital Boulogne,GINECOLOGIA,08:00 - 14:00,Hospital Boulogne,GINECOLOGIA,08:00 - 12:00,Mismo centro
-49,LOWCEWICZ BARBARA,Miércoles,Hospital Boulogne,GINECOLOGIA,08:00 - 12:00,Hospital Boulogne,GINECOLOGIA,08:00 - 12:00,Mismo centro
-50,MALDONADO AYLEN,Miércoles,Hospital Boulogne,Sin área,12:40 - 15:20,Hospital Boulogne,Sin área,12:40 - 15:00,Mismo centro
-51,MAMANI SANDRA,Miércoles,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 11:40,CAPS San Isidro Labrador,PEDIATRIA,08:08 - 11:40,Mismo centro
-52,MAMANI SANDRA,Miércoles,CAPS San Isidro Labrador,PEDIATRIA,13:00 - 15:00,CAPS San Isidro Labrador,PEDIATRIA,13:00 - 15:00,Mismo centro
-53,MARANGELLI ANTONELA,Jueves,CAPS La Ribera,PEDIATRIA,08:00 - 09:00,CAPS La Ribera,PEDIATRIA,08:00 - 09:00,Mismo centro
-54,MARANGELLI ANTONELA,Jueves,CAPS La Ribera,PEDIATRIA,11:00 - 14:00,CAPS La Ribera,PEDIATRIA,11:00 - 14:00,Mismo centro
-55,MARANGELLI ANTONELA,Miércoles,CAPS La Ribera,PEDIATRIA,08:00 - 12:40,CAPS La Ribera,PEDIATRIA,08:00 - 12:40,Mismo centro
-56,MARIA MARTHA PANIZZA,Jueves,Centro El Nido,PSICOLOGIA,10:00 - 12:00,Centro El Nido,PSICOLOGIA,10:00 - 12:00,Mismo centro
-57,MARIA MARTHA PANIZZA,Jueves,Centro El Nido,PSICOLOGIA,10:00 - 12:00,Centro El Nido,PSICOLOGIA,10:30 - 12:00,Mismo centro
-58,MARIA MARTHA PANIZZA,Jueves,Centro El Nido,PSICOLOGIA,10:00 - 12:00,Centro El Nido,PSICOLOGIA,10:30 - 12:00,Mismo centro
-59,MARIA MARTHA PANIZZA,Jueves,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Mismo centro
-60,MARIA MARTHA PANIZZA,Jueves,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Mismo centro
-61,MARIA MARTHA PANIZZA,Jueves,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Mismo centro
-62,MARIA MARTHA PANIZZA,Jueves,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Mismo centro
-63,MARIA MARTHA PANIZZA,Jueves,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Mismo centro
-64,MARIA MARTHA PANIZZA,Jueves,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Centro El Nido,PSICOLOGIA,13:00 - 15:00,Mismo centro
-65,MENDEZ SIGNORI LILIANA,Lunes,Hospital Boulogne,Sin área,15:00 - 16:00,Hospital Boulogne,Sin área,15:00 - 16:00,Mismo centro
-66,MENDEZ SIGNORI LILIANA,Martes,Hospital Boulogne,Sin área,16:00 - 17:00,Hospital Boulogne,Sin área,16:00 - 17:00,Mismo centro
-67,MENDEZ SIGNORI LILIANA,Miércoles,Hospital Boulogne,Sin área,09:00 - 13:00,Hospital Boulogne,Sin área,12:00 - 15:20,Mismo centro
-68,MENDEZ SIGNORI LILIANA,Miércoles,Hospital Boulogne,Sin área,09:00 - 13:00,Hospital Boulogne,Sin área,12:40 - 15:20,Mismo centro
-69,MENDEZ SIGNORI LILIANA,Miércoles,Hospital Boulogne,Sin área,12:00 - 15:20,Hospital Boulogne,Sin área,12:40 - 15:20,Mismo centro
-70,MENDEZ SIGNORI LILIANA,Viernes,Hospital Boulogne,Sin área,15:00 - 16:00,Hospital Boulogne,Sin área,15:00 - 16:00,Mismo centro
-71,MENEGATTI ALEJANDRA,Martes,CAPS San Pantaleón,ODONTOLOGIA,09:00 - 10:00,CAPS San Pantaleón,ODONTOLOGIA,09:30 - 10:00,Mismo centro
-72,MENENDEZ CYNTHIA,Miércoles,CAPS San Pantaleón,GINECOLOGIA,09:00 - 12:00,CAPS San Pantaleón,GINECOLOGIA,09:00 - 15:00,Mismo centro
-73,ONOSTRE,Jueves,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-74,ONOSTRE,Jueves,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-75,ONOSTRE,Jueves,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,10:00 - 12:00,Mismo centro
-76,ONOSTRE,Jueves,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-77,ONOSTRE,Jueves,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,10:00 - 12:00,Mismo centro
-78,ONOSTRE,Jueves,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,10:00 - 12:00,Mismo centro
-79,ONOSTRE,Lunes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Mismo centro
-80,ONOSTRE,Lunes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-81,ONOSTRE,Lunes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-82,ONOSTRE,Lunes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,13:00 - 16:00,Mismo centro
-83,ONOSTRE,Lunes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-84,ONOSTRE,Lunes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-85,ONOSTRE,Lunes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-86,ONOSTRE,Lunes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,13:00 - 16:00,Mismo centro
-87,ONOSTRE,Lunes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,13:00 - 16:00,Mismo centro
-88,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Mismo centro
-89,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Mismo centro
-90,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-91,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-92,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Mismo centro
-93,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-94,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-95,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-96,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-97,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-98,ONOSTRE,Miércoles,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-99,ONOSTRE,Miércoles,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-100,ONOSTRE,Miércoles,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-101,ONOSTRE,Viernes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Mismo centro
-102,ONOSTRE,Viernes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-103,ONOSTRE,Viernes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-104,ONOSTRE,Viernes,Centro El Nido,ESTIMULACION TEMPRANA,00:00 - 23:59,Centro El Nido,ESTIMULACION TEMPRANA,13:00 - 16:00,Mismo centro
-105,ONOSTRE,Viernes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-106,ONOSTRE,Viernes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-107,ONOSTRE,Viernes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Mismo centro
-108,ONOSTRE,Viernes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,13:00 - 16:00,Mismo centro
-109,ONOSTRE,Viernes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 16:00,Centro El Nido,ESTIMULACION TEMPRANA,13:00 - 16:00,Mismo centro
-110,ORTIZ YULIANA,Martes,CAPS Bajo Boulogne,CLINICA MEDICA,08:00 - 12:00,CAPS Bajo Boulogne,CLINICA MEDICA,08:00 - 09:00,Mismo centro
-111,RABOSTO MATIAS,Martes,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 15:30,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 15:40,Mismo centro
-112,RABOSTO MATIAS,Martes,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 15:30,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 09:00,Mismo centro
-113,RABOSTO MATIAS,Martes,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 15:40,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 09:00,Mismo centro
-114,RODRIGUEZ MARTINA,Jueves,CAPS San Isidro Labrador,OBSTETRICIA,08:00 - 11:40,CAPS San Isidro Labrador,OBSTETRICIA,08:00 - 11:40,Mismo centro
-115,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-116,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-117,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-118,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-119,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-120,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-121,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-122,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-123,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-124,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-125,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-126,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-127,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-128,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-129,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-130,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-131,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-132,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-133,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-134,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-135,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-136,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-137,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-138,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-139,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-140,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-141,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-142,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-143,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-144,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-145,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-146,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-147,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-148,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-149,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-150,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-151,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-152,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-153,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-154,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-155,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-156,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-157,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-158,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-159,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-160,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-161,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-162,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-163,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-164,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-165,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-166,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-167,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-168,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-169,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-170,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-171,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-172,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-173,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-174,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-175,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-176,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-177,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-178,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-179,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-180,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-181,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-182,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-183,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-184,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-185,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-186,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-187,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-188,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-189,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-190,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-191,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-192,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-193,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-194,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-195,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-196,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-197,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-198,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-199,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-200,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-201,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-202,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-203,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-204,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-205,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-206,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-207,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-208,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-209,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-210,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-211,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-212,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-213,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-214,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-215,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-216,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-217,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-218,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-219,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-220,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-221,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-222,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-223,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-224,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-225,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-226,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-227,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-228,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-229,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-230,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-231,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-232,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-233,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-234,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-235,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-236,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-237,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-238,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-239,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
-240,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-241,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-242,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-243,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-244,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-245,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-246,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-247,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-248,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-249,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-250,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-251,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-252,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-253,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-254,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-255,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-256,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-257,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-258,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-259,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-260,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-261,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-262,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-263,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-264,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-265,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-266,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-267,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-268,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-269,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-270,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-271,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-272,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-273,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-274,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-275,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-276,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-277,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-278,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-279,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-280,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-281,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-282,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-283,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-284,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-285,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-286,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-287,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-288,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-289,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-290,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-291,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-292,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-293,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-294,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-295,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-296,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-297,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-298,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-299,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-300,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-301,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-302,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-303,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-304,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
-305,TOGNON ANDREA,Miércoles,CAPS Bajo Boulogne,PSICOLOGIA,13:30 - 17:00,CAPS Bajo Boulogne,PSICOLOGIA,14:30 - 17:30,Mismo centro
-306,VACCARO DIEGO,Jueves,CAPS Beccar,PSICOLOGIA,08:00 - 14:00,CAPS Villa Adelina,PSICOLOGIA,13:00 - 16:00,Centros diferentes
-307,VAZQUEZ MARIA ALEJANDRA,Jueves,Hospital Boulogne,PSICOLOGIA,07:30 - 11:00,Hospital Boulogne,PSICOLOGIA,08:00 - 12:00,Mismo centro
-308,VAZQUEZ MARIA ALEJANDRA,Lunes,Hospital Boulogne,PSICOLOGIA,07:30 - 11:00,Hospital Boulogne,PSICOLOGIA,08:00 - 12:00,Mismo centro
-309,VAZQUEZ MARIA ALEJANDRA,Martes,Hospital Boulogne,PSICOLOGIA,07:30 - 11:00,Hospital Boulogne,PSICOLOGIA,08:00 - 12:00,Mismo centro
-310,VAZQUEZ MARIA ALEJANDRA,Miércoles,Hospital Boulogne,PSICOLOGIA,07:30 - 11:00,Hospital Boulogne,PSICOLOGIA,08:00 - 12:00,Mismo centro
-311,VAZQUEZ MARIA ALEJANDRA,Viernes,Hospital Boulogne,PSICOLOGIA,06:30 - 11:00,Hospital Boulogne,PSICOLOGIA,08:00 - 12:00,Mismo centro
+1,AMURRI HORACIO,Viernes,Hospital Boulogne,NEUROLOGIA,12:00 - 15:00,Hospital Boulogne,NEUROLOGIA,12:00 - 15:00,Mismo centro
+2,ASTIGUETA MARIANO,Martes,Hospital Odontológico,CIRUGIA,08:00 - 12:00,Hospital Odontológico,CIRUGIA,08:00 - 12:00,Mismo centro
+3,ASTIGUETA MARIANO,Martes,Hospital Odontológico,CIRUGIA,13:00 - 14:30,Hospital Odontológico,CIRUGIA,13:00 - 15:00,Mismo centro
+4,ASTIGUETA MARIANO,Miércoles,Hospital Odontológico,CIRUGIA,08:00 - 12:00,Hospital Odontológico,CIRUGIA,08:00 - 12:00,Mismo centro
+5,ASTIGUETA MARIANO,Miércoles,Hospital Odontológico,CIRUGIA,13:00 - 14:30,Hospital Odontológico,CIRUGIA,13:00 - 15:00,Mismo centro
+6,BRINNAND MARIA,Lunes,CAPS La Ribera,PEDIATRIA,08:00 - 13:40,CAPS Beccar,PEDIATRIA,12:20 - 14:00,Centros diferentes
+7,BRUNO CECILIA,Jueves,CAPS San Pantaleón,NUTRICION,08:00 - 12:00,CAPS San Pantaleón,NUTRICION,09:00 - 18:00,Mismo centro
+8,BRUNO CECILIA,Jueves,CAPS San Pantaleón,NUTRICION,09:00 - 18:00,CAPS San Pantaleón,NUTRICION,13:00 - 15:00,Mismo centro
+9,BRUNO CECILIA,Lunes,CAPS San Pantaleón,NUTRICION,08:00 - 12:00,CAPS San Pantaleón,NUTRICION,09:00 - 18:00,Mismo centro
+10,BRUNO CECILIA,Miércoles,CAPS San Pantaleón,NUTRICION,08:00 - 12:00,CAPS San Pantaleón,NUTRICION,09:00 - 18:00,Mismo centro
+11,CALORINA VARGAS,Jueves,CAPS San Isidro Labrador,ODONTOLOGIA,08:00 - 11:40,CAPS San Isidro Labrador,ODONTOLOGIA,08:00 - 11:20,Mismo centro
+12,CARRIERI NICOLAS,Jueves,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,Mismo centro
+13,CARRIERI NICOLAS,Lunes,CAPS Beccar,CLINICA MEDICA,08:00 - 16:00,CAPS Beccar,CLINICA MEDICA,08:00 - 10:00,Mismo centro
+14,CARRIERI NICOLAS,Miércoles,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,Mismo centro
+15,CARRIERI NICOLAS,Viernes,CAPS Beccar,CLINICA MEDICA,08:00 - 12:30,CAPS Diagonal Salta,CLINICA MEDICA,09:30 - 12:10,Centros diferentes
+16,CONDE,Jueves,Centro El Nido,PEDIATRIA,08:00 - 14:00,Centro El Nido,PEDIATRIA,08:00 - 14:00,Mismo centro
+17,CONDE,Viernes,Centro El Nido,PEDIATRIA,08:00 - 14:00,Centro El Nido,PEDIATRIA,08:00 - 14:00,Mismo centro
+18,COVELLI DANIELA EUGENIA,Lunes,Hospital Materno,NUTRICION,08:00 - 23:00,Hospital Materno,NUTRICION,08:40 - 12:00,Mismo centro
+19,COVELLI DANIELA EUGENIA,Martes,Hospital Materno,NUTRICION,08:00 - 23:00,Hospital Materno,NUTRICION,08:40 - 12:00,Mismo centro
+20,COVELLI DANIELA EUGENIA,Miércoles,Hospital Materno,NUTRICION,08:00 - 23:00,Hospital Materno,NUTRICION,08:40 - 12:00,Mismo centro
+21,CYNTHIA GISELA MENENDEZ,Martes,Hospital Materno,TRACTO GENITAL INFERIOR,08:30 - 12:30,Hospital Materno,TRACTO GENITAL INFERIOR,09:00 - 15:00,Mismo centro
+22,DIEGUEZ GABRIELA,Lunes,CAPS Barrio Obrero,CLINICA MEDICA,12:40 - 16:00,CAPS Barrio Obrero,CLINICA MEDICA,13:00 - 14:00,Mismo centro
+23,DIEGUEZ GABRIELA,Lunes,CAPS Barrio Obrero,CLINICA MEDICA,12:40 - 16:00,CAPS Barrio Obrero,CLINICA MEDICA,14:00 - 16:00,Mismo centro
+24,DRA TROTTA,Martes,Hospital Boulogne,DERMATOLOGIA,08:00 - 13:00,Hospital Boulogne,DERMATOLOGIA,09:00 - 13:00,Mismo centro
+25,ECG EMBARAZADAS,Viernes,Hospital Materno,OBSTETRICIA,08:00 - 12:00,Hospital Materno,OBSTETRICIA,11:15 - 13:15,Mismo centro
+26,ECG PROGRAMADA,Jueves,CAPS San Isidro Labrador,CARDIOLOGIA,08:00 - 14:30,CAPS Bajo Boulogne,CARDIOLOGIA,09:30 - 11:30,Centros diferentes
+27,ECG PROGRAMADA,Martes,CAPS San Isidro Labrador,CARDIOLOGIA,08:00 - 14:30,CAPS Bajo Boulogne,CARDIOLOGIA,09:30 - 11:30,Centros diferentes
+28,GRZONA MAGDALENA,Lunes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,Mismo centro
+29,GRZONA MAGDALENA,Lunes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
+30,GRZONA MAGDALENA,Lunes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
+31,GRZONA MAGDALENA,Martes,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 14:20,CAPS San Isidro Labrador,PEDIATRIA,12:00 - 13:00,Mismo centro
+32,JULIETA DE VICTOR,Lunes,Hospital Materno,GENETICA,09:30 - 12:45,Hospital Materno,OBSTETRICIA,11:30 - 12:45,Mismo centro
+33,LOBOSCO LAURA,Jueves,Hospital Odontológico,ODONTOLOGIA,08:00 - 12:00,Hospital Odontológico,ODONTOLOGIA,08:00 - 12:00,Mismo centro
+34,LOBOSCO LAURA,Jueves,Hospital Odontológico,ODONTOLOGIA,13:00 - 15:00,Hospital Odontológico,ODONTOLOGIA,13:00 - 15:00,Mismo centro
+35,LOBOSCO LAURA,Lunes,Hospital Odontológico,ODONTOLOGIA,08:00 - 12:00,Hospital Odontológico,ODONTOLOGIA,08:00 - 12:00,Mismo centro
+36,LOBOSCO LAURA,Lunes,Hospital Odontológico,ODONTOLOGIA,13:00 - 15:00,Hospital Odontológico,ODONTOLOGIA,13:00 - 15:00,Mismo centro
+37,LOWCEWICZ BARBARA,Jueves,Hospital Boulogne,GINECOLOGIA,08:00 - 12:00,Hospital Boulogne,GINECOLOGIA,08:00 - 10:00,Mismo centro
+38,LOWCEWICZ BARBARA,Jueves,Hospital Boulogne,GINECOLOGIA,08:00 - 12:00,Hospital Boulogne,GINECOLOGIA,10:00 - 14:00,Mismo centro
+39,LOWCEWICZ BARBARA,Martes,Hospital Boulogne,GINECOLOGIA,08:00 - 14:00,Hospital Boulogne,GINECOLOGIA,08:00 - 12:00,Mismo centro
+40,LOWCEWICZ BARBARA,Miércoles,Hospital Boulogne,GINECOLOGIA,08:00 - 12:00,Hospital Boulogne,GINECOLOGIA,08:00 - 12:00,Mismo centro
+41,MALDONADO AYLEN,Miércoles,Hospital Boulogne,Sin área,12:40 - 15:20,Hospital Boulogne,Sin área,12:40 - 15:00,Mismo centro
+42,MAMANI SANDRA,Miércoles,CAPS San Isidro Labrador,PEDIATRIA,08:00 - 11:40,CAPS San Isidro Labrador,PEDIATRIA,08:08 - 11:40,Mismo centro
+43,MAMANI SANDRA,Miércoles,CAPS San Isidro Labrador,PEDIATRIA,13:00 - 15:00,CAPS San Isidro Labrador,PEDIATRIA,13:00 - 15:00,Mismo centro
+44,MARANGELLI ANTONELA,Jueves,CAPS La Ribera,PEDIATRIA,08:00 - 09:00,CAPS La Ribera,PEDIATRIA,08:00 - 09:00,Mismo centro
+45,MARANGELLI ANTONELA,Jueves,CAPS La Ribera,PEDIATRIA,11:00 - 14:00,CAPS La Ribera,PEDIATRIA,11:00 - 14:00,Mismo centro
+46,MARANGELLI ANTONELA,Miércoles,CAPS La Ribera,PEDIATRIA,08:00 - 12:40,CAPS La Ribera,PEDIATRIA,08:00 - 12:40,Mismo centro
+47,MARIA MARTHA PANIZZA,Jueves,Centro El Nido,PSICOLOGIA,10:00 - 12:00,Centro El Nido,PSICOLOGIA,10:00 - 12:00,Mismo centro
+48,MENDEZ SIGNORI LILIANA,Lunes,Hospital Boulogne,Sin área,15:00 - 16:00,Hospital Boulogne,Sin área,15:00 - 16:00,Mismo centro
+49,MENDEZ SIGNORI LILIANA,Martes,Hospital Boulogne,Sin área,16:00 - 17:00,Hospital Boulogne,Sin área,16:00 - 17:00,Mismo centro
+50,MENEGATTI ALEJANDRA,Martes,CAPS San Pantaleón,ODONTOLOGIA,09:00 - 10:00,CAPS San Pantaleón,ODONTOLOGIA,09:30 - 10:00,Mismo centro
+51,MENENDEZ CYNTHIA,Miércoles,CAPS San Pantaleón,GINECOLOGIA,09:00 - 12:00,CAPS San Pantaleón,GINECOLOGIA,09:00 - 15:00,Mismo centro
+52,ONOSTRE,Martes,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Centro El Nido,ESTIMULACION TEMPRANA,08:00 - 12:00,Mismo centro
+53,ORTIZ YULIANA,Martes,CAPS Bajo Boulogne,CLINICA MEDICA,08:00 - 12:00,CAPS Bajo Boulogne,CLINICA MEDICA,08:00 - 09:00,Mismo centro
+54,RABOSTO MATIAS,Martes,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 15:30,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 15:40,Mismo centro
+55,RABOSTO MATIAS,Martes,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 15:30,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 09:00,Mismo centro
+56,RABOSTO MATIAS,Martes,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 15:40,CAPS Diagonal Salta,ODONTOLOGIA,08:00 - 09:00,Mismo centro
+57,RODRIGUEZ MARTINA,Jueves,CAPS San Isidro Labrador,OBSTETRICIA,08:00 - 11:40,CAPS San Isidro Labrador,OBSTETRICIA,08:00 - 11:40,Mismo centro
+58,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
+59,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
+60,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
+61,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+62,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+63,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+64,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
+65,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
+66,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+67,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+68,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+69,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Mismo centro
+70,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+71,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+72,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+73,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+74,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+75,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,09:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+76,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+77,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+78,SPOTORNO ANDREA,Viernes,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Hospital Boulogne,ECOGRAFIA,11:00 - 13:00,Mismo centro
+79,TOGNON ANDREA,Miércoles,CAPS Bajo Boulogne,PSICOLOGIA,13:30 - 17:00,CAPS Bajo Boulogne,PSICOLOGIA,14:30 - 17:30,Mismo centro
+80,VACCARO DIEGO,Jueves,CAPS Beccar,PSICOLOGIA,08:00 - 14:00,CAPS Villa Adelina,PSICOLOGIA,13:00 - 16:00,Centros diferentes
+81,VAZQUEZ MARIA ALEJANDRA,Lunes,Hospital Boulogne,PSICOLOGIA,07:30 - 11:00,Hospital Boulogne,PSICOLOGIA,08:00 - 12:00,Mismo centro
+82,VAZQUEZ MARIA ALEJANDRA,Martes,Hospital Boulogne,PSICOLOGIA,07:30 - 11:00,Hospital Boulogne,PSICOLOGIA,08:00 - 12:00,Mismo centro

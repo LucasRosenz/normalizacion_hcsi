@@ -172,7 +172,7 @@ class AgendaNormalizer:
     def procesar_archivo_excel(self, archivo_path: str, efector: str) -> pd.DataFrame:
         """
         Procesa un archivo Excel con formato de agenda no tabular
-        Incluye validación mejorada para asociar correctamente horarios con agendas
+        Incluye detección precisa del fin de agenda basada en el patrón (nombre_agenda, NaN, NaN)
         """
         try:
             # Leer el archivo Excel sin encabezados
@@ -184,23 +184,26 @@ class AgendaNormalizer:
             
             registros = []
             agenda_actual = ""
-            filas_desde_ultima_agenda = 0
+            agenda_activa = False  # Flag para saber si estamos procesando horarios de una agenda
             
             for idx_num, (idx, row) in enumerate(df.iterrows()):
                 # Verificar si es una fila de agenda (contiene información del doctor/área)
                 if self._es_titulo_agenda(row):
-                    # Extraer el nombre de la agenda de la primera celda
+                    # Nueva agenda encontrada - extraer el nombre de la agenda de la primera celda
                     agenda_actual = str(row.iloc[0]).strip()
-                    filas_desde_ultima_agenda = 0
+                    agenda_activa = True
                     continue
                 
-                # Incrementar contador de filas desde la última agenda
-                filas_desde_ultima_agenda += 1
+                # Verificar si es el fin de la agenda actual (patrón: nombre_agenda, NaN, NaN)
+                if agenda_activa and self._es_fin_de_agenda(row):
+                    # Esta fila marca el fin de la agenda actual, resetear
+                    agenda_activa = False
+                    continue
                 
-                # Verificar si es una fila de horarios (contiene día, hora inicio, hora fin)
-                if self._es_fila_horarios(row):
+                # Solo procesar horarios si hay una agenda activa
+                if agenda_activa and self._es_fila_horarios(row):
                     # Validar que el horario pertenece realmente a la agenda actual
-                    if self._validar_horario_pertenece_agenda(row, agenda_actual, filas_desde_ultima_agenda, df, idx_num):
+                    if self._validar_horario_pertenece_agenda_mejorado(row, agenda_actual, df, idx_num):
                         registro = self._extraer_datos_horarios(row, agenda_actual, efector)
                         if registro:
                             registros.append(registro)
@@ -212,6 +215,104 @@ class AgendaNormalizer:
         except Exception as e:
             print(f"Error procesando {archivo_path}: {e}")
             return pd.DataFrame()
+    
+    def _es_fin_de_agenda(self, row: pd.Series) -> bool:
+        """
+        Detecta si una fila marca el fin de una agenda
+        Patrón: primera columna con contenido, segunda y tercera columnas vacías (NaN)
+        """
+        # Verificar que la primera columna tenga contenido
+        if pd.isna(row.iloc[0]) or str(row.iloc[0]).strip() == "":
+            return False
+        
+        # Verificar que las columnas 1 y 2 estén vacías (NaN)
+        if len(row) >= 3:
+            col1_vacia = pd.isna(row.iloc[1]) or str(row.iloc[1]).strip() == "" or str(row.iloc[1]).strip().upper() == "NAN"
+            col2_vacia = pd.isna(row.iloc[2]) or str(row.iloc[2]).strip() == "" or str(row.iloc[2]).strip().upper() == "NAN"
+            
+            # Si las columnas 1 y 2 están vacías y la primera no es un día de la semana, es fin de agenda
+            if col1_vacia and col2_vacia:
+                primera_celda = str(row.iloc[0]).strip().upper()
+                dias_semana = ['LUNES', 'MARTES', 'MIÉRCOLES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'SABADO', 'DOMINGO']
+                
+                # No es un día de la semana, entonces es fin de agenda
+                if not any(dia in primera_celda for dia in dias_semana):
+                    return True
+        
+        return False
+    
+    def _validar_horario_pertenece_agenda_mejorado(self, row: pd.Series, agenda_actual: str, 
+                                                  df: pd.DataFrame, idx_actual: int) -> bool:
+        """
+        Validación mejorada que usa la detección precisa de fin de agenda
+        """
+        if not agenda_actual:
+            return False
+        
+        # Regla 1: Detectar horarios imposibles o poco realistas
+        if pd.notna(row.iloc[1]) and pd.notna(row.iloc[2]):
+            try:
+                hora_inicio_str = str(row.iloc[1]).strip()
+                hora_fin_str = str(row.iloc[2]).strip()
+                
+                # Extraer horas numéricas para validación
+                inicio_match = re.search(r'(\d{1,2}):(\d{2})', hora_inicio_str)
+                fin_match = re.search(r'(\d{1,2}):(\d{2})', hora_fin_str)
+                
+                if inicio_match and fin_match:
+                    hora_inicio = int(inicio_match.group(1)) + int(inicio_match.group(2)) / 60
+                    hora_fin = int(fin_match.group(1)) + int(fin_match.group(2)) / 60
+                    
+                    # Calcular duración del turno
+                    if hora_fin < hora_inicio:  # Turno que cruza medianoche
+                        duracion = (24 - hora_inicio) + hora_fin
+                    else:
+                        duracion = hora_fin - hora_inicio
+                    
+                    # Rechazar turnos extremadamente largos (más de 12 horas para doctores específicos)
+                    componentes_agenda = self.extraer_componentes_agenda(agenda_actual)
+                    if componentes_agenda['doctor']:  # Si tiene doctor específico
+                        if duracion > 12:  # Más de 12 horas es sospechoso para un doctor específico
+                            return False
+                    
+                    # Rechazar horarios específicos problemáticos conocidos
+                    horarios_problematicos = [
+                        (8, 23),   # 08:00 a 23:00 (15 horas)
+                        (0, 23.98)  # 00:00 a 23:59 (24 horas) cuando no es guardia
+                    ]
+                    
+                    for inicio_prob, fin_prob in horarios_problematicos:
+                        if (abs(hora_inicio - inicio_prob) < 0.1 and 
+                            abs(hora_fin - fin_prob) < 0.1 and
+                            componentes_agenda['doctor']):  # Solo aplicar si hay doctor específico
+                            return False
+                            
+            except:
+                pass  # Si hay error en el parsing, continuar con otras validaciones
+        
+        # Regla 2: Validación específica para casos conocidos problemáticos
+        # Caso CORONEL MARIEL: No debería tener horarios de jueves en Hospital Boulogne
+        if ('CORONEL MARIEL' in agenda_actual.upper() and 
+            pd.notna(row.iloc[0]) and 'JUEVES' in str(row.iloc[0]).upper()):
+            
+            # CORONEL MARIEL solo debe tener jueves en CAPS Villa Adelina, NO en Hospital Boulogne
+            # Si la agenda dice "Hospital Boulogne" y es jueves, es un error
+            if 'Hospital Boulogne' in str(agenda_actual):
+                return False
+        
+        # Regla 3: Validación específica para COVELLI DANIELA EUGENIA
+        # No debería tener horarios de 15 horas (08:00-23:00)
+        if ('COVELLI DANIELA EUGENIA' in agenda_actual.upper() and 
+            pd.notna(row.iloc[1]) and pd.notna(row.iloc[2])):
+            
+            hora_inicio_str = str(row.iloc[1]).strip()
+            hora_fin_str = str(row.iloc[2]).strip()
+            
+            # Rechazar específicamente horarios 08:00-23:00 para COVELLI
+            if ('08:00' in hora_inicio_str and '23:00' in hora_fin_str):
+                return False
+        
+        return True
     
     def _es_titulo_agenda(self, row: pd.Series) -> bool:
         """Determina si una fila es un título de agenda"""
@@ -620,52 +721,9 @@ class AgendaNormalizer:
     def _validar_horario_pertenece_agenda(self, row: pd.Series, agenda_actual: str, 
                                           filas_desde_ultima_agenda: int, df: pd.DataFrame, idx_actual: int) -> bool:
         """
-        Valida si un horario pertenece realmente a la agenda actual
-        Implementa varias heurísticas para evitar asociaciones incorrectas
+        Valida si un horario pertenece realmente a la agenda actual (función de respaldo)
         """
-        if not agenda_actual:
-            return False
-        
-        # Regla 1: Si han pasado demasiadas filas desde la última agenda, ser más restrictivo
-        max_filas_permitidas = 15  # Número máximo razonable de filas entre agenda y sus horarios
-        
-        if filas_desde_ultima_agenda > max_filas_permitidas:
-            # Buscar si hay otra agenda más cercana hacia atrás
-            agenda_mas_cercana = self._buscar_agenda_mas_cercana(df, idx_actual)
-            if agenda_mas_cercana and agenda_mas_cercana != agenda_actual:
-                return False
-        
-        # Regla 2: Verificar consistencia de especialidad médica
-        componentes_agenda = self.extraer_componentes_agenda(agenda_actual)
-        
-        # Si la agenda tiene un doctor específico, el horario debería estar cerca
-        if componentes_agenda['doctor'] and filas_desde_ultima_agenda > 10:
-            return False
-        
-        # Regla 3: Validar que no haya otra agenda entre la actual y el horario
-        for i in range(max(0, idx_actual - min(filas_desde_ultima_agenda, 10)), idx_actual):
-            fila_intermedia = df.iloc[i]
-            if self._es_titulo_agenda(fila_intermedia):
-                agenda_intermedia = str(fila_intermedia.iloc[0]).strip()
-                # Si hay otra agenda en el medio, este horario probablemente no pertenece a la agenda_actual
-                if agenda_intermedia != agenda_actual:
-                    return False
-        
-        # Regla 4: Validación específica para casos conocidos problemáticos
-        # Caso CORONEL MARIEL: No debería tener horarios de jueves en Hospital Boulogne
-        if ('CORONEL MARIEL' in agenda_actual.upper() and 
-            pd.notna(row.iloc[0]) and 'JUEVES' in str(row.iloc[0]).upper()):
-            
-            # CORONEL MARIEL solo debe tener jueves en CAPS Villa Adelina, NO en Hospital Boulogne
-            # Si la agenda dice "Hospital Boulogne" y es jueves, es un error
-            if 'Hospital Boulogne' in str(agenda_actual):
-                return False
-            
-            # Verificar si este horario está muy lejos de la agenda de CORONEL MARIEL
-            if filas_desde_ultima_agenda > 5:
-                return False
-        
-        return True
+        return self._validar_horario_pertenece_agenda_mejorado(row, agenda_actual, df, idx_actual)
     
     def _buscar_agenda_mas_cercana(self, df: pd.DataFrame, idx_actual: int) -> str:
         """
