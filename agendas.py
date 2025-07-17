@@ -190,19 +190,29 @@ class AgendaNormalizer:
             
             registros = []
             agenda_actual = ""
+            encontro_encabezado_horarios = False
             
             for idx, row in df.iterrows():
+                # Verificar si es una fila de encabezado de horarios "Día | Hora inicio | Hora fin"
+                if (pd.notna(row.iloc[0]) and str(row.iloc[0]).upper().strip() == 'DÍA' and
+                    len(row) >= 3 and pd.notna(row.iloc[1]) and pd.notna(row.iloc[2])):
+                    encontro_encabezado_horarios = True
+                    continue
+                
                 # Verificar si es una fila de agenda (contiene información del doctor/área)
                 if self._es_titulo_agenda(row):
                     # Extraer el nombre de la agenda de la primera celda
                     agenda_actual = str(row.iloc[0]).strip()
+                    encontro_encabezado_horarios = False  # Reset para la nueva agenda
                     continue
                 
                 # Verificar si es una fila de horarios (contiene día, hora inicio, hora fin)
                 if self._es_fila_horarios(row):
-                    registro = self._extraer_datos_horarios(row, agenda_actual, efector)
-                    if registro:
-                        registros.append(registro)
+                    # Solo procesar horarios si tenemos una agenda actual Y hemos visto un encabezado
+                    if agenda_actual and encontro_encabezado_horarios:
+                        registro = self._extraer_datos_horarios(row, agenda_actual, efector)
+                        if registro:
+                            registros.append(registro)
             
             return pd.DataFrame(registros)
             
@@ -211,61 +221,52 @@ class AgendaNormalizer:
             return pd.DataFrame()
     
     def _es_titulo_agenda(self, row: pd.Series) -> bool:
-        """Determina si una fila es un título de agenda"""
+        """
+        Determina si una fila es un título de agenda
+        CRITERIO PURAMENTE ESTRUCTURAL: Solo detecta títulos de agenda cuando:
+        - La primera columna tiene contenido (no es nan)
+        - La segunda columna está vacía (es nan)
+        - La tercera columna está vacía (es nan)
+        - La primera celda no está vacía después de hacer strip()
+        
+        Este criterio es independiente del contenido y se basa únicamente en la estructura.
+        """
+        # Verificar que tengamos al menos 3 columnas
+        if len(row) < 3:
+            return False
+        
+        # CRITERIO ESTRICTO: Primera columna con contenido, segunda y tercera vacías
         if pd.isna(row.iloc[0]):
+            return False
+        
+        # Verificar que las columnas 2 y 3 estén vacías (nan)
+        if pd.notna(row.iloc[1]) or pd.notna(row.iloc[2]):
             return False
         
         primera_celda = str(row.iloc[0]).strip()
         
-        # Si la primera celda contiene palabras clave médicas (doctores/profesionales)
-        palabras_medicas = ['PEDIATRIA', 'DR.', 'DRA.', 'DOCTOR', 'DOCTORA', 'LIC.', 'MEDICO', 'CLINICO']
-        if any(palabra in primera_celda.upper() for palabra in palabras_medicas):
-            return True
+        # Si la primera celda está vacía después de strip(), no es un título
+        if not primera_celda:
+            return False
         
-        # Si contiene "PERFIL PROFESIONAL" (formato HCSI)
-        if 'PERFIL PROFESIONAL' in primera_celda.upper():
-            return True
-        
-        # Detectar especialidades médicas sin doctor específico
-        especialidades_medicas = [
-            'CARDIOLOGIA', 'NEUROLOGIA', 'DERMATOLOGIA', 'GINECOLOGIA', 'OBSTETRICIA',
-            'TRAUMATOLOGIA', 'OFTALMOLOGIA', 'OTORRINOLARINGOLOGIA', 'UROLOGIA',
-            'NEUMOLOGIA', 'HEMATOLOGIA', 'ONCOLOGIA', 'REUMATOLOGIA', 'INFECTOLOGIA',
-            'NEFROLOGIA', 'CLINICA MEDICA', 'MEDICINA INTERNA', 'CIRUGIA',
-            'ANESTESIOLOGIA', 'PSIQUIATRIA', 'HEMOTERAPIA', 'KINESIOLOGIA',
-            'LABORATORIO', 'NUTRICION', 'NEUROCIRUGÍA', 'MEDICINA LABORAL',
-            'SERVICIO SOCIAL', 'DIABETOLOGIA', 'GUARDIA MEDICA', 'DIRECCION MEDICA',
-            'ANATOMIA PATOLOGICA', 'CIRUGIA VASCULAR', 'NEUMONOLOGIA', 'ODONTOLOGIA',
-            'ADOLESCENCIA', 'RADIOLOGIA', 'ENDODONCIA', 'PROTESIS',
-            'ESTIMULACION TEMPRANA', 'FONOAUDIOLOGIA', 'TERAPIA OCUPACIONAL',
-            'PSICOPEDAGOGIA', 'MUSICOTERAPIA', 'SALUD SEXUAL', 'MEDICINA PREVENTIVA',
-            'RONDA SANITARIA', 'ENFERMERIA', 'VACUNACION', 'ECOGRAFIA', 'FARMACIA',
-            'ESTADISTICA', 'TRABAJO SOCIAL', 'ADMINISTRACION', 'DIRECCION',
-            'COORDINACION', 'SECRETARIA', 'ARCHIVO', 'INFORMES', 'CONSULTORIOS',
-            'CONTROL', 'POST ALTA', 'DEMANDA', 'MEDICINA', 'CIRUGIA MAXILOFACIAL',
-            'CIRUGIA PLASTICA', 'MEDICINA FAMILIAR', 'ATENCION', 'CONSULTORIO',
-            'UNIDAD', 'SALA', 'TURNO', 'AGENDA', 'GUARDIA', 'EMERGENCIA'
-        ]
-        
-        texto_upper = primera_celda.upper()
-        if any(especialidad in texto_upper for especialidad in especialidades_medicas):
-            return True
-        
-        return False
+        # Si cumple con el formato estructural "NOMBRE AGENDA, nan, nan", es un título
+        return True
     
     def _es_fila_horarios(self, row: pd.Series) -> bool:
         """Determina si una fila contiene información de horarios"""
+        # Si la primera celda es "Día" (encabezado de tabla), NO es fila de horarios
+        if pd.notna(row.iloc[0]) and str(row.iloc[0]).upper().strip() == 'DÍA':
+            return False
+        
         # Buscar días de la semana en la primera columna
         dias_semana = ['LUNES', 'MARTES', 'MIÉRCOLES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'SABADO', 'DOMINGO']
         
         if pd.notna(row.iloc[0]):
             primera_celda = str(row.iloc[0]).upper()
             if any(dia in primera_celda for dia in dias_semana):
-                return True
-        
-        # Si la primera celda es "Día" (encabezado de tabla)
-        if pd.notna(row.iloc[0]) and str(row.iloc[0]).upper().strip() == 'DÍA':
-            return False
+                # Verificar que también tenga horarios en las columnas 2 y 3
+                if pd.notna(row.iloc[1]) and pd.notna(row.iloc[2]):
+                    return True
         
         return False
     
