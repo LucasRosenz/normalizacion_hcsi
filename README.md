@@ -21,12 +21,25 @@ Una aplicación web interactiva para visualizar y analizar agendas médicas cons
 
 ## Instalación y ejecución local
 
+### Prerequisitos
+
+Asegúrate de tener:
+- Python 3.8 o superior
+- Los archivos Excel originales en el directorio `agendas_originales/`
+
+### Pasos
+
 1. Clona el repositorio
-2. Instala las dependencias:
+2. Crea el directorio de datos:
+   ```bash
+   mkdir agendas_originales
+   ```
+3. Coloca los archivos Excel de las agendas en `agendas_originales/`
+4. Instala las dependencias:
    ```bash
    pip install -r requirements.txt
    ```
-3. Ejecuta la aplicación:
+5. Ejecuta la aplicación:
    ```bash
    streamlit run app_agendas.py
    ```
@@ -34,9 +47,17 @@ Una aplicación web interactiva para visualizar y analizar agendas médicas cons
 ## Estructura del proyecto
 
 - `app_agendas.py`: Aplicación principal de Streamlit
-- `agendas.py`: Módulo de procesamiento de datos
+- `agendas.py`: Módulo de procesamiento de archivos Excel
 - `requirements.txt`: Dependencias del proyecto
+- `agendas_originales/`: Directorio con archivos Excel originales
 - `agendas_consolidadas.csv`: Datos consolidados (generado automáticamente)
+
+## Fuente de datos
+
+La aplicación procesa archivos Excel originales ubicados en `agendas_originales/` que contienen:
+- Agendas de múltiples hospitales y CAPS
+- Información de médicos, especialidades y horarios
+- Datos de turnos programados y espontáneos
 
 ## Uso
 

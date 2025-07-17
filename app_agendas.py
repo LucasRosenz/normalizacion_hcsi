@@ -94,11 +94,17 @@ def cargar_datos():
             progress_bar.progress(30)
             df = pd.read_csv("agendas_consolidadas.csv")
         else:
-            status_text.text("Generando datos...")
+            # Verificar que exista el directorio de agendas originales
+            if not os.path.exists("agendas_originales"):
+                st.error("❌ No se encontró el directorio 'agendas_originales'")
+                st.info("Por favor, asegúrate de que el directorio 'agendas_originales' existe y contiene los archivos Excel.")
+                st.stop()
+            
+            status_text.text("Procesando archivos Excel...")
             progress_bar.progress(20)
             
             try:
-                # Primero intentar con el procesador real
+                # Procesar archivos Excel originales
                 from agendas import main as procesar_agendas
                 status_text.text("Procesando archivos Excel...")
                 progress_bar.progress(40)
@@ -108,17 +114,17 @@ def cargar_datos():
                 if os.path.exists("agendas_consolidadas.csv"):
                     df = pd.read_csv("agendas_consolidadas.csv")
                 else:
-                    raise FileNotFoundError("No se pudo generar con datos reales")
+                    st.error("❌ No se pudo generar el archivo consolidado")
+                    st.info("Verifica que los archivos Excel en 'agendas_originales' sean válidos.")
+                    st.stop()
                     
             except Exception as e:
-                # Si no funciona el procesador real, usar datos de ejemplo
-                status_text.text("Generando datos de ejemplo...")
-                progress_bar.progress(60)
-                
-                from generar_datos_ejemplo import crear_archivo_ejemplo
-                crear_archivo_ejemplo()
-                df = pd.read_csv("agendas_consolidadas.csv")
-                st.info("📊 Usando datos de ejemplo para demostración")
+                st.error(f"❌ Error procesando archivos Excel: {str(e)}")
+                st.info("Verifica que:")
+                st.info("- El directorio 'agendas_originales' existe")
+                st.info("- Los archivos Excel están en formato correcto")
+                st.info("- Los archivos no están corruptos")
+                st.stop()
         
         status_text.text("Procesando datos...")
         progress_bar.progress(70)
@@ -181,15 +187,11 @@ if df.empty:
                 st.error(f"Error subiendo archivo: {e}")
     
     with col2:
-        st.markdown("**Opción 2: Generar datos de ejemplo**")
-        if st.button("🔄 Generar datos de ejemplo"):
-            try:
-                from generar_datos_ejemplo import crear_archivo_ejemplo
-                crear_archivo_ejemplo()
-                st.success("✅ Datos de ejemplo generados")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error: {e}")
+        st.markdown("**Opción 2: Verificar archivos Excel**")
+        st.info("Asegúrate de que:")
+        st.info("- El directorio 'agendas_originales' existe")
+        st.info("- Los archivos Excel están presentes")
+        st.info("- Los archivos no están corruptos")
         
         # Opción para limpiar caché
         st.markdown("**Opción 3: Limpiar caché**")

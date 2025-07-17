@@ -11,6 +11,7 @@
    - `requirements.txt`
    - `README.md`
    - `.streamlit/config.toml`
+   - `agendas_originales/` (directorio con archivos Excel)
    - `agendas_consolidadas.csv` (si existe)
 
 ### 2. Configurar Streamlit Cloud
@@ -27,7 +28,7 @@
 ### 3. Configuración recomendada
 
 La aplicación está configurada para:
-- **Auto-detectar datos**: Si no existe `agendas_consolidadas.csv`, intentará generarlo
+- **Procesar archivos Excel**: Si no existe `agendas_consolidadas.csv`, procesará los archivos Excel en `agendas_originales/`
 - **Subida manual**: Permite subir el archivo CSV si es necesario
 - **Configuración responsive**: Se adapta a diferentes tamaños de pantalla
 - **Caché optimizado**: Mejora el rendimiento con `@st.cache_data`
