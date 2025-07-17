@@ -61,7 +61,9 @@ class AgendaNormalizer:
             'MEDICINA LABORAL': r'\bMEDICINA\s+LABORAL\b',
             'SERVICIO SOCIAL': r'\bSERVICIO\s+SOCIAL\b|\bLIC\.\s*EN\s+TRABAJO\s+SOCIAL\b|\bTRABAJO\s+SOCIAL\b|\bTRABAJADORA\s+SOCIAL\b',
             'DIABETOLOGIA': r'\bDIABETOLOGIA\b',
-            'GUARDIA MEDICA': r'\bGUARDIA\s+MEDICA\b',
+            'GUARDIA MEDICA': r'\bGUARDIA\s+MEDICA\b(?!\s+(?:CLINICA|PEDIATRICA|PEDI))',
+            'GUARDIA CLINICA': r'\bGUARDIA\s+M[EÉ]DICA\s+CL[IÍ]NICA\b',
+            'GUARDIA PEDIATRICA': r'\bGUARDIA\s+M[EÉ]DICA\s+PEDI[AÁ]TRICA\b',
             'DIRECCION MEDICA': r'\bDIRECCION\s+MEDICA\b',
             'ANATOMIA PATOLOGICA': r'\bANATOMIA\s+PATOLOGICA\b|A\.\s*PATOLOGICA',
             'CIRUGIA VASCULAR': r'\bCIRUGIA\s+VASCULAR\b',
@@ -143,6 +145,7 @@ class AgendaNormalizer:
         
         # Buscar tipo de turno - patrones mejorados
         tipo_patterns = {
+            'GUARDIA': r'\bGUARDIA\b|\bGUARDIA\s+MEDICA\b|\bGUARDIAS\b',
             'ESPONTANEA': r'\bESPONTANEA\b|\bESPONTÁNEA\b|\bESPONTÃ_x0081_NEA\b',
             'PROGRAMADA': r'\bPROGRAMADA\b|\bTURNO\s+PROGRAMADO\b|\bPROGRAMADO\b',
             'SOBRETURNO': r'\bSOBRETURNO\b|\bSOBRETURNOS\b',
@@ -466,6 +469,9 @@ class AgendaNormalizer:
             'Ã_x008d_': 'Í',
             'Ã_x0081_': 'Á',
             'Ã_x0081_N': 'ÁN',
+            'MÃ‰DICA': 'MÉDICA',
+            'CLÃ_x008d_NICA': 'CLÍNICA',
+            'PEDIÃ_x0081_TRICA': 'PEDIÁTRICA',
             'BARILÃ_x0081_': 'BARILÁ',
             'INÃ‰S': 'INÉS',
             'Ã‰S': 'ÉS',
