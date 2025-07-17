@@ -8,13 +8,33 @@
 2. Sube todos los archivos del proyecto:
    - `app_agendas.py`
    - `agendas.py`
+   - `auth.py` ⭐ **NUEVO: Sistema de autenticación**
+   - `auth_config.py` ⭐ **NUEVO: Configuración de credenciales**
    - `requirements.txt`
    - `README.md`
+   - `AUTENTICACION.md` ⭐ **NUEVO: Documentación de seguridad**
    - `.streamlit/config.toml`
    - `agendas_originales/` (directorio con archivos Excel)
    - `agendas_consolidadas.csv` (si existe)
 
-### 2. Configurar Streamlit Cloud
+### 2. ⚠️ IMPORTANTE: Configurar credenciales
+
+**ANTES del despliegue, cambiar las credenciales por defecto:**
+
+1. Edita `auth_config.py`:
+   ```python
+   USERS = {
+       "admin": "TU_CONTRASEÑA_SEGURA_ADMIN",
+       "medico": "TU_CONTRASEÑA_SEGURA_MEDICO", 
+       "director": "TU_CONTRASEÑA_SEGURA_DIRECTOR"
+   }
+   
+   MASTER_PASSWORD = "TU_CONTRASEÑA_MAESTRA_SUPER_SEGURA"
+   ```
+
+2. Usar contraseñas fuertes (mínimo 12 caracteres, combinando letras, números y símbolos)
+
+### 3. Configurar Streamlit Cloud
 
 1. Ve a [share.streamlit.io](https://share.streamlit.io)
 2. Conecta tu cuenta de GitHub
@@ -25,15 +45,25 @@
    - **Advanced settings** (opcional):
      - Variables de entorno si las necesitas
 
-### 3. Configuración recomendada
+### 4. Configuración recomendada
 
 La aplicación está configurada para:
+- **🔐 Autenticación obligatoria**: Solo usuarios autorizados pueden acceder
 - **Procesar archivos Excel**: Si no existe `agendas_consolidadas.csv`, procesará los archivos Excel en `agendas_originales/`
 - **Subida manual**: Permite subir el archivo CSV si es necesario
 - **Configuración responsive**: Se adapta a diferentes tamaños de pantalla
 - **Caché optimizado**: Mejora el rendimiento con `@st.cache_data`
+- **Sesión persistente**: No requiere re-login en cada recarga
 
-### 4. URL de acceso
+### 5. Sistema de Seguridad
+
+✅ **Aplicación pública pero protegida**: La URL es pública pero el contenido requiere login
+✅ **Múltiples usuarios**: Diferentes credenciales para diferentes roles
+✅ **Contraseña maestra**: Acceso rápido para administradores
+✅ **Límite de intentos**: Protección contra ataques de fuerza bruta
+✅ **Datos sensibles protegidos**: Solo personal autorizado puede ver las agendas médicas
+
+### 6. URL de acceso
 
 Una vez desplegada, la aplicación estará disponible en:
 `https://tu-usuario-normalizacion-hcsi-app-streamlit-app.streamlit.app`

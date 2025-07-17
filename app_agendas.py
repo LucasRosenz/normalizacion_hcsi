@@ -5,203 +5,45 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import datetime
 import os
-import sys
-from contextlib import contextmanager
-import warnings
-
-# Configurar warnings para evitar mensajes innecesarios
-warnings.filterwarnings('ignore')
-
-# Configuración de optimización
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', 100)
-
-# Context manager para manejo de errores
-@contextmanager
-def error_handler(operation_name="operación"):
-    try:
-        yield
-    except Exception as e:
-        st.error(f"Error en {operation_name}: {str(e)[:200]}...")
-        st.info("Si el problema persiste, intenta recargar la página o contacta al soporte.")
-
-# Función para limpiar caché si es necesario
-def limpiar_cache():
-    """Limpia el caché de Streamlit"""
-    if st.button("🔄 Limpiar caché y recargar"):
-        st.cache_data.clear()
-        st.rerun()
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Agendas HCSI - Visualización",
-    page_icon="🏥",
+    page_title="Agendas salud",
+    page_icon="",
     layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        'Get Help': 'https://github.com/LucasRosenz/normalizacion_hcsi',
-        'Report a bug': 'mailto:lrosenzvit@sanisidro.gob.ar',
-        'About': 'Sistema de visualización de agendas médicas - Hospital de Clínicas San Isidro'
-    }
+    initial_sidebar_state="expanded"
 )
 
 # Título principal
-st.title("🏥 Visualización de agendas médicas")
-st.markdown("### Sistema integral de análisis de horarios - Hospital de Clínicas San Isidro")
+st.title("Agendas salud")
+st.markdown("### Dashboard interactivo para visualización de horarios")
 
-# Información sobre la aplicación
-with st.expander("ℹ️ Información de la aplicación"):
-    st.markdown("""
-    **Sistema de visualización de agendas médicas**
-    
-    Esta aplicación permite analizar y visualizar las agendas médicas consolidadas de múltiples centros de salud.
-    
-    **Funcionalidades principales:**
-    - 📊 Análisis general con métricas y gráficos
-    - 📅 Visualización por días de la semana
-    - 🏥 Comparativa entre centros de salud
-    - 📋 Tabla completa con filtros avanzados
-    - 🗓️ Vista calendario tipo agenda
-    - 🔍 Análisis UNIQUE para explorar valores únicos
-    - ⚙️ Panel de gestión con detección de conflictos
-    
-    **Desarrollado por:** Lucas Rosenzvit - lrosenzvit@sanisidro.gob.ar
-    """)
-
-# Verificar si hay datos disponibles
-data_status = st.empty()
-with data_status:
-    if os.path.exists("agendas_consolidadas.csv"):
-        file_size = os.path.getsize("agendas_consolidadas.csv")
-        st.success(f"✅ Datos cargados correctamente ({file_size/1024:.1f} KB)")
-    else:
-        st.warning("⚠️ No se encontró archivo de datos. Se intentará generar automáticamente.")
-
-@st.cache_data(ttl=3600)  # Cache por 1 hora
+@st.cache_data
 def cargar_datos():
-    """Carga los datos de agendas consolidadas con caché optimizado"""
-    with error_handler("carga de datos"):
-        # Mostrar progreso
-        progress_bar = st.progress(0)
-        status_text = st.empty()
+    """Carga los datos de agendas consolidadas"""
+    try:
+        df = pd.read_csv("datos/csv_procesado/agendas_consolidadas.csv")
         
-        status_text.text("Verificando archivos...")
-        progress_bar.progress(10)
+        # Limpiar datos
+        df['doctor'] = df['doctor'].fillna('Sin asignar')
+        df['area'] = df['area'].fillna('Sin área')
+        df['tipo_turno'] = df['tipo_turno'].fillna('No especificado')
         
-        # Intentar cargar el archivo CSV
-        if os.path.exists("agendas_consolidadas.csv"):
-            status_text.text("Cargando datos existentes...")
-            progress_bar.progress(30)
-            df = pd.read_csv("agendas_consolidadas.csv")
-        else:
-            # Verificar que exista el directorio de agendas originales
-            if not os.path.exists("agendas_originales"):
-                st.error("❌ No se encontró el directorio 'agendas_originales'")
-                st.info("Por favor, asegúrate de que el directorio 'agendas_originales' existe y contiene los archivos Excel.")
-                st.stop()
-            
-            status_text.text("Procesando archivos Excel...")
-            progress_bar.progress(20)
-            
-            try:
-                # Procesar archivos Excel originales
-                from agendas import main as procesar_agendas
-                status_text.text("Procesando archivos Excel...")
-                progress_bar.progress(40)
-                procesar_agendas()
-                
-                # Cargar datos generados
-                if os.path.exists("agendas_consolidadas.csv"):
-                    df = pd.read_csv("agendas_consolidadas.csv")
-                else:
-                    st.error("❌ No se pudo generar el archivo consolidado")
-                    st.info("Verifica que los archivos Excel en 'agendas_originales' sean válidos.")
-                    st.stop()
-                    
-            except Exception as e:
-                st.error(f"❌ Error procesando archivos Excel: {str(e)}")
-                st.info("Verifica que:")
-                st.info("- El directorio 'agendas_originales' existe")
-                st.info("- Los archivos Excel están en formato correcto")
-                st.info("- Los archivos no están corruptos")
-                st.stop()
-        
-        status_text.text("Procesando datos...")
-        progress_bar.progress(70)
-        
-        # Validar que el DataFrame no esté vacío
-        if df.empty:
-            raise ValueError("El archivo de datos está vacío")
-        
-        # Limpiar datos de forma eficiente
-        df = df.fillna({
-            'doctor': 'Sin asignar',
-            'area': 'Sin área', 
-            'tipo_turno': 'No especificado'
-        })
-        
-        status_text.text("Finalizando...")
-        progress_bar.progress(90)
-        
-        # Convertir horas a datetime para mejor manejo (solo si es necesario)
-        try:
-            df['hora_inicio_dt'] = pd.to_datetime(df['hora_inicio'], format='%H:%M', errors='coerce').dt.time
-            df['hora_fin_dt'] = pd.to_datetime(df['hora_fin'], format='%H:%M', errors='coerce').dt.time
-        except:
-            pass  # Si hay error, continuar sin las columnas de tiempo
-        
-        progress_bar.progress(100)
-        status_text.text("¡Datos cargados exitosamente!")
-        
-        # Limpiar elementos de progreso después de un momento
-        import time
-        time.sleep(1)
-        progress_bar.empty()
-        status_text.empty()
+        # Convertir horas a datetime para mejor manejo
+        df['hora_inicio_dt'] = pd.to_datetime(df['hora_inicio'], format='%H:%M', errors='coerce').dt.time
+        df['hora_fin_dt'] = pd.to_datetime(df['hora_fin'], format='%H:%M', errors='coerce').dt.time
         
         return df
+    except Exception as e:
+        st.error(f"Error cargando datos: {e}")
+        return pd.DataFrame()
 
-# Cargar datos con manejo de errores
-with st.spinner("Cargando datos..."):
-    df = cargar_datos()
+# Cargar datos
+df = cargar_datos()
 
-# Verificar carga exitosa
 if df.empty:
-    st.error("❌ No se pudieron cargar los datos.")
-    st.info("💡 Opciones para resolver:")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("**Opción 1: Subir archivo CSV**")
-        uploaded_file = st.file_uploader("Sube agendas_consolidadas.csv", type=['csv'])
-        
-        if uploaded_file is not None:
-            try:
-                # Guardar archivo subido
-                with open("agendas_consolidadas.csv", "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                st.success("✅ Archivo subido exitosamente")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error subiendo archivo: {e}")
-    
-    with col2:
-        st.markdown("**Opción 2: Verificar archivos Excel**")
-        st.info("Asegúrate de que:")
-        st.info("- El directorio 'agendas_originales' existe")
-        st.info("- Los archivos Excel están presentes")
-        st.info("- Los archivos no están corruptos")
-        
-        # Opción para limpiar caché
-        st.markdown("**Opción 3: Limpiar caché**")
-        limpiar_cache()
-    
+    st.error("No se pudieron cargar los datos. Verifica que existe el archivo datos/csv_procesado/agendas_consolidadas.csv")
     st.stop()
-
-# Mostrar información de los datos cargados
-st.success(f"✅ Datos cargados: {len(df):,} registros")
-data_status.empty()  # Limpiar el mensaje de estado anterior
 
 # Sidebar con filtros
 st.sidebar.header("Filtros")
@@ -234,13 +76,6 @@ tipo_turno_seleccionado = st.sidebar.selectbox(
     tipos_turno_disponibles
 )
 
-# Filtro por médico
-medicos_disponibles = ['Todos'] + sorted(df[df['doctor'] != 'Sin asignar']['doctor'].unique().tolist())
-medico_seleccionado = st.sidebar.selectbox(
-    "Médico:",
-    medicos_disponibles
-)
-
 # Aplicar filtros
 df_filtrado = df.copy()
 
@@ -255,9 +90,6 @@ if dia_seleccionado != 'Todos':
 
 if tipo_turno_seleccionado != 'Todos':
     df_filtrado = df_filtrado[df_filtrado['tipo_turno'] == tipo_turno_seleccionado]
-
-if medico_seleccionado != 'Todos':
-    df_filtrado = df_filtrado[df_filtrado['doctor'] == medico_seleccionado]
 
 # Métricas principales
 col1, col2, col3, col4 = st.columns(4)
@@ -297,7 +129,7 @@ with col4:
 st.markdown("---")
 
 # Layout principal con tabs
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Resumen general", "Horarios por día", "Comparativa centros", "Tabla completa", "Calendario", "Análisis UNIQUE", "Gestión"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión"])
 
 with tab1:
     st.header("Resumen general")
@@ -431,6 +263,49 @@ with tab2:
         st.warning(f"No hay datos disponibles para {dia_analisis} con los filtros aplicados.")
 
 with tab3:
+    st.header("Análisis por médico")
+    
+    # Selector de doctor
+    doctores_disponibles = sorted(df_filtrado[df_filtrado['doctor'] != 'Sin asignar']['doctor'].unique().tolist())
+    
+    if doctores_disponibles:
+        doctor_seleccionado = st.selectbox(
+            "Médico:",
+            doctores_disponibles
+        )
+        
+        df_doctor = df_filtrado[df_filtrado['doctor'] == doctor_seleccionado]
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            # Contar agendas únicas del médico
+            agendas_unicas_doctor = df_doctor.groupby(['nombre_original_agenda', 'efector']).ngroups
+            st.metric("Total de agendas", agendas_unicas_doctor)
+        
+        with col2:
+            especialidades_doctor = df_doctor['area'].nunique()
+            st.metric("Especialidades", especialidades_doctor)
+        
+        with col3:
+            centros_doctor = df_doctor['efector'].nunique()
+            st.metric("Centros de salud", centros_doctor)
+        
+        # Horarios del doctor por día
+        horarios_doctor = df_doctor.groupby('dia').agg({
+            'hora_inicio': lambda x: ', '.join(sorted(set(x.astype(str)))),
+            'hora_fin': lambda x: ', '.join(sorted(set(x.astype(str)))),
+            'efector': lambda x: ', '.join(set(x)),
+            'area': lambda x: ', '.join(set(x))
+        }).reset_index()
+        
+        st.subheader(f"Horarios de {doctor_seleccionado}")
+        st.dataframe(horarios_doctor, use_container_width=True)
+        
+    else:
+        st.warning("No hay médicos disponibles con los filtros aplicados.")
+
+with tab4:
     st.header("Comparativa entre centros de salud")
     
     # Comparativa de métricas por efector
@@ -489,7 +364,7 @@ with tab3:
     metricas_efector_sorted = metricas_efector.sort_values('Total agendas', ascending=False)
     st.dataframe(metricas_efector_sorted, use_container_width=True)
 
-with tab4:
+with tab5:
     st.header("Tabla completa de agendas")
     
     # Información sobre los datos mostrados
@@ -646,7 +521,7 @@ with tab4:
                 else:
                     st.info("No hay especialidades con agendas disponibles.")
 
-with tab5:
+with tab6:
     st.header("Vista calendario - agenda semanal")
     
     # Selectores específicos para la vista calendario
@@ -712,7 +587,7 @@ with tab5:
         st.markdown("---")
         
         # Crear la vista de calendario
-        st.subheader("📅 Agenda Semanal")
+        st.subheader("Agenda Semanal")
         
         # Ordenar días de la semana
         dias_orden = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
@@ -732,7 +607,7 @@ with tab5:
         
         for i, dia in enumerate(dias_disponibles):
             with cols[i]:
-                st.markdown(f"### 📅 {dia}")
+                st.markdown(f"### {dia}")
                 
                 # Filtrar turnos del día
                 turnos_dia = df_calendario[df_calendario['dia'] == dia].copy()
@@ -885,396 +760,12 @@ with tab5:
         st.warning(f"No se encontraron agendas para **{area_calendario}** en **{efector_calendario}**")
         st.info("Intenta seleccionar otra combinación de hospital y especialidad.")
 
-with tab6:
-    st.header("📊 Análisis UNIQUE")
-    st.markdown("Explora valores únicos de cualquier campo con filtros avanzados")
-    
-    # Configuración del análisis UNIQUE
-    st.subheader("Configuración del análisis")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Selector del campo a analizar
-        campos_disponibles = {
-            'efector': '🏥 Centro de salud',
-            'area': '⚕️ Especialidad médica',
-            'doctor': '👨‍⚕️ Médico',
-            'tipo_turno': '📋 Tipo de turno',
-            'dia': '📅 Día de la semana',
-            'hora_inicio': '🕐 Hora de inicio',
-            'hora_fin': '🕑 Hora de fin',
-            'nombre_original_agenda': '📝 Nombre original de agenda'
-        }
-        
-        campo_unique = st.selectbox(
-            "Campo a analizar:",
-            options=list(campos_disponibles.keys()),
-            format_func=lambda x: campos_disponibles[x],
-            key="campo_unique"
-        )
-    
-    with col2:
-        # Opciones de visualización
-        mostrar_conteos = st.checkbox("Mostrar conteos", value=True)
-        mostrar_grafico = st.checkbox("Mostrar gráfico", value=True)
-        limite_resultados = st.number_input(
-            "Límite de resultados (0 = todos):",
-            min_value=0,
-            max_value=1000,
-            value=0,
-            step=10
-        )
-    
-    # Filtros específicos para el análisis UNIQUE
-    st.subheader("Filtros adicionales")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        # Filtro por efector para UNIQUE
-        efectores_unique = ['Todos'] + sorted(df['efector'].unique().tolist())
-        efector_unique = st.selectbox(
-            "Filtrar por centro:",
-            efectores_unique,
-            key="efector_unique"
-        )
-    
-    with col2:
-        # Filtro por área para UNIQUE
-        areas_unique = ['Todas'] + sorted(df[df['area'] != 'Sin área']['area'].unique().tolist())
-        area_unique = st.selectbox(
-            "Filtrar por especialidad:",
-            areas_unique,
-            key="area_unique"
-        )
-    
-    with col3:
-        # Filtro por día para UNIQUE
-        dias_unique = ['Todos'] + sorted(df['dia'].unique().tolist())
-        dia_unique = st.selectbox(
-            "Filtrar por día:",
-            dias_unique,
-            key="dia_unique"
-        )
-    
-    # Aplicar filtros al DataFrame
-    df_unique = df.copy()
-    
-    if efector_unique != 'Todos':
-        df_unique = df_unique[df_unique['efector'] == efector_unique]
-    
-    if area_unique != 'Todas':
-        df_unique = df_unique[df_unique['area'] == area_unique]
-    
-    if dia_unique != 'Todos':
-        df_unique = df_unique[df_unique['dia'] == dia_unique]
-    
-    # Realizar análisis UNIQUE
-    if not df_unique.empty:
-        st.markdown("---")
-        st.subheader(f"Análisis UNIQUE: {campos_disponibles[campo_unique]}")
-        
-        with st.spinner("Procesando análisis UNIQUE..."):
-            # Obtener valores únicos con manejo de errores
-            try:
-                valores_unicos = df_unique[campo_unique].dropna().unique()
-                
-                if len(valores_unicos) == 0:
-                    st.warning("No se encontraron valores únicos para el campo seleccionado.")
-                    st.stop()
-                
-                if mostrar_conteos:
-                    # Contar ocurrencias de forma eficiente
-                    conteos = df_unique[campo_unique].value_counts()
-                    
-                    # Aplicar límite si se especifica
-                    if limite_resultados > 0:
-                        conteos = conteos.head(limite_resultados)
-                        valores_unicos = conteos.index.tolist()
-                    
-                    # Limitar a máximo 1000 resultados para evitar problemas de rendimiento
-                    if len(conteos) > 1000:
-                        st.warning("⚠️ Demasiados resultados. Mostrando solo los primeros 1000.")
-                        conteos = conteos.head(1000)
-                        valores_unicos = conteos.index.tolist()
-                    
-                    # Métricas principales
-                    col1, col2, col3, col4 = st.columns(4)
-                    
-                    with col1:
-                        st.metric("Total valores únicos", len(valores_unicos))
-                    
-                    with col2:
-                        st.metric("Total registros", len(df_unique))
-                    
-                    with col3:
-                        if len(conteos) > 0:
-                            st.metric("Más común", str(conteos.index[0])[:20] + "..." if len(str(conteos.index[0])) > 20 else str(conteos.index[0]))
-                        else:
-                            st.metric("Más común", "N/A")
-                    
-                    with col4:
-                        if len(conteos) > 0:
-                            st.metric("Ocurrencias máx.", int(conteos.iloc[0]))
-                        else:
-                            st.metric("Ocurrencias máx.", "N/A")
-                    
-                    # Tabla de conteos con paginación para mejor rendimiento
-                    st.subheader("Tabla de conteos")
-                    
-                    # Crear DataFrame para mostrar
-                    df_conteos = pd.DataFrame({
-                        campos_disponibles[campo_unique]: conteos.index,
-                        'Cantidad': conteos.values,
-                        'Porcentaje': (conteos.values.astype(float) / len(df_unique) * 100).round(2)
-                    })
-                    
-                    # Agregar número de fila
-                    df_conteos.insert(0, '#', range(1, len(df_conteos) + 1))
-                    
-                    # Mostrar con altura limitada para mejor rendimiento
-                    st.dataframe(df_conteos, use_container_width=True, height=min(400, len(df_conteos) * 35 + 100))
-                    
-                    # Botón para descargar resultados
-                    csv_unique = df_conteos.to_csv(index=False)
-                    st.download_button(
-                        label="📥 Descargar resultados CSV",
-                        data=csv_unique,
-                        file_name=f"unique_{campo_unique}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                        mime="text/csv"
-                    )
-                    
-                    # Gráfico si se solicita (con límites para rendimiento)
-                    if mostrar_grafico and len(conteos) > 0:
-                        st.subheader("Visualización gráfica")
-                        
-                        # Limitar datos para gráfico
-                        conteos_grafico = conteos.head(50)  # Máximo 50 para gráfico
-                        
-                        with error_handler("generación de gráfico"):
-                            # Seleccionar tipo de gráfico según el número de valores
-                            if len(conteos_grafico) <= 20:
-                                # Gráfico de barras para pocos valores
-                                fig_unique = px.bar(
-                                    x=conteos_grafico.index,
-                                    y=conteos_grafico.values,
-                                    title=f"Distribución de {campos_disponibles[campo_unique]} (Top {len(conteos_grafico)})",
-                                    labels={'x': campos_disponibles[campo_unique], 'y': 'Cantidad'},
-                                    color=conteos_grafico.values,
-                                    color_continuous_scale='viridis'
-                                )
-                                fig_unique.update_layout(
-                                    height=500,
-                                    xaxis_tickangle=-45,
-                                    showlegend=False
-                                )
-                            else:
-                                # Gráfico de barras horizontales para muchos valores
-                                fig_unique = px.bar(
-                                    x=conteos_grafico.values,
-                                    y=conteos_grafico.index,
-                                    orientation='h',
-                                    title=f"Distribución de {campos_disponibles[campo_unique]} (Top {len(conteos_grafico)})",
-                                    labels={'x': 'Cantidad', 'y': campos_disponibles[campo_unique]},
-                                    color=conteos_grafico.values,
-                                    color_continuous_scale='viridis'
-                                )
-                                fig_unique.update_layout(
-                                    height=max(400, min(800, len(conteos_grafico) * 20)),
-                                    showlegend=False
-                                )
-                            
-                            st.plotly_chart(fig_unique, use_container_width=True)
-                            
-                            # Gráfico de pastel para proporciones (solo si hay pocos valores)
-                            if len(conteos_grafico) <= 10:
-                                fig_pie = px.pie(
-                                    values=conteos_grafico.values,
-                                    names=conteos_grafico.index,
-                                    title=f"Proporción de {campos_disponibles[campo_unique]}"
-                                )
-                                fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-                                fig_pie.update_layout(height=500)
-                                st.plotly_chart(fig_pie, use_container_width=True)
-                
-                else:
-                    # Solo mostrar lista de valores únicos sin conteos
-                    # Aplicar límite si se especifica
-                    if limite_resultados > 0:
-                        valores_unicos = valores_unicos[:limite_resultados]
-                    
-                    # Limitar a máximo 1000 para rendimiento
-                    if len(valores_unicos) > 1000:
-                        st.warning("⚠️ Demasiados resultados. Mostrando solo los primeros 1000.")
-                        valores_unicos = valores_unicos[:1000]
-                    
-                    st.metric("Total valores únicos", len(valores_unicos))
-                    
-                    # Mostrar valores únicos en una tabla simple
-                    df_valores = pd.DataFrame({
-                        campos_disponibles[campo_unique]: valores_unicos
-                    })
-                    df_valores.insert(0, '#', range(1, len(df_valores) + 1))
-                    
-                    st.dataframe(df_valores, use_container_width=True, height=min(400, len(df_valores) * 35 + 100))
-                    
-                    # Botón para descargar
-                    csv_valores = df_valores.to_csv(index=False)
-                    st.download_button(
-                        label="📥 Descargar valores únicos CSV",
-                        data=csv_valores,
-                        file_name=f"valores_unicos_{campo_unique}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                        mime="text/csv"
-                    )
-                
-            except Exception as e:
-                st.error(f"Error procesando análisis UNIQUE: {e}")
-                st.info("Intenta con un campo diferente o aplica más filtros para reducir el tamaño de los datos.")
-        
-        # Análisis cruzado opcional
-        st.markdown("---")
-        st.subheader("Análisis cruzado")
-        
-        # Permitir seleccionar un segundo campo para análisis cruzado
-        campos_cruzado = {k: v for k, v in campos_disponibles.items() if k != campo_unique}
-        
-        if campos_cruzado:
-            campo_cruzado = st.selectbox(
-                "Campo para análisis cruzado (opcional):",
-                options=['Ninguno'] + list(campos_cruzado.keys()),
-                format_func=lambda x: 'Ninguno' if x == 'Ninguno' else campos_cruzado[x]
-            )
-            
-            if campo_cruzado != 'Ninguno':
-                with st.spinner("Generando análisis cruzado..."):
-                    with error_handler("análisis cruzado"):
-                        # Verificar tamaño de datos antes del análisis cruzado
-                        unique_campo1 = df_unique[campo_unique].nunique()
-                        unique_campo2 = df_unique[campo_cruzado].nunique()
-                        
-                        if unique_campo1 * unique_campo2 > 10000:
-                            st.warning("⚠️ El análisis cruzado podría ser muy grande. Aplicando límites para mejor rendimiento.")
-                            # Limitar a los 50 valores más comunes de cada campo
-                            top_campo1 = df_unique[campo_unique].value_counts().head(50).index
-                            top_campo2 = df_unique[campo_cruzado].value_counts().head(50).index
-                            
-                            df_cruzado = df_unique[
-                                (df_unique[campo_unique].isin(top_campo1)) & 
-                                (df_unique[campo_cruzado].isin(top_campo2))
-                            ]
-                        else:
-                            df_cruzado = df_unique
-                        
-                        # Crear tabla cruzada
-                        tabla_cruzada = pd.crosstab(
-                            df_cruzado[campo_unique],
-                            df_cruzado[campo_cruzado],
-                            margins=True
-                        )
-                        
-                        st.subheader(f"Tabla cruzada: {campos_disponibles[campo_unique]} vs {campos_disponibles[campo_cruzado]}")
-                        
-                        # Mostrar información sobre la tabla
-                        st.info(f"Tabla de {len(tabla_cruzada)-1} filas x {len(tabla_cruzada.columns)-1} columnas")
-                        
-                        # Mostrar tabla con altura limitada
-                        st.dataframe(tabla_cruzada, use_container_width=True, height=min(500, len(tabla_cruzada) * 35 + 100))
-                        
-                        # Heatmap de la tabla cruzada (excluyendo totales y limitando tamaño)
-                        if len(tabla_cruzada) > 1 and len(tabla_cruzada.columns) > 1:
-                            tabla_sin_totales = tabla_cruzada.iloc[:-1, :-1]
-                            
-                            # Limitar tamaño del heatmap para rendimiento
-                            if len(tabla_sin_totales) > 50 or len(tabla_sin_totales.columns) > 50:
-                                st.warning("⚠️ Tabla muy grande para heatmap. Mostrando solo una muestra.")
-                                tabla_sin_totales = tabla_sin_totales.head(50).iloc[:, :50]
-                            
-                            if not tabla_sin_totales.empty:
-                                fig_heatmap = px.imshow(
-                                    tabla_sin_totales,
-                                    title=f"Heatmap: {campos_disponibles[campo_unique]} vs {campos_disponibles[campo_cruzado]}",
-                                    labels={'x': campos_disponibles[campo_cruzado], 'y': campos_disponibles[campo_unique]},
-                                    color_continuous_scale='Blues'
-                                )
-                                fig_heatmap.update_layout(height=min(700, max(400, len(tabla_sin_totales) * 15)))
-                                st.plotly_chart(fig_heatmap, use_container_width=True)
-                        
-                        # Botón para descargar tabla cruzada
-                        csv_cruzado = tabla_cruzada.to_csv()
-                        st.download_button(
-                            label="📥 Descargar tabla cruzada CSV",
-                            data=csv_cruzado,
-                            file_name=f"tabla_cruzada_{campo_unique}_{campo_cruzado}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                            mime="text/csv"
-                        )
-        
-        # Ejemplos y ayuda
-        with st.expander("💡 Ejemplos de uso"):
-            st.markdown("""
-            **Casos de uso comunes:**
-            
-            1. **Análisis de especialidades por hospital:**
-               - Campo: Especialidad médica
-               - Filtro: Hospital Materno Infantil
-               - Resultado: Todas las especialidades disponibles en ese hospital
-            
-            2. **Médicos por especialidad:**
-               - Campo: Médico
-               - Filtro: Especialidad = PEDIATRIA
-               - Resultado: Todos los pediatras del sistema
-            
-            3. **Horarios de atención:**
-               - Campo: Hora de inicio
-               - Filtro: Día = Lunes
-               - Resultado: Todos los horarios de inicio los lunes
-            
-            4. **Análisis cruzado - Especialidades por centro:**
-               - Campo principal: Especialidad médica
-               - Campo cruzado: Centro de salud
-               - Resultado: Matriz de especialidades disponibles por centro
-            """)
-    
-    else:
-        st.warning("No hay datos disponibles con los filtros aplicados.")
-        st.info("Intenta ajustar los filtros para obtener resultados.")
-
 with tab7:
     st.header("Gestión")
     
-    # Sistema de autenticación con persistencia
-    def inicializar_autenticacion():
-        """Inicializa el estado de autenticación verificando si hay una sesión guardada"""
-        if 'authenticated_gerencial' not in st.session_state:
-            st.session_state.authenticated_gerencial = False
-        
-        # Verificar si hay una autenticación persistente guardada
-        if 'auth_timestamp' not in st.session_state:
-            st.session_state.auth_timestamp = None
-        
-        # Verificar si la autenticación no ha expirado (24 horas)
-        if (st.session_state.auth_timestamp and 
-            (datetime.datetime.now() - st.session_state.auth_timestamp).total_seconds() < 86400):
-            st.session_state.authenticated_gerencial = True
-        elif st.session_state.auth_timestamp:
-            # Si ha expirado, limpiar la autenticación
-            st.session_state.authenticated_gerencial = False
-            st.session_state.auth_timestamp = None
-    
-    # Función para autenticar y guardar timestamp
-    def autenticar_usuario():
-        """Autentica al usuario y guarda el timestamp"""
-        st.session_state.authenticated_gerencial = True
-        st.session_state.auth_timestamp = datetime.datetime.now()
-    
-    # Función para cerrar sesión
-    def cerrar_sesion():
-        """Cierra la sesión y limpia la autenticación"""
+    # Sistema de autenticación
+    if 'authenticated_gerencial' not in st.session_state:
         st.session_state.authenticated_gerencial = False
-        st.session_state.auth_timestamp = None
-    
-    # Inicializar autenticación
-    inicializar_autenticacion()
     
     if not st.session_state.authenticated_gerencial:
         st.info("Esta sección requiere autenticación")
@@ -1292,11 +783,10 @@ with tab7:
                 if st.button("Ingresar", type="primary", use_container_width=True):
                     # Contraseña
                     if password_input == "maxisalas":
-                        autenticar_usuario()
-                        st.success("✅ Sesión iniciada correctamente")
+                        st.session_state.authenticated_gerencial = True
                         st.rerun()
                     else:
-                        st.error("❌ Contraseña incorrecta")
+                        st.error("Contraseña incorrecta")
             
             with col_btn2:
                 if st.button("Cancelar", use_container_width=True):
@@ -1304,30 +794,14 @@ with tab7:
         
         
     else:
-        # Información de sesión y botón de logout
-        col1, col2, col3 = st.columns([3, 1, 1])
-        
-        with col1:
-            if st.session_state.auth_timestamp:
-                tiempo_sesion = datetime.datetime.now() - st.session_state.auth_timestamp
-                horas_sesion = int(tiempo_sesion.total_seconds() // 3600)
-                minutos_sesion = int((tiempo_sesion.total_seconds() % 3600) // 60)
-                st.info(f"🔐 Sesión activa desde hace {horas_sesion}h {minutos_sesion}m")
-        
-        with col2:
-            # Botón para extender sesión
-            if st.button("Extender sesión", use_container_width=True):
-                st.session_state.auth_timestamp = datetime.datetime.now()
-                st.success("✅ Sesión extendida por 24 horas más")
-                st.rerun()
-        
+        # Botón de logout
+        col1, col2, col3 = st.columns([4, 1, 1])
         with col3:
-            if st.button("Cerrar sesión", use_container_width=True):
-                cerrar_sesion()
-                st.success("✅ Sesión cerrada correctamente")
+            if st.button("Cerrar sesión"):
+                st.session_state.authenticated_gerencial = False
                 st.rerun()
         
-        st.success("🔓 Acceso autorizado - Sesión persistente activa")
+        st.success("Acceso autorizado")
         
         # Filtros específicos para gestión gerencial
         st.subheader("Filtros de análisis")
@@ -1372,6 +846,73 @@ with tab7:
         
         if dia_gerencial != 'Todos':
             df_gerencial = df_gerencial[df_gerencial['dia'] == dia_gerencial]
+        
+        # Selector de día específico para análisis detallado (igual que la solapa original)
+        st.subheader("Análisis de horarios por día")
+        
+        dias_orden = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+        dia_analisis_ger = st.selectbox(
+            "Día para análisis detallado:",
+            dias_orden,
+            key="dia_analisis_gerencial"
+        )
+        
+        df_dia_ger = df_gerencial[df_gerencial['dia'] == dia_analisis_ger]
+        
+        if not df_dia_ger.empty:
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Heatmap de horarios (similar al original)
+                if 'hora_inicio' in df_dia_ger.columns:
+                    df_dia_copy_ger = df_dia_ger.copy()
+                    df_dia_copy_ger['hora_inicio_num'] = pd.to_datetime(df_dia_copy_ger['hora_inicio'], format='%H:%M', errors='coerce').dt.hour
+                    
+                    heatmap_data_ger = df_dia_copy_ger.groupby(['efector', 'hora_inicio_num']).size().reset_index(name='count')
+                    
+                    if not heatmap_data_ger.empty:
+                        fig_heatmap_ger = px.density_heatmap(
+                            heatmap_data_ger,
+                            x='hora_inicio_num',
+                            y='efector',
+                            z='count',
+                            title=f"Intensidad de agendas - {dia_analisis_ger} (Vista gerencial)",
+                            labels={'hora_inicio_num': 'Hora', 'efector': 'Centro de salud', 'count': 'Número de agendas'}
+                        )
+                        fig_heatmap_ger.update_layout(height=400)
+                        st.plotly_chart(fig_heatmap_ger, use_container_width=True)
+            
+            with col2:
+                # Top médicos del día (agendas únicas)
+                df_medicos_dia_ger = df_dia_ger[df_dia_ger['doctor'] != 'Sin asignar']
+                if not df_medicos_dia_ger.empty:
+                    medicos_dia_ger = df_medicos_dia_ger.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
+
+                    fig_medicos_ger = px.bar(
+                        x=medicos_dia_ger.values,
+                        y=medicos_dia_ger.index,
+                        orientation='h',
+                        title=f"Top médicos - {dia_analisis_ger} (Vista gerencial)",
+                        labels={'x': 'Número de agendas', 'y': 'Médico'}
+                    )
+                    fig_medicos_ger.update_layout(height=400)
+                    st.plotly_chart(fig_medicos_ger, use_container_width=True)
+                else:
+                    st.info(f"No hay médicos con agendas disponibles para {dia_analisis_ger}.")
+
+            # Tabla detallada del día (similar al original)
+            st.subheader(f"Detalle de agendas - {dia_analisis_ger}")
+            
+            df_mostrar_ger = df_dia_ger[['efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
+            df_mostrar_ger = df_mostrar_ger.sort_values(['efector', 'hora_inicio'])
+            
+            st.dataframe(
+                df_mostrar_ger,
+                use_container_width=True,
+                height=300
+            )
+        else:
+            st.warning(f"No hay datos disponibles para {dia_analisis_ger} con los filtros aplicados.")
         
         # NUEVA FUNCIONALIDAD: Análisis de superposición de horarios
         st.markdown("---")
@@ -1499,7 +1040,7 @@ with tab7:
                 st.plotly_chart(fig_conflictos, use_container_width=True)
             
         else:
-            st.success("✅ No se detectaron conflictos de horarios en los datos filtrados.")
+            st.success("No se detectaron conflictos de horarios en los datos filtrados.")
             st.info("Todos los médicos tienen horarios sin superposiciones.")
 
 # Footer

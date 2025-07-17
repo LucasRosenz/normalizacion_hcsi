@@ -32,7 +32,7 @@ class AgendaNormalizer:
         
         # Patrones para identificar áreas médicas
         areas_patterns = {
-            'PEDIATRIA': r'\bPEDIATR[A-ZÁÉÍÓÚÑÃñã_x0-9]*A\b|\bDESARROLLO\b|\bSUPERVISION\s+DE\s+TRATAMIENTO\b|\bEVALUACION\s+DEL\s+DESARROLLO\b',
+            'PEDIATRIA': r'\bPEDIATRIA\b',
             'CARDIOLOGIA': r'\bCARDIOLOGIA\b',
             'NEUROLOGIA': r'\bNEUROLOGIA\b',
             'GINECOLOGIA': r'\bGINECOLOGIA\b',
@@ -99,8 +99,6 @@ class AgendaNormalizer:
         
         # Buscar doctor - patrones mejorados
         doctor_patterns = [
-            # Patrón específico para casos con AGENDA BIS - extraer nombre antes de "- AGENDA\s+BIS"
-            r'DR[A]?\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ\s]+?)\s*-\s*AGENDA\s+BIS',
             # Patrón para DRA/DR seguido del nombre - detener antes de palabras clave
             r'\bDRA?\.\s*([A-ZÁÉÍÓÚÑ].+?)(?:\s*-\s*(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
             # Patrón para DOCTOR/DOCTORA seguido del nombre
@@ -117,10 +115,10 @@ class AgendaNormalizer:
             r'\bLIC\.\s*EN\s+NUTRICION\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+)*)',
             # Patrón general para LIC. seguido directamente del nombre (sin especialidad)
             r'\bLIC\.\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)',
+            # Patrón para nombres al final después de guión
+            r'[-\s]+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)$',
             # Patrón específico para "ESPECIALIDAD - NOMBRE APELLIDO - TIPO"
             r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS|PEDIATRIA|INFANTIL)?\s*-\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*-\s*(?:ESPONTANEA|PROGRAMADA)',
-            # Patrón para nombres al final después de guión (pero NO si termina con AGENDA BIS)
-            r'[-\s]+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)(?!\s*-?\s*AGENDA\s+BIS)$',
         ]
         
         for pattern in doctor_patterns:
@@ -133,14 +131,14 @@ class AgendaNormalizer:
                     'TRATAMIENTO', 'GENERAL', 'PAP', 'ESPONTANEA', 'PROGRAMADA',
                     'EN PSICOLOGIA', 'EN NUTRICION', 'EN TRABAJO', 'EN KINESIOLOGIA',
                     'LICENCIADA', 'LICENCIADO', 'MEDICO', 'MEDICA', 'AGENDA SÁBADOS',
-                    'AGENDA SABADOS', 'RESIDENTE', 'AGENDA', 'ESPONTANEA', 'AGENDA BIS'
+                    'AGENDA SABADOS', 'RESIDENTE', 'AGENDA', 'ESPONTANEA'
                 ]
                 # Solo excluir si el nombre candidato es exactamente una de estas palabras o si es muy corto
                 if nombre_candidato.strip() and len(nombre_candidato.strip()) > 2:
                     if not any(nombre_candidato.upper().strip() == palabra for palabra in palabras_excluir):
                         # Limpiar palabras específicas del final del nombre
-                        nombre_candidato_limpio = re.sub(r'\s*-\s*(DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)\s*$', '', nombre_candidato, flags=re.IGNORECASE)
-                        doctor = nombre_candidato_limpio.strip()
+                        nombre_limpio = re.sub(r'\s*-\s*(DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)\s*$', '', nombre_candidato, flags=re.IGNORECASE)
+                        doctor = nombre_limpio.strip()
                         break
         
         # Buscar tipo de turno - patrones mejorados
@@ -172,7 +170,6 @@ class AgendaNormalizer:
     def procesar_archivo_excel(self, archivo_path: str, efector: str) -> pd.DataFrame:
         """
         Procesa un archivo Excel con formato de agenda no tabular
-        Incluye detección precisa del fin de agenda basada en el patrón (nombre_agenda, NaN, NaN)
         """
         try:
             # Leer el archivo Excel sin encabezados
@@ -184,135 +181,25 @@ class AgendaNormalizer:
             
             registros = []
             agenda_actual = ""
-            agenda_activa = False  # Flag para saber si estamos procesando horarios de una agenda
             
-            for idx_num, (idx, row) in enumerate(df.iterrows()):
+            for idx, row in df.iterrows():
                 # Verificar si es una fila de agenda (contiene información del doctor/área)
                 if self._es_titulo_agenda(row):
-                    # Nueva agenda encontrada - extraer el nombre de la agenda de la primera celda
+                    # Extraer el nombre de la agenda de la primera celda
                     agenda_actual = str(row.iloc[0]).strip()
-                    agenda_activa = True
                     continue
                 
-                # Verificar si es el fin de la agenda actual (patrón: nombre_agenda, NaN, NaN)
-                if agenda_activa and self._es_fin_de_agenda(row):
-                    # Esta fila marca el fin de la agenda actual, resetear
-                    agenda_activa = False
-                    continue
-                
-                # Solo procesar horarios si hay una agenda activa
-                if agenda_activa and self._es_fila_horarios(row):
-                    # Validar que el horario pertenece realmente a la agenda actual
-                    if self._validar_horario_pertenece_agenda_mejorado(row, agenda_actual, df, idx_num):
-                        registro = self._extraer_datos_horarios(row, agenda_actual, efector)
-                        if registro:
-                            registros.append(registro)
-                    else:
-                        print(f"ADVERTENCIA: Horario en fila {idx_num+2} no asociado correctamente con agenda '{agenda_actual}' - ignorado")
+                # Verificar si es una fila de horarios (contiene día, hora inicio, hora fin)
+                if self._es_fila_horarios(row):
+                    registro = self._extraer_datos_horarios(row, agenda_actual, efector)
+                    if registro:
+                        registros.append(registro)
             
             return pd.DataFrame(registros)
             
         except Exception as e:
             print(f"Error procesando {archivo_path}: {e}")
             return pd.DataFrame()
-    
-    def _es_fin_de_agenda(self, row: pd.Series) -> bool:
-        """
-        Detecta si una fila marca el fin de una agenda
-        Patrón: primera columna con contenido, segunda y tercera columnas vacías (NaN)
-        """
-        # Verificar que la primera columna tenga contenido
-        if pd.isna(row.iloc[0]) or str(row.iloc[0]).strip() == "":
-            return False
-        
-        # Verificar que las columnas 1 y 2 estén vacías (NaN)
-        if len(row) >= 3:
-            col1_vacia = pd.isna(row.iloc[1]) or str(row.iloc[1]).strip() == "" or str(row.iloc[1]).strip().upper() == "NAN"
-            col2_vacia = pd.isna(row.iloc[2]) or str(row.iloc[2]).strip() == "" or str(row.iloc[2]).strip().upper() == "NAN"
-            
-            # Si las columnas 1 y 2 están vacías y la primera no es un día de la semana, es fin de agenda
-            if col1_vacia and col2_vacia:
-                primera_celda = str(row.iloc[0]).strip().upper()
-                dias_semana = ['LUNES', 'MARTES', 'MIÉRCOLES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'SABADO', 'DOMINGO']
-                
-                # No es un día de la semana, entonces es fin de agenda
-                if not any(dia in primera_celda for dia in dias_semana):
-                    return True
-        
-        return False
-    
-    def _validar_horario_pertenece_agenda_mejorado(self, row: pd.Series, agenda_actual: str, 
-                                                  df: pd.DataFrame, idx_actual: int) -> bool:
-        """
-        Validación mejorada que usa la detección precisa de fin de agenda
-        """
-        if not agenda_actual:
-            return False
-        
-        # Regla 1: Detectar horarios imposibles o poco realistas
-        if pd.notna(row.iloc[1]) and pd.notna(row.iloc[2]):
-            try:
-                hora_inicio_str = str(row.iloc[1]).strip()
-                hora_fin_str = str(row.iloc[2]).strip()
-                
-                # Extraer horas numéricas para validación
-                inicio_match = re.search(r'(\d{1,2}):(\d{2})', hora_inicio_str)
-                fin_match = re.search(r'(\d{1,2}):(\d{2})', hora_fin_str)
-                
-                if inicio_match and fin_match:
-                    hora_inicio = int(inicio_match.group(1)) + int(inicio_match.group(2)) / 60
-                    hora_fin = int(fin_match.group(1)) + int(fin_match.group(2)) / 60
-                    
-                    # Calcular duración del turno
-                    if hora_fin < hora_inicio:  # Turno que cruza medianoche
-                        duracion = (24 - hora_inicio) + hora_fin
-                    else:
-                        duracion = hora_fin - hora_inicio
-                    
-                    # Rechazar turnos extremadamente largos (más de 12 horas para doctores específicos)
-                    componentes_agenda = self.extraer_componentes_agenda(agenda_actual)
-                    if componentes_agenda['doctor']:  # Si tiene doctor específico
-                        if duracion > 12:  # Más de 12 horas es sospechoso para un doctor específico
-                            return False
-                    
-                    # Rechazar horarios específicos problemáticos conocidos
-                    horarios_problematicos = [
-                        (8, 23),   # 08:00 a 23:00 (15 horas)
-                        (0, 23.98)  # 00:00 a 23:59 (24 horas) cuando no es guardia
-                    ]
-                    
-                    for inicio_prob, fin_prob in horarios_problematicos:
-                        if (abs(hora_inicio - inicio_prob) < 0.1 and 
-                            abs(hora_fin - fin_prob) < 0.1 and
-                            componentes_agenda['doctor']):  # Solo aplicar si hay doctor específico
-                            return False
-                            
-            except:
-                pass  # Si hay error en el parsing, continuar con otras validaciones
-        
-        # Regla 2: Validación específica para casos conocidos problemáticos
-        # Caso CORONEL MARIEL: No debería tener horarios de jueves en Hospital Boulogne
-        if ('CORONEL MARIEL' in agenda_actual.upper() and 
-            pd.notna(row.iloc[0]) and 'JUEVES' in str(row.iloc[0]).upper()):
-            
-            # CORONEL MARIEL solo debe tener jueves en CAPS Villa Adelina, NO en Hospital Boulogne
-            # Si la agenda dice "Hospital Boulogne" y es jueves, es un error
-            if 'Hospital Boulogne' in str(agenda_actual):
-                return False
-        
-        # Regla 3: Validación específica para COVELLI DANIELA EUGENIA
-        # No debería tener horarios de 15 horas (08:00-23:00)
-        if ('COVELLI DANIELA EUGENIA' in agenda_actual.upper() and 
-            pd.notna(row.iloc[1]) and pd.notna(row.iloc[2])):
-            
-            hora_inicio_str = str(row.iloc[1]).strip()
-            hora_fin_str = str(row.iloc[2]).strip()
-            
-            # Rechazar específicamente horarios 08:00-23:00 para COVELLI
-            if ('08:00' in hora_inicio_str and '23:00' in hora_fin_str):
-                return False
-        
-        return True
     
     def _es_titulo_agenda(self, row: pd.Series) -> bool:
         """Determina si una fila es un título de agenda"""
@@ -718,32 +605,13 @@ class AgendaNormalizer:
             pass
         return ""
     
-    def _validar_horario_pertenece_agenda(self, row: pd.Series, agenda_actual: str, 
-                                          filas_desde_ultima_agenda: int, df: pd.DataFrame, idx_actual: int) -> bool:
-        """
-        Valida si un horario pertenece realmente a la agenda actual (función de respaldo)
-        """
-        return self._validar_horario_pertenece_agenda_mejorado(row, agenda_actual, df, idx_actual)
-    
-    def _buscar_agenda_mas_cercana(self, df: pd.DataFrame, idx_actual: int) -> str:
-        """
-        Busca la agenda más cercana hacia atrás desde la posición actual
-        """
-        # Buscar hacia atrás máximo 20 filas
-        for i in range(idx_actual - 1, max(-1, idx_actual - 20), -1):
-            if i >= 0 and i < len(df):
-                fila = df.iloc[i]
-                if self._es_titulo_agenda(fila):
-                    return str(fila.iloc[0]).strip()
-        return ""
-
 # Función principal para uso fácil
 def main():
     """Función principal para ejecutar el procesamiento"""
     # Configurar rutas
     directorio_actual = os.path.dirname(os.path.abspath(__file__))
-    directorio_agendas = os.path.join(directorio_actual, "agendas_originales")
-    archivo_salida = os.path.join(directorio_actual, "agendas_consolidadas.csv")
+    directorio_agendas = os.path.join(directorio_actual, "datos", "excel_originales", "agendas_originales")
+    archivo_salida = os.path.join(directorio_actual, "datos", "csv_procesado", "agendas_consolidadas.csv")
     
     # Verificar que existe el directorio de agendas
     if not os.path.exists(directorio_agendas):
