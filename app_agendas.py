@@ -197,14 +197,18 @@ with tab2:
     st.header("Análisis de horarios por día")
     
     # Selector de día específico para análisis detallado
-    dias_orden = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+    dias_orden = ['TODOS', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
     dia_analisis = st.selectbox(
         "Día para análisis detallado:",
         dias_orden,
         key="dia_analisis"
     )
     
-    df_dia = df_filtrado[df_filtrado['dia'] == dia_analisis]
+    # Filtrar datos según selección
+    if dia_analisis == 'TODOS':
+        df_dia = df_filtrado.copy()
+    else:
+        df_dia = df_filtrado[df_filtrado['dia'] == dia_analisis]
     
     if not df_dia.empty:
         col1, col2 = st.columns(2)
@@ -216,43 +220,63 @@ with tab2:
                 df_dia_copy = df_dia.copy()
                 df_dia_copy['hora_inicio_num'] = pd.to_datetime(df_dia_copy['hora_inicio'], format='%H:%M', errors='coerce').dt.hour
                 
-                heatmap_data = df_dia_copy.groupby(['efector', 'hora_inicio_num']).size().reset_index(name='count')
+                if dia_analisis == 'TODOS':
+                    # Para TODOS los días, agrupar por día y hora
+                    heatmap_data = df_dia_copy.groupby(['dia', 'hora_inicio_num']).size().reset_index(name='count')
+                    titulo_heatmap = "Intensidad de agendas - Todos los días"
+                    y_label = 'Día'
+                    y_column = 'dia'
+                else:
+                    # Para un día específico, agrupar por efector y hora
+                    heatmap_data = df_dia_copy.groupby(['efector', 'hora_inicio_num']).size().reset_index(name='count')
+                    titulo_heatmap = f"Intensidad de agendas - {dia_analisis}"
+                    y_label = 'Centro de salud'
+                    y_column = 'efector'
                 
                 if not heatmap_data.empty:
                     fig_heatmap = px.density_heatmap(
                         heatmap_data,
                         x='hora_inicio_num',
-                        y='efector',
+                        y=y_column,
                         z='count',
-                        title=f"Intensidad de agendas - {dia_analisis}",
-                        labels={'hora_inicio_num': 'Hora', 'efector': 'Centro de salud', 'count': 'Número de agendas'}
+                        title=titulo_heatmap,
+                        labels={'hora_inicio_num': 'Hora', y_column: y_label, 'count': 'Número de agendas'}
                     )
                     fig_heatmap.update_layout(height=400)
                     st.plotly_chart(fig_heatmap, use_container_width=True)
         
         with col2:
-            # Top médicos del día (agendas únicas)
+            # Top médicos del día/todos los días (agendas únicas)
             df_medicos_dia = df_dia[df_dia['doctor'] != 'Sin asignar']
             if not df_medicos_dia.empty:
                 medicos_dia = df_medicos_dia.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
 
+                titulo_medicos = f"Top médicos - {dia_analisis}" if dia_analisis != 'TODOS' else "Top médicos - Todos los días"
                 fig_medicos = px.bar(
                     x=medicos_dia.values,
                     y=medicos_dia.index,
                     orientation='h',
-                    title=f"Top médicos - {dia_analisis}",
+                    title=titulo_medicos,
                     labels={'x': 'Número de agendas', 'y': 'Médico'}
                 )
                 fig_medicos.update_layout(height=400)
                 st.plotly_chart(fig_medicos, use_container_width=True)
             else:
-                st.info(f"No hay médicos con agendas disponibles para {dia_analisis}.")
+                mensaje_medicos = f"No hay médicos con agendas disponibles para {dia_analisis}." if dia_analisis != 'TODOS' else "No hay médicos con agendas disponibles."
+                st.info(mensaje_medicos)
 
-        # Tabla detallada del día
-        st.subheader(f"Detalle de agendas - {dia_analisis}")
+        # Tabla detallada del día/todos los días
+        titulo_tabla = f"Detalle de agendas - {dia_analisis}" if dia_analisis != 'TODOS' else "Detalle de agendas - Todos los días"
+        st.subheader(titulo_tabla)
         
-        df_mostrar = df_dia[['efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
-        df_mostrar = df_mostrar.sort_values(['efector', 'hora_inicio'])
+        if dia_analisis == 'TODOS':
+            # Para TODOS, incluir la columna día
+            df_mostrar = df_dia[['dia', 'efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
+            df_mostrar = df_mostrar.sort_values(['dia', 'efector', 'hora_inicio'])
+        else:
+            # Para un día específico, no incluir la columna día
+            df_mostrar = df_dia[['efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
+            df_mostrar = df_mostrar.sort_values(['efector', 'hora_inicio'])
         
         st.dataframe(
             df_mostrar,
@@ -260,7 +284,8 @@ with tab2:
             height=300
         )
     else:
-        st.warning(f"No hay datos disponibles para {dia_analisis} con los filtros aplicados.")
+        mensaje_warning = f"No hay datos disponibles para {dia_analisis} con los filtros aplicados." if dia_analisis != 'TODOS' else "No hay datos disponibles con los filtros aplicados."
+        st.warning(mensaje_warning)
 
 with tab3:
     st.header("Análisis por médico")
