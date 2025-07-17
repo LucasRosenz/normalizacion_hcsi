@@ -133,11 +133,17 @@ class AgendaNormalizer:
                     'TRATAMIENTO', 'GENERAL', 'PAP', 'ESPONTANEA', 'PROGRAMADA',
                     'EN PSICOLOGIA', 'EN NUTRICION', 'EN TRABAJO', 'EN KINESIOLOGIA',
                     'LICENCIADA', 'LICENCIADO', 'MEDICO', 'MEDICA', 'AGENDA SÁBADOS',
-                    'AGENDA SABADOS', 'RESIDENTE', 'AGENDA', 'ESPONTANEA'
+                    'AGENDA SABADOS', 'RESIDENTE', 'AGENDA', 'ESPONTANEA', 'AGENDA BIS',
+                    'BIS', 'DIU', 'IMPLANTE', 'EXTRACCION', 'COLOCACION', 'REUNION EQUIPO'
                 ]
                 # Solo excluir si el nombre candidato es exactamente una de estas palabras o si es muy corto
                 if nombre_candidato.strip() and len(nombre_candidato.strip()) > 2:
-                    if not any(nombre_candidato.upper().strip() == palabra for palabra in palabras_excluir):
+                    # Verificar que no contenga palabras clave (no solo coincidencias exactas)
+                    es_palabra_clave = any(palabra in nombre_candidato.upper().strip() for palabra in palabras_excluir)
+                    # Verificar que no sea exactamente una palabra clave
+                    es_exactamente_palabra_clave = any(nombre_candidato.upper().strip() == palabra for palabra in palabras_excluir)
+                    
+                    if not es_palabra_clave and not es_exactamente_palabra_clave:
                         # Limpiar palabras específicas del final del nombre
                         nombre_limpio = re.sub(r'\s*-\s*(DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)\s*$', '', nombre_candidato, flags=re.IGNORECASE)
                         doctor = nombre_limpio.strip()
