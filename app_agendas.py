@@ -828,49 +828,55 @@ with tab7:
         
         st.success("Acceso autorizado")
         
-        # Filtros específicos para gestión gerencial
-        st.subheader("Filtros de análisis")
+        # Mostrar estado de filtros aplicados
+        st.subheader("📊 Estado de filtros aplicados")
+        
+        # Crear un resumen visual de los filtros activos
+        filtros_activos = []
+        if efector_seleccionado != 'Todos':
+            filtros_activos.append(f"**Hospital/CAPS:** {efector_seleccionado}")
+        if area_seleccionada != 'Todas':
+            filtros_activos.append(f"**Área:** {area_seleccionada}")
+        if dia_seleccionado != 'Todos':
+            filtros_activos.append(f"**Día:** {dia_seleccionado}")
+        if tipo_turno_seleccionado != 'Todos':
+            filtros_activos.append(f"**Tipo de agenda:** {tipo_turno_seleccionado}")
+        
+        if filtros_activos:
+            st.info("🔍 **Filtros activos desde la barra lateral:**\n\n" + " • ".join(filtros_activos))
+        else:
+            st.info("🔍 **Mostrando todos los datos** (sin filtros aplicados)")
+        
+        # Filtro adicional específico para gestión
+        st.subheader("🎯 Filtro adicional de gestión")
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            # Filtro por médico específico
-            medicos_gerencial = ['Todos'] + sorted(df[df['doctor'] != 'Sin asignar']['doctor'].unique().tolist())
+            # Filtro por médico específico (usando datos ya filtrados)
+            medicos_gerencial = ['Todos'] + sorted(df_filtrado[df_filtrado['doctor'] != 'Sin asignar']['doctor'].unique().tolist())
             medico_gerencial = st.selectbox(
                 "Médico específico:",
                 medicos_gerencial,
-                key="medico_gerencial"
+                key="medico_gerencial",
+                help="Filtro adicional que se aplica sobre los filtros de la barra lateral"
             )
         
         with col2:
-            # Filtro por área médica para gestión
-            areas_gerencial = ['Todas'] + sorted(df[df['area'] != 'Sin área']['area'].unique().tolist())
-            area_gerencial = st.selectbox(
-                "Área médica:",
-                areas_gerencial,
-                key="area_gerencial"
-            )
+            # Mostrar estadísticas de los datos filtrados
+            total_registros_filtrados = len(df_filtrado)
+            medicos_disponibles = len(medicos_gerencial) - 1  # -1 para excluir "Todos"
+            st.metric("Registros filtrados", f"{total_registros_filtrados:,}")
         
         with col3:
-            # Filtro por día para gestión
-            dias_gerencial = ['Todos'] + sorted(df['dia'].unique().tolist())
-            dia_gerencial = st.selectbox(
-                "Día de análisis:",
-                dias_gerencial,
-                key="dia_gerencial"
-            )
+            st.metric("Médicos disponibles", f"{medicos_disponibles:,}")
         
-        # Aplicar filtros
-        df_gerencial = df.copy()
+        # Aplicar filtro adicional de médico específico a los datos ya filtrados
+        df_gerencial = df_filtrado.copy()
         
         if medico_gerencial != 'Todos':
             df_gerencial = df_gerencial[df_gerencial['doctor'] == medico_gerencial]
-        
-        if area_gerencial != 'Todas':
-            df_gerencial = df_gerencial[df_gerencial['area'] == area_gerencial]
-        
-        if dia_gerencial != 'Todos':
-            df_gerencial = df_gerencial[df_gerencial['dia'] == dia_gerencial]
+            st.success(f"🎯 Análisis enfocado en: **{medico_gerencial}**")
         
         # NUEVA FUNCIONALIDAD: Análisis de superposición de horarios
         st.markdown("---")
