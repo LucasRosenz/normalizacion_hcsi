@@ -9,7 +9,6 @@ import os
 # Configuración de la página
 st.set_page_config(
     page_title="Agendas salud",
-    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -772,15 +771,15 @@ with tab6:
         col1, col2, col3, col4, col5 = st.columns(5)
         
         with col1:
-            st.markdown("� **PROGRAMADA**")
+            st.markdown("**PROGRAMADA** (Azul)")
         with col2:
-            st.markdown("� **ESPONTANEA**")
+            st.markdown("**ESPONTANEA** (Naranja)")
         with col3:
-            st.markdown("� **URGENCIA**")
+            st.markdown("**URGENCIA** (Rojo)")
         with col4:
-            st.markdown("� **CONTROL**")
+            st.markdown("**CONTROL** (Violeta)")
         with col5:
-            st.markdown("� **SOBRETURNO**")
+            st.markdown("**SOBRETURNO** (Verde)")
         
     else:
         st.warning(f"No se encontraron agendas para **{area_calendario}** en **{efector_calendario}**")
@@ -877,7 +876,7 @@ with tab7:
         
         if medico_gerencial != 'Todos':
             df_gerencial = df_gerencial[df_gerencial['doctor'] == medico_gerencial]
-            st.success(f"🎯 Análisis enfocado en: **{medico_gerencial}**")
+            st.success(f"Análisis enfocado en: **{medico_gerencial}**")
         
         # NUEVA FUNCIONALIDAD: Análisis de superposición de horarios
         st.markdown("---")
@@ -1039,7 +1038,7 @@ with tab8:
         st.markdown("---")
         
         # Análisis de duplicados
-        st.subheader("📋 Análisis de Agendas Duplicadas")
+        st.subheader("Análisis de Agendas Duplicadas")
         
         # Encontrar agendas con el mismo nombre pero diferentes IDs
         nombre_counts = df_filtrado.groupby(['nombre_original_agenda', 'efector']).agg({
@@ -1057,8 +1056,8 @@ with tab8:
                 num_duplicados = row['agenda_id']
                 
                 st.write(f"**{efector}**")
-                st.write(f"📝 Agenda: `{nombre_agenda}`")
-                st.write(f"🔢 Instancias: {num_duplicados}")
+                st.write(f"Agenda: `{nombre_agenda}`")
+                st.write(f"Instancias: {num_duplicados}")
                 
                 # Mostrar los IDs específicos
                 ids_agenda = df_filtrado[
@@ -1066,7 +1065,7 @@ with tab8:
                     (df_filtrado['efector'] == efector)
                 ]['agenda_id'].unique()
                 
-                st.write(f"🆔 IDs: {', '.join(ids_agenda)}")
+                st.write(f"IDs: {', '.join(ids_agenda)}")
                 
                 # Mostrar tabla detallada de estas agendas duplicadas
                 df_duplicado = df_filtrado[
@@ -1093,10 +1092,10 @@ with tab8:
                 )
                 st.markdown("---")
         else:
-            st.success("✅ No se detectaron agendas duplicadas en los datos filtrados.")
+            st.success("No se detectaron agendas duplicadas en los datos filtrados.")
         
         # Análisis por centro
-        st.subheader("📊 Análisis por Centro de Salud")
+        st.subheader("Análisis por Centro de Salud")
         
         resumen_centros = df_filtrado.groupby('efector').agg({
             'agenda_id': 'nunique',
@@ -1129,8 +1128,8 @@ with tab8:
         st.plotly_chart(fig_duplicados, use_container_width=True)
         
     else:
-        st.error("❌ La columna 'agenda_id' no está disponible en los datos.")
-        st.info("💡 Para usar esta funcionalidad, reprocesa los datos con la versión actualizada del sistema.")
+        st.error("La columna 'agenda_id' no está disponible en los datos.")
+        st.info("Para usar esta funcionalidad, reprocesa los datos con la versión actualizada del sistema.")
 
 # Footer
 st.markdown("---")
