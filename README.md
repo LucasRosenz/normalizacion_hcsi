@@ -46,8 +46,40 @@ Asegúrate de tener:
 
 ## Estructura del proyecto
 
-- `app_agendas.py`: Aplicación principal de Streamlit
-- `agendas.py`: Módulo de procesamiento de archivos Excel
+```
+normalizacion_hcsi/
+├── agendas.py              # Módulo principal de procesamiento
+├── app_agendas.py          # Aplicación Streamlit
+├── auth.py                 # Módulo de autenticación
+├── auth_config.py          # Configuración de autenticación
+├── requirements.txt        # Dependencias del proyecto
+├── README.md              # Este archivo
+├── ESTADO_FINAL.md        # Estado final del proyecto
+├── datos/                 # Directorio de datos
+│   ├── excel_originales/   # Archivos Excel originales
+│   └── csv_procesado/     # Archivos CSV procesados
+├── docs/                  # Documentación del proyecto
+├── scripts_verificacion/  # Scripts de verificación y testing
+│   ├── verificar_integridad_agendas.py
+│   ├── analizar_errores.py
+│   ├── test_app.py
+│   └── README.md
+└── .streamlit/            # Configuración de Streamlit
+```
+
+### Archivos principales
+
+- **`agendas.py`**: Módulo principal que procesa archivos Excel y normaliza agendas médicas
+- **`app_agendas.py`**: Aplicación web Streamlit con 7 pestañas de análisis
+- **`auth.py`**: Sistema de autenticación para acceso controlado
+- **`ESTADO_FINAL.md`**: Documentación del estado final y logros del proyecto
+
+### Scripts de verificación
+
+Los scripts de verificación están organizados en `scripts_verificacion/`:
+- **`verificar_integridad_agendas.py`**: Verifica integridad entre Excel originales y tabla final
+- **`analizar_errores.py`**: Analiza errores en el procesamiento
+- **`test_app.py`**: Pruebas unitarias para la aplicación
 - `requirements.txt`: Dependencias del proyecto
 - `agendas_originales/`: Directorio con archivos Excel originales
 - `agendas_consolidadas.csv`: Datos consolidados (generado automáticamente)

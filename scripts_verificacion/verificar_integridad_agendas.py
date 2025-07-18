@@ -246,11 +246,11 @@ def main():
     """
     Función principal para ejecutar la verificación
     """
-    # Configurar rutas
-    directorio_actual = os.path.dirname(os.path.abspath(__file__))
+    # Configurar rutas - ahora estamos en subcarpeta, subir un nivel
+    directorio_actual = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     directorio_excel = os.path.join(directorio_actual, "datos", "excel_originales", "agendas_originales")
     archivo_csv = os.path.join(directorio_actual, "datos", "csv_procesado", "agendas_consolidadas.csv")
-    archivo_reporte = os.path.join(directorio_actual, "reporte_integridad_agendas.csv")
+    archivo_reporte = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reporte_integridad_agendas.csv")
     
     # Verificar que existen los archivos/directorios necesarios
     if not os.path.exists(directorio_excel):
