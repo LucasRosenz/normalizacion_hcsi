@@ -830,7 +830,7 @@ with tab7:
         st.success("Acceso autorizado")
         
         # Mostrar estado de filtros aplicados
-        st.subheader("📊 Estado de filtros aplicados")
+        st.subheader("Estado de filtros aplicados")
         
         # Crear un resumen visual de los filtros activos
         filtros_activos = []
@@ -844,12 +844,12 @@ with tab7:
             filtros_activos.append(f"**Tipo de agenda:** {tipo_turno_seleccionado}")
         
         if filtros_activos:
-            st.info("🔍 **Filtros activos desde la barra lateral:**\n\n" + " • ".join(filtros_activos))
+            st.info("**Filtros activos desde la barra lateral:**\n\n" + " • ".join(filtros_activos))
         else:
-            st.info("🔍 **Mostrando todos los datos** (sin filtros aplicados)")
+            st.info("**Mostrando todos los datos** (sin filtros aplicados)")
         
         # Filtro adicional específico para gestión
-        st.subheader("🎯 Filtro adicional de gestión")
+        st.subheader("Filtro adicional de gestión")
         
         col1, col2, col3 = st.columns(3)
         
