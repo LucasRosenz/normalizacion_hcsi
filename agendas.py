@@ -11,7 +11,7 @@ class AgendaNormalizer:
     
     def __init__(self):
         self.df_consolidado = pd.DataFrame(columns=[
-            'nombre_original_agenda', 'doctor', 'area', 'tipo_turno', 
+            'agenda_id', 'nombre_original_agenda', 'doctor', 'area', 'tipo_turno', 
             'dia', 'hora_inicio', 'hora_fin', 'efector'
         ])
         
@@ -190,6 +190,8 @@ class AgendaNormalizer:
             
             registros = []
             agenda_actual = ""
+            agenda_id_counter = 0  # Contador para generar IDs únicos de agenda
+            agenda_actual_id = ""
             encontro_encabezado_horarios = False
             
             for idx, row in df.iterrows():
@@ -203,6 +205,9 @@ class AgendaNormalizer:
                 if self._es_titulo_agenda(row):
                     # Extraer el nombre de la agenda de la primera celda
                     agenda_actual = str(row.iloc[0]).strip()
+                    agenda_id_counter += 1
+                    # Generar ID único que incluye el efector y un contador secuencial
+                    agenda_actual_id = f"{efector}_{agenda_id_counter:03d}_{agenda_actual}"
                     encontro_encabezado_horarios = False  # Reset para la nueva agenda
                     continue
                 
@@ -210,7 +215,7 @@ class AgendaNormalizer:
                 if self._es_fila_horarios(row):
                     # Solo procesar horarios si tenemos una agenda actual Y hemos visto un encabezado
                     if agenda_actual and encontro_encabezado_horarios:
-                        registro = self._extraer_datos_horarios(row, agenda_actual, efector)
+                        registro = self._extraer_datos_horarios(row, agenda_actual, efector, agenda_actual_id)
                         if registro:
                             registros.append(registro)
             
@@ -270,7 +275,7 @@ class AgendaNormalizer:
         
         return False
     
-    def _extraer_datos_horarios(self, row: pd.Series, agenda_actual: str, efector: str) -> Optional[Dict]:
+    def _extraer_datos_horarios(self, row: pd.Series, agenda_actual: str, efector: str, agenda_id: Optional[str] = None) -> Optional[Dict]:
         """Extrae datos de horarios de una fila"""
         try:
             # MANTENER el nombre de la agenda EXACTAMENTE como está (sin limpiar)
@@ -331,7 +336,7 @@ class AgendaNormalizer:
             
             # Crear registro si tenemos información básica
             if dia and (hora_inicio or hora_fin):
-                return {
+                registro = {
                     'nombre_original_agenda': agenda_actual,  # SIN LIMPIAR - exactamente como está
                     'doctor': self.limpiar_texto(componentes['doctor']),
                     'area': self.limpiar_texto(componentes['area']),
@@ -341,6 +346,12 @@ class AgendaNormalizer:
                     'hora_fin': hora_fin,
                     'efector': efector
                 }
+                
+                # Agregar agenda_id si se proporciona
+                if agenda_id:
+                    registro['agenda_id'] = agenda_id
+                
+                return registro
         
         except Exception as e:
             print(f"Error extrayendo datos de horarios: {e}")
@@ -530,6 +541,8 @@ class AgendaNormalizer:
         """
         registros = []
         agenda_actual = ""
+        agenda_id_counter = 0  # Contador para generar IDs únicos de agenda
+        agenda_actual_id = ""
         
         i = 0
         while i < len(df):
@@ -555,6 +568,9 @@ class AgendaNormalizer:
             # Si la columna B está vacía, probablemente sea una agenda/doctor
             if pd.isna(row.iloc[1]) or str(row.iloc[1]).strip() == "" or str(row.iloc[1]).strip() == "NaN":
                 agenda_actual = str(row.iloc[0]).strip()
+                agenda_id_counter += 1
+                # Generar ID único que incluye el efector y un contador secuencial
+                agenda_actual_id = f"{efector}_{agenda_id_counter:03d}_{agenda_actual}"
                 i += 1
                 continue
             
@@ -580,6 +596,7 @@ class AgendaNormalizer:
                     componentes = self.extraer_componentes_agenda(agenda_limpia_para_procesamiento)
                     
                     registro = {
+                        'agenda_id': agenda_actual_id,
                         'nombre_original_agenda': agenda_actual,  # SIN LIMPIAR - exactamente como está
                         'doctor': self.limpiar_texto(componentes['doctor']),
                         'area': self.limpiar_texto(componentes['area']),

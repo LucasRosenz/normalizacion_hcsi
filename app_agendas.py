@@ -129,7 +129,7 @@ with col4:
 st.markdown("---")
 
 # Layout principal con tabs
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión", "Control de Calidad"])
 
 with tab1:
     st.header("Resumen general")
@@ -271,11 +271,11 @@ with tab2:
         
         if dia_analisis == 'TODOS':
             # Para TODOS, incluir la columna día
-            df_mostrar = df_dia[['dia', 'efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
+            df_mostrar = df_dia[['agenda_id', 'dia', 'efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
             df_mostrar = df_mostrar.sort_values(['dia', 'efector', 'hora_inicio'])
         else:
             # Para un día específico, no incluir la columna día
-            df_mostrar = df_dia[['efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
+            df_mostrar = df_dia[['agenda_id', 'efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
             df_mostrar = df_mostrar.sort_values(['efector', 'hora_inicio'])
         
         st.dataframe(
@@ -431,7 +431,7 @@ with tab5:
         )
     
     # Preparar datos para mostrar
-    columnas_mostrar = []
+    columnas_mostrar = ['agenda_id']  # Siempre incluir agenda_id
     
     if mostrar_nombre_original:
         columnas_mostrar.append('nombre_original_agenda')
@@ -470,6 +470,7 @@ with tab5:
     
     # Renombrar columnas para mejor visualización
     nombres_columnas = {
+        'agenda_id': 'ID de Agenda',
         'nombre_original_agenda': 'Nombre original de agenda',
         'efector': 'Centro de salud',
         'area': 'Especialidad',
@@ -1006,6 +1007,130 @@ with tab7:
         else:
             st.success("No se detectaron conflictos de horarios en los datos filtrados.")
             st.info("Todos los médicos tienen horarios sin superposiciones.")
+
+# TAB 8: CONTROL DE CALIDAD
+with tab8:
+    st.header("Control de Calidad de Datos")
+    
+    # Verificar si existe la columna agenda_id
+    if 'agenda_id' in df.columns:
+        # Métricas generales
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            total_registros = len(df_filtrado)
+            st.metric("Total Registros", total_registros)
+        
+        with col2:
+            agendas_unicas_id = df_filtrado['agenda_id'].nunique()
+            st.metric("Agendas Únicas (ID)", agendas_unicas_id)
+        
+        with col3:
+            agendas_unicas_nombre = df_filtrado['nombre_original_agenda'].nunique()
+            st.metric("Nombres Únicos", agendas_unicas_nombre)
+        
+        with col4:
+            duplicados_detectados = agendas_unicas_id - agendas_unicas_nombre
+            if duplicados_detectados > 0:
+                st.metric("Duplicados Detectados", duplicados_detectados, delta=f"+{duplicados_detectados}")
+            else:
+                st.metric("Duplicados Detectados", duplicados_detectados)
+        
+        st.markdown("---")
+        
+        # Análisis de duplicados
+        st.subheader("📋 Análisis de Agendas Duplicadas")
+        
+        # Encontrar agendas con el mismo nombre pero diferentes IDs
+        nombre_counts = df_filtrado.groupby(['nombre_original_agenda', 'efector']).agg({
+            'agenda_id': 'nunique'
+        }).reset_index()
+        
+        duplicados = nombre_counts[nombre_counts['agenda_id'] > 1]
+        
+        if len(duplicados) > 0:
+            st.warning(f"Se encontraron {len(duplicados)} agendas con nombres duplicados en el mismo centro:")
+            
+            for _, row in duplicados.iterrows():
+                nombre_agenda = row['nombre_original_agenda']
+                efector = row['efector']
+                num_duplicados = row['agenda_id']
+                
+                st.write(f"**{efector}**")
+                st.write(f"📝 Agenda: `{nombre_agenda}`")
+                st.write(f"🔢 Instancias: {num_duplicados}")
+                
+                # Mostrar los IDs específicos
+                ids_agenda = df_filtrado[
+                    (df_filtrado['nombre_original_agenda'] == nombre_agenda) & 
+                    (df_filtrado['efector'] == efector)
+                ]['agenda_id'].unique()
+                
+                st.write(f"🆔 IDs: {', '.join(ids_agenda)}")
+                
+                # Mostrar tabla detallada de estas agendas duplicadas
+                df_duplicado = df_filtrado[
+                    (df_filtrado['nombre_original_agenda'] == nombre_agenda) & 
+                    (df_filtrado['efector'] == efector)
+                ].groupby(['agenda_id', 'dia']).agg({
+                    'hora_inicio': 'first',
+                    'hora_fin': 'first',
+                    'doctor': 'first',
+                    'area': 'first'
+                }).reset_index()
+                
+                st.dataframe(
+                    df_duplicado.rename(columns={
+                        'agenda_id': 'ID de Agenda',
+                        'dia': 'Día',
+                        'hora_inicio': 'Hora Inicio',
+                        'hora_fin': 'Hora Fin',
+                        'doctor': 'Médico',
+                        'area': 'Área'
+                    }),
+                    use_container_width=True,
+                    hide_index=True
+                )
+                st.markdown("---")
+        else:
+            st.success("✅ No se detectaron agendas duplicadas en los datos filtrados.")
+        
+        # Análisis por centro
+        st.subheader("📊 Análisis por Centro de Salud")
+        
+        resumen_centros = df_filtrado.groupby('efector').agg({
+            'agenda_id': 'nunique',
+            'nombre_original_agenda': 'nunique'
+        }).reset_index()
+        
+        resumen_centros['duplicados'] = resumen_centros['agenda_id'] - resumen_centros['nombre_original_agenda']
+        resumen_centros = resumen_centros.sort_values('duplicados', ascending=False)
+        
+        st.dataframe(
+            resumen_centros.rename(columns={
+                'efector': 'Centro de Salud',
+                'agenda_id': 'Agendas Únicas (ID)',
+                'nombre_original_agenda': 'Nombres Únicos',
+                'duplicados': 'Duplicados'
+            }),
+            use_container_width=True,
+            hide_index=True
+        )
+        
+        # Gráfico de duplicados por centro
+        fig_duplicados = px.bar(
+            resumen_centros[resumen_centros['duplicados'] > 0],
+            x='efector',
+            y='duplicados',
+            title='Duplicados por Centro de Salud',
+            labels={'efector': 'Centro de Salud', 'duplicados': 'Número de Duplicados'}
+        )
+        fig_duplicados.update_layout(xaxis_tickangle=-45)
+        st.plotly_chart(fig_duplicados, use_container_width=True)
+        
+    else:
+        st.error("❌ La columna 'agenda_id' no está disponible en los datos.")
+        st.info("💡 Para usar esta funcionalidad, reprocesa los datos con la versión actualizada del sistema.")
 
 # Footer
 st.markdown("---")
