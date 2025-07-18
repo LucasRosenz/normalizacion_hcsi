@@ -128,7 +128,7 @@ with col4:
 st.markdown("---")
 
 # Layout principal con tabs
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión", "Control de Calidad"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión", "Control de calidad"])
 
 with tab1:
     st.header("Resumen general")
@@ -1038,7 +1038,7 @@ with tab8:
         st.markdown("---")
         
         # Análisis de duplicados
-        st.subheader("Análisis de Agendas Duplicadas")
+        st.subheader("Análisis de agendas duplicadas")
         
         # Encontrar agendas con el mismo nombre pero diferentes IDs
         nombre_counts = df_filtrado.groupby(['nombre_original_agenda', 'efector']).agg({
@@ -1095,7 +1095,7 @@ with tab8:
             st.success("No se detectaron agendas duplicadas en los datos filtrados.")
         
         # Análisis por centro
-        st.subheader("Análisis por Centro de Salud")
+        st.subheader("Análisis por centro de salud")
         
         resumen_centros = df_filtrado.groupby('efector').agg({
             'agenda_id': 'nunique',
