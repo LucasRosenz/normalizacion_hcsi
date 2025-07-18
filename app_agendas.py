@@ -1107,9 +1107,9 @@ with tab8:
         
         st.dataframe(
             resumen_centros.rename(columns={
-                'efector': 'Centro de Salud',
-                'agenda_id': 'Agendas Únicas (ID)',
-                'nombre_original_agenda': 'Nombres Únicos',
+                'efector': 'Centro de salud',
+                'agenda_id': 'Agendas únicas (ID)',
+                'nombre_original_agenda': 'Nombres únicos',
                 'duplicados': 'Duplicados'
             }),
             use_container_width=True,
@@ -1121,8 +1121,8 @@ with tab8:
             resumen_centros[resumen_centros['duplicados'] > 0],
             x='efector',
             y='duplicados',
-            title='Duplicados por Centro de Salud',
-            labels={'efector': 'Centro de Salud', 'duplicados': 'Número de Duplicados'}
+            title='Duplicados por centro de salud',
+            labels={'efector': 'Centro de salud', 'duplicados': 'Número de duplicados'}
         )
         fig_duplicados.update_layout(xaxis_tickangle=-45)
         st.plotly_chart(fig_duplicados, use_container_width=True)
