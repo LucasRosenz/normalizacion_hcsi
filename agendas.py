@@ -418,6 +418,8 @@ class AgendaNormalizer:
             return 'CAPS San Isidro Labrador'
         elif 'CAPS SAN PANTALEON' in nombre_upper:
             return 'CAPS San Pantaleón'
+        elif 'CAPS MARTINEZ' in nombre_upper:
+            return 'CAPS Martínez'
         elif 'CAPS VILLA ADELINA' in nombre_upper:
             return 'CAPS Villa Adelina'
         elif 'CENTRO EL NIDO' in nombre_upper:
