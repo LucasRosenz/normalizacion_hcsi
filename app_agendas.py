@@ -1009,7 +1009,7 @@ with tab7:
 
 # TAB 8: CONTROL DE CALIDAD
 with tab8:
-    st.header("Control de Calidad de Datos")
+    st.header("Control de calidad de datos")
     
     # Verificar si existe la columna agenda_id
     if 'agenda_id' in df.columns:
@@ -1018,23 +1018,23 @@ with tab8:
         
         with col1:
             total_registros = len(df_filtrado)
-            st.metric("Total Registros", total_registros)
+            st.metric("Total registros", total_registros)
         
         with col2:
             agendas_unicas_id = df_filtrado['agenda_id'].nunique()
-            st.metric("Agendas Únicas (ID)", agendas_unicas_id)
+            st.metric("Agendas únicas (ID)", agendas_unicas_id)
         
         with col3:
             agendas_unicas_nombre = df_filtrado['nombre_original_agenda'].nunique()
-            st.metric("Nombres Únicos", agendas_unicas_nombre)
+            st.metric("Nombres únicos", agendas_unicas_nombre)
         
         with col4:
             duplicados_detectados = agendas_unicas_id - agendas_unicas_nombre
             if duplicados_detectados > 0:
-                st.metric("Duplicados Detectados", duplicados_detectados, delta=f"+{duplicados_detectados}")
+                st.metric("Duplicados detectados", duplicados_detectados, delta=f"+{duplicados_detectados}")
             else:
-                st.metric("Duplicados Detectados", duplicados_detectados)
-        
+                st.metric("Duplicados detectados", duplicados_detectados)
+
         st.markdown("---")
         
         # Análisis de duplicados
@@ -1080,10 +1080,10 @@ with tab8:
                 
                 st.dataframe(
                     df_duplicado.rename(columns={
-                        'agenda_id': 'ID de Agenda',
+                        'agenda_id': 'ID de agenda',
                         'dia': 'Día',
-                        'hora_inicio': 'Hora Inicio',
-                        'hora_fin': 'Hora Fin',
+                        'hora_inicio': 'Hora inicio',
+                        'hora_fin': 'Hora fin',
                         'doctor': 'Médico',
                         'area': 'Área'
                     }),
