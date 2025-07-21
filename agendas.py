@@ -364,6 +364,16 @@ class AgendaNormalizer:
         """
         archivos_procesados = []
         
+        # Primero, buscar y procesar el archivo HCSI CSV (si existe)
+        archivo_hcsi = os.path.join(os.path.dirname(directorio), "Agendas HCSI.csv")
+        if os.path.exists(archivo_hcsi):
+            print(f"Procesando archivo HCSI CSV: {os.path.basename(archivo_hcsi)}")
+            df_hcsi = self._procesar_archivo_hcsi_csv(archivo_hcsi)
+            if not df_hcsi.empty:
+                archivos_procesados.append(df_hcsi)
+                print(f"  - {len(df_hcsi)} registros extraídos del HCSI")
+        
+        # Luego procesar los archivos Excel normales
         for archivo in os.listdir(directorio):
             if archivo.endswith(('.xlsx', '.xls')):
                 # Excluir archivos HCSI ya que tienen formato diferente
@@ -390,6 +400,110 @@ class AgendaNormalizer:
         
         return pd.DataFrame()
     
+    def _procesar_archivo_hcsi_csv(self, archivo_path: str) -> pd.DataFrame:
+        """
+        Procesa el archivo CSV del Hospital de Clínicas San Ignacio (HCSI)
+        que tiene formato tabular con columnas: Especialidad, Profesional, Dia, Horario, TipoTurno
+        """
+        try:
+            df = pd.read_csv(archivo_path)
+            registros = []
+            agenda_id_counter = 0
+            
+            print(f"Procesando {len(df)} registros del HCSI...")
+            
+            for idx, row in df.iterrows():
+                # Saltar filas con datos faltantes esenciales
+                if pd.isna(row.get('Especialidad')) or pd.isna(row.get('Dia')) or pd.isna(row.get('Horario')):
+                    continue
+                
+                agenda_id_counter += 1
+                
+                # Extraer datos básicos
+                especialidad = str(row['Especialidad']).strip()
+                profesional = str(row.get('Profesional', '')).strip() if pd.notna(row.get('Profesional')) else ""
+                dia_raw = str(row['Dia']).strip()
+                horario_raw = str(row['Horario']).strip()
+                tipo_turno_raw = str(row.get('TipoTurno', '')).strip() if pd.notna(row.get('TipoTurno')) else ""
+                subespecialidad = str(row.get('Subespecialidad', '')).strip() if pd.notna(row.get('Subespecialidad')) else ""
+                
+                # Mapear días de la semana
+                dia_mapping = {
+                    'LUN': 'Lunes', 'LUNES': 'Lunes',
+                    'MAR': 'Martes', 'MARTES': 'Martes', 
+                    'MIE': 'Miércoles', 'MIERCOLES': 'Miércoles', 'MIÉRCOLES': 'Miércoles',
+                    'JUE': 'Jueves', 'JUEVES': 'Jueves',
+                    'VIE': 'Viernes', 'VIERNES': 'Viernes',
+                    'SAB': 'Sábado', 'SABADO': 'Sábado', 'SÁBADO': 'Sábado',
+                    'DOM': 'Domingo', 'DOMINGO': 'Domingo'
+                }
+                dia = dia_mapping.get(dia_raw.upper(), dia_raw)
+                
+                # Procesar horario (formato: "08:00 a 12:00" o "13:00 a 18:00")
+                hora_inicio = ""
+                hora_fin = ""
+                if " a " in horario_raw:
+                    partes_horario = horario_raw.split(" a ")
+                    if len(partes_horario) == 2:
+                        hora_inicio = partes_horario[0].strip()
+                        hora_fin = partes_horario[1].strip()
+                
+                # Crear nombre de agenda combinando especialidad + subespecialidad + profesional
+                nombre_agenda_partes = [especialidad]
+                if subespecialidad and subespecialidad != "GENERAL":
+                    nombre_agenda_partes.append(subespecialidad)
+                if profesional:
+                    nombre_agenda_partes.append(profesional)
+                
+                nombre_agenda = " - ".join(nombre_agenda_partes)
+                
+                # Generar ID único
+                agenda_id = f"Hospital de Clínicas San Ignacio_{agenda_id_counter:03d}_{especialidad}"
+                
+                # Normalizar tipo de turno
+                tipo_turno_normalizado = ""
+                if tipo_turno_raw.upper() == "PROGRAMADO":
+                    tipo_turno_normalizado = "PROGRAMADA"
+                elif tipo_turno_raw.upper() in ["ESPONTANEO", "ESPONTÁNEO"]:
+                    tipo_turno_normalizado = "ESPONTANEA"
+                else:
+                    tipo_turno_normalizado = tipo_turno_raw.upper()
+                
+                # Limpiar nombre del profesional (remover formato "APELLIDO ,NOMBRE")
+                doctor_limpio = ""
+                if profesional:
+                    if "," in profesional:
+                        partes = profesional.split(",")
+                        if len(partes) >= 2:
+                            apellido = partes[0].strip()
+                            nombre = partes[1].strip()
+                            doctor_limpio = f"{nombre} {apellido}"
+                        else:
+                            doctor_limpio = profesional
+                    else:
+                        doctor_limpio = profesional
+                
+                # Crear registro
+                registro = {
+                    'agenda_id': agenda_id,
+                    'nombre_original_agenda': nombre_agenda,
+                    'doctor': doctor_limpio,
+                    'area': especialidad.upper(),
+                    'tipo_turno': tipo_turno_normalizado,
+                    'dia': dia,
+                    'hora_inicio': hora_inicio,
+                    'hora_fin': hora_fin,
+                    'efector': 'Hospital de Clínicas San Ignacio'
+                }
+                
+                registros.append(registro)
+            
+            return pd.DataFrame(registros)
+            
+        except Exception as e:
+            print(f"Error procesando archivo HCSI CSV: {e}")
+            return pd.DataFrame()
+
     def _inferir_efector(self, nombre_archivo: str) -> str:
         """Infiere el nombre del efector desde el nombre del archivo"""
         nombre_base = os.path.splitext(nombre_archivo)[0]

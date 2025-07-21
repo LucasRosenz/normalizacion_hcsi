@@ -55,7 +55,7 @@ efector_seleccionado = st.sidebar.selectbox(
 )
 
 # Filtro por área médica
-areas_disponibles = ['Todas'] + sorted(df[df['area'] != 'Sin área']['area'].unique().tolist())
+areas_disponibles = ['Todas'] + sorted(df['area'].unique().tolist())
 area_seleccionada = st.sidebar.selectbox(
     "Área:",
     areas_disponibles
@@ -111,7 +111,7 @@ with col2:
     )
 
 with col3:
-    areas_unicas = df_filtrado[df_filtrado['area'] != 'Sin área']['area'].nunique()
+    areas_unicas = df_filtrado['area'].nunique()
     st.metric(
         label="Especialidades",
         value=areas_unicas
@@ -338,7 +338,7 @@ with tab4:
     
     metricas_efector = df_filtrado.groupby('efector').agg({
         'doctor': lambda x: x[x != 'Sin asignar'].nunique(),
-        'area': lambda x: x[x != 'Sin área'].nunique()
+        'area': lambda x: x.nunique()
     })
     
     # Calcular agendas únicas por separado
@@ -503,7 +503,7 @@ with tab5:
         st.metric("Médicos", doctores_tabla)
     
     with col3:
-        areas_tabla = df_mostrar[df_mostrar['area'] != 'Sin área']['area'].nunique()
+        areas_tabla = df_mostrar['area'].nunique()
         st.metric("Especialidades", areas_tabla)
     
     with col4:
@@ -566,7 +566,7 @@ with tab6:
     with col2:
         # Selector de área específica (obligatorio)
         df_efector = df[df['efector'] == efector_calendario]
-        areas_calendario = sorted(df_efector[df_efector['area'] != 'Sin área']['area'].unique().tolist())
+        areas_calendario = sorted(df_efector['area'].unique().tolist())
         
         if areas_calendario:
             area_calendario = st.selectbox(
