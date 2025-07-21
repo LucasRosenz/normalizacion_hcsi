@@ -89,7 +89,8 @@ class AgendaNormalizer:
             'MUSICOTERAPIA': r'\bMUSICOTERAPIA\b',
             'FONOAUDIOLOGIA': r'\bFONOAUDIOLOGIA\b',
             'TERAPIA OCUPACIONAL': r'\bTERAPIA\s+OCUPACIONAL\b',
-            'PSICOPEDAGOGIA': r'\bPSICOPEDAGOGIA\b'
+            'PSICOPEDAGOGIA': r'\bPSICOPEDAGOGIA\b',
+            'ENFERMERIA': r'\bENFERMERIA\b|\bENFERMERÍA\b|\bLIC\.\s*EN\s+ENFERMERIA\b|\bLIC\.\s*EN\s+ENFERMERÍA\b|\bENFERMER[AO]\b'
         }
         
         # Buscar área médica
