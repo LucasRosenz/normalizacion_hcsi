@@ -922,9 +922,11 @@ with tab7:
                                     'centro_1': row1['efector'],
                                     'area_1': row1['area'],
                                     'horario_1': f"{row1['hora_inicio']} - {row1['hora_fin']}",
+                                    'tipo_agenda_1': row1['tipo_turno'],
                                     'centro_2': row2['efector'],
                                     'area_2': row2['area'],
                                     'horario_2': f"{row2['hora_inicio']} - {row2['hora_fin']}",
+                                    'tipo_agenda_2': row2['tipo_turno'],
                                     'tipo_conflicto': 'Mismo centro' if row1['efector'] == row2['efector'] else 'Centros diferentes'
                                 })
             
@@ -971,9 +973,11 @@ with tab7:
                 'centro_1': 'Centro 1',
                 'area_1': 'Área 1',
                 'horario_1': 'Horario 1',
+                'tipo_agenda_1': 'Tipo Agenda 1',
                 'centro_2': 'Centro 2',
                 'area_2': 'Área 2',
                 'horario_2': 'Horario 2',
+                'tipo_agenda_2': 'Tipo Agenda 2',
                 'tipo_conflicto': 'Tipo de conflicto'
             })
             
