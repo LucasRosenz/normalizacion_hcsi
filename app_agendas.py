@@ -163,7 +163,7 @@ with col4:
 st.markdown("---")
 
 # Layout principal con tabs
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión", "Control de calidad"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión", "Control de calidad", "Sin asignar"])
 
 with tab1:
     st.header("Resumen general")
@@ -1219,6 +1219,174 @@ with tab8:
     else:
         st.error("La columna 'agenda_id' no está disponible en los datos.")
         st.info("Para usar esta funcionalidad, reprocesa los datos con la versión actualizada del sistema.")
+
+with tab9:
+    st.header("Sin asignar")
+    st.markdown("Análisis de agendas con campos faltantes o sin asignar")
+    
+    # Selector de campo a analizar
+    campos_disponibles = {
+        'doctor': 'Médico',
+        'area': 'Área/Especialidad', 
+        'tipo_turno': 'Tipo de turno',
+        'dia': 'Día',
+        'hora_inicio': 'Hora inicio',
+        'hora_fin': 'Hora fin'
+    }
+    
+    campo_seleccionado = st.selectbox(
+        "Selecciona el campo a analizar:",
+        list(campos_disponibles.keys()),
+        format_func=lambda x: campos_disponibles[x]
+    )
+    
+    # Definir qué valores se consideran "sin asignar" para cada campo
+    valores_sin_asignar = {
+        'doctor': ['Sin asignar', '', 'nan', None],
+        'area': ['Sin área', '', 'nan', None],
+        'tipo_turno': ['No especificado', '', 'nan', None],
+        'dia': ['', 'nan', None],
+        'hora_inicio': ['', 'nan', None],
+        'hora_fin': ['', 'nan', None]
+    }
+    
+    # Filtrar registros sin asignar para el campo seleccionado
+    valores_faltantes = valores_sin_asignar[campo_seleccionado]
+    
+    # Crear máscara para valores faltantes
+    mask_sin_asignar = df_filtrado[campo_seleccionado].isin(valores_faltantes) | \
+                      df_filtrado[campo_seleccionado].isna() | \
+                      (df_filtrado[campo_seleccionado].astype(str).str.strip() == '')
+    
+    df_sin_asignar = df_filtrado[mask_sin_asignar]
+    
+    # Métricas
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        total_sin_asignar = len(df_sin_asignar)
+        total_registros = len(df_filtrado)
+        porcentaje = (total_sin_asignar / total_registros * 100) if total_registros > 0 else 0
+        st.metric(
+            f"Registros sin {campos_disponibles[campo_seleccionado].lower()}", 
+            total_sin_asignar,
+            f"{porcentaje:.1f}% del total"
+        )
+    
+    with col2:
+        agendas_afectadas = df_sin_asignar['nombre_original_agenda'].nunique()
+        st.metric("Agendas afectadas", agendas_afectadas)
+    
+    with col3:
+        efectores_afectados = df_sin_asignar['efector'].nunique()
+        st.metric("Centros afectados", efectores_afectados)
+    
+    if not df_sin_asignar.empty:
+        # Análisis por efector
+        st.subheader(f"Distribución por centro de salud")
+        
+        resumen_efector = df_sin_asignar.groupby('efector').agg({
+            'nombre_original_agenda': 'nunique',
+            campo_seleccionado: 'count'
+        }).reset_index()
+        resumen_efector = resumen_efector.rename(columns={
+            'efector': 'Centro de salud',
+            'nombre_original_agenda': 'Agendas afectadas',
+            campo_seleccionado: 'Registros sin asignar'
+        }).sort_values('Registros sin asignar', ascending=False)
+        
+        # Gráfico de barras
+        fig_efector = px.bar(
+            resumen_efector,
+            x='Centro de salud',
+            y='Registros sin asignar',
+            title=f'Registros sin {campos_disponibles[campo_seleccionado].lower()} por centro',
+            color='Registros sin asignar',
+            color_continuous_scale='reds'
+        )
+        fig_efector.update_layout(xaxis_tickangle=-45, height=400)
+        st.plotly_chart(fig_efector, use_container_width=True)
+        
+        st.dataframe(resumen_efector, use_container_width=True, hide_index=True)
+        
+        # Tabla detallada de agendas sin asignar
+        st.subheader(f"Detalle de agendas sin {campos_disponibles[campo_seleccionado].lower()}")
+        
+        # Preparar columnas para mostrar
+        columnas_mostrar = ['nombre_original_agenda', 'efector', 'dia', 'hora_inicio', 'hora_fin']
+        if campo_seleccionado not in columnas_mostrar:
+            columnas_mostrar.append(campo_seleccionado)
+        
+        # Agregar otras columnas relevantes
+        for col in ['doctor', 'area', 'tipo_turno']:
+            if col != campo_seleccionado and col not in columnas_mostrar:
+                columnas_mostrar.append(col)
+        
+        df_detalle = df_sin_asignar[columnas_mostrar].drop_duplicates()
+        
+        # Renombrar columnas para mejor presentación
+        df_detalle_renamed = df_detalle.rename(columns={
+            'nombre_original_agenda': 'Nombre original de agenda',
+            'efector': 'Centro de salud',
+            'dia': 'Día',
+            'hora_inicio': 'Hora inicio',
+            'hora_fin': 'Hora fin',
+            'doctor': 'Médico',
+            'area': 'Área',
+            'tipo_turno': 'Tipo de turno'
+        })
+        
+        # Filtros adicionales para la tabla
+        st.markdown("**Filtros para la tabla:**")
+        col_filter1, col_filter2 = st.columns(2)
+        
+        with col_filter1:
+            efectores_unicos = ['Todos'] + sorted(df_sin_asignar['efector'].unique().tolist())
+            efector_filtro = st.selectbox(
+                "Filtrar por centro:",
+                efectores_unicos,
+                key="filtro_efector_sin_asignar"
+            )
+        
+        with col_filter2:
+            if campo_seleccionado != 'area':
+                areas_sin_asignar = ['Todas'] + sorted(df_sin_asignar['area'].dropna().unique().tolist())
+                area_filtro = st.selectbox(
+                    "Filtrar por área:",
+                    areas_sin_asignar,
+                    key="filtro_area_sin_asignar"
+                )
+            else:
+                area_filtro = 'Todas'
+        
+        # Aplicar filtros a la tabla
+        df_tabla_filtrada = df_detalle_renamed.copy()
+        
+        if efector_filtro != 'Todos':
+            df_tabla_filtrada = df_tabla_filtrada[df_tabla_filtrada['Centro de salud'] == efector_filtro]
+        
+        if area_filtro != 'Todas' and campo_seleccionado != 'area':
+            df_tabla_filtrada = df_tabla_filtrada[df_tabla_filtrada['Área'] == area_filtro]
+        
+        # Mostrar la tabla
+        st.dataframe(
+            df_tabla_filtrada,
+            use_container_width=True,
+            hide_index=True
+        )
+        
+        # Botón para descargar
+        if st.button(f"Descargar registros sin {campos_disponibles[campo_seleccionado].lower()}"):
+            csv = df_tabla_filtrada.to_csv(index=False)
+            st.download_button(
+                label="Descargar CSV",
+                data=csv,
+                file_name=f"registros_sin_{campo_seleccionado}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                mime="text/csv"
+            )
+    
+    else:
+        st.success(f"No se encontraron registros sin {campos_disponibles[campo_seleccionado].lower()} con los filtros aplicados.")
 
 # Footer
 st.markdown("---")
