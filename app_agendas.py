@@ -40,6 +40,34 @@ def cargar_datos():
         st.error(f"Error cargando datos: {e}")
         return pd.DataFrame()
 
+def calcular_horas_medico(df_doctor):
+    """Calcula las horas semanales totales de un médico"""
+    try:
+        total_horas = 0
+        
+        for _, row in df_doctor.iterrows():
+            try:
+                # Convertir horarios a datetime
+                inicio = pd.to_datetime(row['hora_inicio'], format='%H:%M')
+                fin = pd.to_datetime(row['hora_fin'], format='%H:%M')
+                
+                # Calcular diferencia en horas
+                diferencia = fin - inicio
+                horas = diferencia.total_seconds() / 3600
+                
+                # Solo sumar si es un valor válido y positivo
+                if horas > 0:
+                    total_horas += horas
+                    
+            except (ValueError, TypeError):
+                # Si hay error en la conversión, saltar este registro
+                continue
+        
+        return round(total_horas, 2)
+    
+    except Exception as e:
+        return 0
+
 # Cargar datos
 df = cargar_datos()
 
@@ -307,7 +335,10 @@ with tab3:
         
         df_doctor = df_filtrado[df_filtrado['doctor'] == doctor_seleccionado]
         
-        col1, col2, col3 = st.columns(3)
+        # Calcular horas semanales
+        horas_semanales = calcular_horas_medico(df_doctor)
+        
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
             # Contar agendas únicas del médico
@@ -322,7 +353,49 @@ with tab3:
             centros_doctor = df_doctor['efector'].nunique()
             st.metric("Centros de salud", centros_doctor)
         
-        # Horarios del doctor por día
+        with col4:
+            st.metric("Horas semanales", f"{horas_semanales}h")
+        
+        # Información detallada de horas por día
+        if horas_semanales > 0:
+            st.subheader("Distribución de horas por día")
+            
+            horas_por_dia = []
+            for dia in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']:
+                df_dia = df_doctor[df_doctor['dia'] == dia]
+                if not df_dia.empty:
+                    horas_dia = calcular_horas_medico(df_dia)
+                    if horas_dia > 0:
+                        horas_por_dia.append({'Día': dia, 'Horas': horas_dia})
+            
+            if horas_por_dia:
+                df_horas_dia = pd.DataFrame(horas_por_dia)
+                
+                # Gráfico de barras para distribución de horas
+                fig_horas = px.bar(
+                    df_horas_dia, 
+                    x='Día', 
+                    y='Horas',
+                    title=f"Distribución de horas semanales - {doctor_seleccionado}",
+                    color='Horas',
+                    color_continuous_scale='viridis'
+                )
+                fig_horas.update_layout(height=400)
+                st.plotly_chart(fig_horas, use_container_width=True)
+                
+                # Tabla resumen de horas por día
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    st.dataframe(df_horas_dia, use_container_width=True)
+                with col2:
+                    st.info(f"""
+                    **Resumen de carga horaria:**
+                    - Total semanal: **{horas_semanales}h**
+                    - Promedio diario: **{round(horas_semanales/7, 2)}h**
+                    - Días activos: **{len(df_horas_dia)}**
+                    """)
+        
+        # Horarios del doctor por día (tabla existente)
         horarios_doctor = df_doctor.groupby('dia').agg({
             'hora_inicio': lambda x: ', '.join(sorted(set(x.astype(str)))),
             'hora_fin': lambda x: ', '.join(sorted(set(x.astype(str)))),
@@ -331,7 +404,7 @@ with tab3:
             'tipo_turno': lambda x: ', '.join(set(x))
         }).reset_index()
         
-        st.subheader(f"Horarios de {doctor_seleccionado}")
+        st.subheader(f"Horarios detallados de {doctor_seleccionado}")
         st.dataframe(horarios_doctor, use_container_width=True)
         
     else:
