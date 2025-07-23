@@ -300,6 +300,7 @@ class AgendaNormalizer:
                     'VIERNES': 'Viernes',
                     'SÁBADO': 'Sábado',
                     'SABADO': 'Sábado',
+                    'SÁB': 'Sábado',
                     'DOMINGO': 'Domingo'
                 }
                 dia = dia_mapping.get(dia_raw.upper(), dia_raw)
@@ -435,7 +436,7 @@ class AgendaNormalizer:
                     'MIE': 'Miércoles', 'MIERCOLES': 'Miércoles', 'MIÉRCOLES': 'Miércoles',
                     'JUE': 'Jueves', 'JUEVES': 'Jueves',
                     'VIE': 'Viernes', 'VIERNES': 'Viernes',
-                    'SAB': 'Sábado', 'SABADO': 'Sábado', 'SÁBADO': 'Sábado',
+                    'SAB': 'Sábado', 'SABADO': 'Sábado', 'SÁBADO': 'Sábado', 'SÁB': 'Sábado',
                     'DOM': 'Domingo', 'DOMINGO': 'Domingo'
                 }
                 dia = dia_mapping.get(dia_raw.upper(), dia_raw)
@@ -702,7 +703,7 @@ class AgendaNormalizer:
                 dia_mapping = {
                     'LUNES': 'Lunes', 'MARTES': 'Martes', 'MIÉRCOLES': 'Miércoles',
                     'MIERCOLES': 'Miércoles', 'JUEVES': 'Jueves', 'VIERNES': 'Viernes',
-                    'SÁBADO': 'Sábado', 'SABADO': 'Sábado', 'DOMINGO': 'Domingo'
+                    'SÁBADO': 'Sábado', 'SABADO': 'Sábado', 'SÁB': 'Sábado', 'DOMINGO': 'Domingo'
                 }
                 dia = dia_mapping.get(dia_raw.upper(), dia_raw)
                 

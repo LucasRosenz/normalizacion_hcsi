@@ -28,6 +28,9 @@ def cargar_datos():
         df['area'] = df['area'].fillna('Sin área')
         df['tipo_turno'] = df['tipo_turno'].fillna('No especificado')
         
+        # Normalizar días de la semana (corregir "Sáb" -> "Sábado")
+        df['dia'] = df['dia'].replace({'Sáb': 'Sábado'})
+        
         # Convertir horas a datetime para mejor manejo
         df['hora_inicio_dt'] = pd.to_datetime(df['hora_inicio'], format='%H:%M', errors='coerce').dt.time
         df['hora_fin_dt'] = pd.to_datetime(df['hora_fin'], format='%H:%M', errors='coerce').dt.time
@@ -62,7 +65,11 @@ area_seleccionada = st.sidebar.selectbox(
 )
 
 # Filtro por día de la semana
-dias_disponibles = ['Todos'] + sorted(df['dia'].unique().tolist())
+# Ordenar días según el orden de la semana
+orden_dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+dias_unicos = df['dia'].unique().tolist()
+dias_ordenados = [dia for dia in orden_dias if dia in dias_unicos]
+dias_disponibles = ['Todos'] + dias_ordenados
 dia_seleccionado = st.sidebar.selectbox(
     "Día:",
     dias_disponibles
