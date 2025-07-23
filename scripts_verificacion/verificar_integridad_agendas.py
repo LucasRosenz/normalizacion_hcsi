@@ -95,6 +95,46 @@ class VerificadorIntegridadAgendas:
             
         return agendas_encontradas
     
+    def extraer_agendas_hcsi_csv(self, archivo_path: str) -> Set[str]:
+        """
+        Extrae nombres de agenda del archivo CSV del HCSI
+        """
+        agendas_encontradas = set()
+        
+        try:
+            df = pd.read_csv(archivo_path)
+            
+            print(f"Procesando {len(df)} registros del HCSI...")
+            
+            for idx, row in df.iterrows():
+                # Saltar filas con datos faltantes esenciales
+                if pd.isna(row.get('Especialidad')):
+                    continue
+                
+                # Extraer datos básicos
+                especialidad = str(row['Especialidad']).strip()
+                profesional = str(row.get('Profesional', '')).strip() if pd.notna(row.get('Profesional')) else ""
+                subespecialidad = str(row.get('Subespecialidad', '')).strip() if pd.notna(row.get('Subespecialidad')) else ""
+                
+                # Crear nombre de agenda combinando especialidad + subespecialidad + profesional
+                nombre_agenda_partes = [especialidad]
+                if subespecialidad and subespecialidad != "GENERAL":
+                    nombre_agenda_partes.append(subespecialidad)
+                if profesional:
+                    nombre_agenda_partes.append(profesional)
+                
+                nombre_agenda = " - ".join(nombre_agenda_partes)
+                
+                if nombre_agenda:  # Solo agregar si no está vacío
+                    agendas_encontradas.add(nombre_agenda)
+                    # Mapear agenda a su archivo origen
+                    self.archivo_origen[nombre_agenda] = "Agendas HCSI.csv"
+                    
+        except Exception as e:
+            print(f"Error leyendo HCSI CSV {archivo_path}: {e}")
+            
+        return agendas_encontradas
+
     def procesar_directorio_excel(self, directorio: str):
         """
         Procesa todos los archivos Excel en un directorio para extraer agendas
@@ -105,11 +145,21 @@ class VerificadorIntegridadAgendas:
             print(f"Error: No existe el directorio {directorio}")
             return
         
+        # Primero buscar y procesar archivo HCSI CSV
+        archivo_hcsi = os.path.join(os.path.dirname(directorio), "Agendas HCSI.csv")
+        if os.path.exists(archivo_hcsi):
+            print(f"Procesando archivo HCSI CSV: {os.path.basename(archivo_hcsi)}")
+            agendas_hcsi = self.extraer_agendas_hcsi_csv(archivo_hcsi)
+            self.agendas_originales.update(agendas_hcsi)
+            print(f"  - {len(agendas_hcsi)} agendas únicas encontradas en HCSI")
+            archivos_procesados += 1
+        
+        # Luego procesar archivos Excel normales
         for archivo in os.listdir(directorio):
             if archivo.endswith(('.xlsx', '.xls')):
-                # Excluir archivos HCSI (formato diferente)
+                # Excluir archivos HCSI Excel ya que procesamos el CSV
                 if 'HCSI' in archivo.upper():
-                    print(f"Saltando archivo HCSI: {archivo} (formato diferente)")
+                    print(f"Saltando archivo HCSI Excel: {archivo} (ya procesado el CSV)")
                     continue
                 
                 archivo_path = os.path.join(directorio, archivo)
@@ -121,7 +171,7 @@ class VerificadorIntegridadAgendas:
                 print(f"  - {len(agendas_archivo)} agendas encontradas")
                 archivos_procesados += 1
         
-        print(f"\nTotal archivos Excel procesados: {archivos_procesados}")
+        print(f"\nTotal archivos procesados: {archivos_procesados}")
         print(f"Total agendas únicas en Excel originales: {len(self.agendas_originales)}")
     
     def verificar_integridad(self, directorio_excel: str, archivo_csv: str):
@@ -130,8 +180,8 @@ class VerificadorIntegridadAgendas:
         """
         print("=== VERIFICACIÓN DE INTEGRIDAD DE AGENDAS ===\n")
         
-        # 1. Extraer agendas de archivos Excel originales
-        print("1. Extrayendo agendas de archivos Excel originales...")
+        # 1. Extraer agendas de archivos Excel originales y HCSI CSV
+        print("1. Extrayendo agendas de archivos originales (Excel + HCSI CSV)...")
         self.procesar_directorio_excel(directorio_excel)
         
         # 2. Extraer agendas de tabla final
@@ -158,12 +208,12 @@ class VerificadorIntegridadAgendas:
         
         print("\n=== RESULTADOS DE VERIFICACIÓN ===")
         print(f"✅ Agendas presentes en ambos: {len(en_ambos)}")
-        print(f"⚠️  Agendas solo en Excel originales: {len(solo_en_excel)}")
+        print(f"⚠️  Agendas solo en archivos originales: {len(solo_en_excel)}")
         print(f"⚠️  Agendas solo en tabla final: {len(solo_en_tabla)}")
         
         # Detallar agendas solo en Excel
         if solo_en_excel:
-            print(f"\n--- AGENDAS SOLO EN EXCEL ORIGINALES ({len(solo_en_excel)}) ---")
+            print(f"\n--- AGENDAS SOLO EN ARCHIVOS ORIGINALES ({len(solo_en_excel)}) ---")
             for agenda in sorted(solo_en_excel):
                 archivo_origen = self.archivo_origen.get(agenda, "Desconocido")
                 print(f"  • '{agenda}' (origen: {archivo_origen})")
@@ -181,7 +231,7 @@ class VerificadorIntegridadAgendas:
         else:
             print("⚠️  DISCREPANCIAS ENCONTRADAS:")
             if solo_en_excel:
-                print(f"   - {len(solo_en_excel)} agenda(s) en Excel no procesada(s)")
+                print(f"   - {len(solo_en_excel)} agenda(s) en archivos originales no procesada(s)")
             if solo_en_tabla:
                 print(f"   - {len(solo_en_tabla)} agenda(s) en tabla sin origen claro")
         
@@ -192,7 +242,7 @@ class VerificadorIntegridadAgendas:
         
         print(f"\nESTADÍSTICAS:")
         print(f"  - Cobertura de procesamiento: {cobertura_procesamiento:.1f}%")
-        print(f"  - Total único en Excel: {total_excel}")
+        print(f"  - Total único en archivos originales: {total_excel}")
         print(f"  - Total único en tabla: {total_tabla}")
     
     def exportar_reporte_detallado(self, archivo_salida: str):
@@ -218,7 +268,7 @@ class VerificadorIntegridadAgendas:
             for agenda in solo_en_excel:
                 reporte_data.append({
                     'nombre_agenda': agenda,
-                    'estado': 'SOLO_EN_EXCEL',
+                    'estado': 'SOLO_EN_ORIGINALES',
                     'archivo_origen': self.archivo_origen.get(agenda, ''),
                     'observaciones': 'No procesada - revisar criterios de detección'
                 })
