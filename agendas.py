@@ -89,7 +89,8 @@ class AgendaNormalizer:
             'MUSICOTERAPIA': r'\bMUSICOTERAPIA\b',
             'FONOAUDIOLOGIA': r'\bFONOAUDIOLOGIA\b',
             'TERAPIA OCUPACIONAL': r'\bTERAPIA\s+OCUPACIONAL\b',
-            'PSICOPEDAGOGIA': r'\bPSICOPEDAGOGIA\b'
+            'PSICOPEDAGOGIA': r'\bPSICOPEDAGOGIA\b',
+            'ENFERMERIA': r'\bENFERMERIA\b|\bENFERMERÍA\b|\bLIC\.\s*EN\s+ENFERMERIA\b|\bLIC\.\s*EN\s+ENFERMERÍA\b|\bENFERMER[AO]\b'
         }
         
         # Buscar área médica
@@ -402,7 +403,7 @@ class AgendaNormalizer:
     
     def _procesar_archivo_hcsi_csv(self, archivo_path: str) -> pd.DataFrame:
         """
-        Procesa el archivo CSV del Hospital Central de San Isidro (HCSI)
+        Procesa el archivo CSV del HCSI
         que tiene formato tabular con columnas: Especialidad, Profesional, Dia, Horario, TipoTurno
         """
         try:
