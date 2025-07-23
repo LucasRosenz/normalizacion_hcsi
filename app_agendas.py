@@ -468,6 +468,110 @@ with tab4:
     st.subheader("Tabla comparativa detallada")
     metricas_efector_sorted = metricas_efector.sort_values('Total agendas', ascending=False)
     st.dataframe(metricas_efector_sorted, use_container_width=True)
+    
+    # Análisis por tipos específicos de agenda
+    st.subheader("Análisis por tipos específicos de agenda")
+    st.markdown("Distribución de agendas CAI, Vacunación y Enfermería por centro")
+    
+    # Función para identificar tipos específicos de agenda
+    def identificar_tipo_agenda(row):
+        tipo_turno = str(row['tipo_turno']).upper()
+        nombre_agenda = str(row['nombre_original_agenda']).upper()
+        
+        if 'CAI' in tipo_turno or 'ESPONTANEA' in tipo_turno or 'ESPONTÁNEA' in tipo_turno:
+            return 'CAI/Espontánea'
+        elif 'VACUN' in nombre_agenda:
+            return 'Vacunación'
+        elif 'ENFERM' in nombre_agenda:
+            return 'Enfermería'
+        else:
+            return 'Otros'
+    
+    # Aplicar la clasificación
+    df_tipos = df_filtrado.copy()
+    df_tipos['tipo_clasificado'] = df_tipos.apply(identificar_tipo_agenda, axis=1)
+    
+    # Filtrar solo los tipos específicos
+    tipos_especificos = ['CAI/Espontánea', 'Vacunación', 'Enfermería']
+    df_tipos_filtrado = df_tipos[df_tipos['tipo_clasificado'].isin(tipos_especificos)]
+    
+    if not df_tipos_filtrado.empty:
+        # Análisis por centro y tipo
+        analisis_tipos = df_tipos_filtrado.groupby(['efector', 'tipo_clasificado']).agg({
+            'nombre_original_agenda': 'nunique'
+        }).reset_index()
+        analisis_tipos['total_registros'] = df_tipos_filtrado.groupby(['efector', 'tipo_clasificado']).size().values
+        analisis_tipos = analisis_tipos.rename(columns={
+            'efector': 'Centro',
+            'tipo_clasificado': 'Tipo de Agenda',
+            'nombre_original_agenda': 'Agendas únicas',
+            'total_registros': 'Total registros'
+        })
+        
+        # Tabla pivot para mejor visualización
+        tabla_pivot = df_tipos_filtrado.groupby(['efector', 'tipo_clasificado']).size().unstack(fill_value=0)
+        tabla_pivot = tabla_pivot.reset_index()
+        tabla_pivot = tabla_pivot.rename(columns={'efector': 'Centro de salud'})
+        
+        # Agregar columna de total
+        cols_tipos = [col for col in tabla_pivot.columns if col != 'Centro de salud']
+        tabla_pivot['Total'] = tabla_pivot[cols_tipos].sum(axis=1)
+        tabla_pivot = tabla_pivot.sort_values('Total', ascending=False)
+        
+        # Mostrar tabla
+        st.dataframe(tabla_pivot, use_container_width=True, hide_index=True)
+        
+        # Gráfico de barras apiladas
+        fig_tipos = px.bar(
+            df_tipos_filtrado.groupby(['efector', 'tipo_clasificado']).size().reset_index(name='count'),
+            x='efector',
+            y='count',
+            color='tipo_clasificado',
+            title='Distribución de agendas CAI, Vacunación y Enfermería por centro',
+            labels={
+                'efector': 'Centro de salud',
+                'count': 'Número de registros',
+                'tipo_clasificado': 'Tipo de agenda'
+            },
+            color_discrete_map={
+                'CAI/Espontánea': '#1f77b4',
+                'Vacunación': '#ff7f0e', 
+                'Enfermería': '#2ca02c'
+            }
+        )
+        fig_tipos.update_layout(xaxis_tickangle=-45, height=500)
+        st.plotly_chart(fig_tipos, use_container_width=True)
+        
+        # Resumen por tipo
+        st.subheader("Resumen por tipo de agenda")
+        resumen_tipos = df_tipos_filtrado.groupby('tipo_clasificado').agg({
+            'nombre_original_agenda': 'nunique',
+            'efector': 'nunique'
+        }).reset_index()
+        resumen_tipos['total_registros'] = df_tipos_filtrado.groupby('tipo_clasificado').size().values
+        resumen_tipos = resumen_tipos.rename(columns={
+            'tipo_clasificado': 'Tipo de agenda',
+            'nombre_original_agenda': 'Agendas únicas',
+            'efector': 'Centros con este tipo',
+            'total_registros': 'Total registros'
+        })
+        
+        col1, col2, col3 = st.columns(3)
+        
+        # Mostrar métricas para cada tipo
+        tipos_metricas = resumen_tipos.to_dict('records')
+        for idx, row in enumerate(tipos_metricas):
+            with [col1, col2, col3][idx % 3]:
+                st.metric(
+                    label=row['Tipo de agenda'],
+                    value=f"{row['Total registros']} registros",
+                    delta=f"{row['Agendas únicas']} agendas únicas"
+                )
+        
+        st.dataframe(resumen_tipos, use_container_width=True, hide_index=True)
+        
+    else:
+        st.info("No se encontraron agendas de tipo CAI, Vacunación o Enfermería con los filtros aplicados.")
 
 with tab5:
     st.header("Tabla completa de agendas")
