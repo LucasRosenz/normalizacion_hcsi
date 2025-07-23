@@ -8,7 +8,8 @@ def analizar_asignaciones_incorrectas():
     puede estar tomando horarios de agendas posteriores incorrectamente
     """
     # Leer el CSV consolidado
-    df = pd.read_csv('agendas_consolidadas.csv')
+    archivo_csv = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'datos', 'csv_procesado', 'agendas_consolidadas.csv')
+    df = pd.read_csv(archivo_csv)
     
     print("=== ANÁLISIS DE ASIGNACIONES INCORRECTAS ===\n")
     
