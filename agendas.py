@@ -403,7 +403,7 @@ class AgendaNormalizer:
     
     def _procesar_archivo_hcsi_csv(self, archivo_path: str) -> pd.DataFrame:
         """
-        Procesa el archivo CSV del Hospital de Clínicas San Ignacio (HCSI)
+        Procesa el archivo CSV del HCSI
         que tiene formato tabular con columnas: Especialidad, Profesional, Dia, Horario, TipoTurno
         """
         try:
@@ -459,7 +459,7 @@ class AgendaNormalizer:
                 nombre_agenda = " - ".join(nombre_agenda_partes)
                 
                 # Generar ID único
-                agenda_id = f"Hospital de Clínicas San Ignacio_{agenda_id_counter:03d}_{especialidad}"
+                agenda_id = f"HCSI_{agenda_id_counter:03d}_{especialidad}"
                 
                 # Normalizar tipo de turno
                 tipo_turno_normalizado = ""
@@ -494,7 +494,7 @@ class AgendaNormalizer:
                     'dia': dia,
                     'hora_inicio': hora_inicio,
                     'hora_fin': hora_fin,
-                    'efector': 'Hospital de Clínicas San Ignacio'
+                    'efector': 'HCSI'
                 }
                 
                 registros.append(registro)
@@ -512,7 +512,7 @@ class AgendaNormalizer:
         
         # Patrones específicos - ORDEN IMPORTANTE: más específicos primero
         if 'HCSI' in nombre_upper:
-            return 'Hospital de Clínicas San Ignacio'
+            return 'HCSI'
         elif 'HOSPITAL BOULOGNE' in nombre_upper:
             return 'Hospital Boulogne'
         elif 'HOSPITAL MATERNO' in nombre_upper:

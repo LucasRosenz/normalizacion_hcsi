@@ -13,6 +13,84 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# CSS personalizado para mejorar la estética
+st.markdown("""
+<style>
+    /* Mejoras para el sidebar */
+    .css-1d391kg {
+        background-color: #f8f9fa;
+    }
+    
+    /* Estilo para los checkboxes */
+    .stCheckbox > label > div[data-testid="stCheckbox"] > div {
+        background-color: #ffffff;
+        border: 2px solid #dee2e6;
+        border-radius: 6px;
+    }
+    
+    .stCheckbox > label > div[data-testid="stCheckbox"] > div:hover {
+        border-color: #0066cc;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Botones de control más atractivos */
+    .stButton > button {
+        background-color: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 12px;
+        padding: 0.25rem 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .stButton > button:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Métricas más llamativas */
+    .metric-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+    
+    /* Separadores más elegantes */
+    hr {
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #dee2e6, transparent);
+        margin: 1rem 0;
+    }
+    
+    /* Títulos más llamativos */
+    .sidebar-title {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Contador de filtros */
+    .filter-count {
+        background-color: #e7f3ff;
+        border: 1px solid #b6d7ff;
+        border-radius: 15px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+        color: #0066cc;
+        margin: 0.25rem 0;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Título principal
 st.title("Agendas salud")
 st.markdown("### Dashboard interactivo para visualización de horarios")
@@ -44,51 +122,117 @@ if df.empty:
     st.error("No se pudieron cargar los datos. Verifica que existe el archivo datos/csv_procesado/agendas_consolidadas.csv")
     st.stop()
 
-# Sidebar con filtros
-st.sidebar.header("Filtros")
+# Sidebar con filtros modernos y eficientes
+st.sidebar.markdown("### 🎯 Filtros")
 
-# Filtro por efector
-efectores_disponibles = ['Todos'] + sorted(df['efector'].unique().tolist())
-efector_seleccionado = st.sidebar.selectbox(
-    "Hospital/CAPS:",
-    efectores_disponibles
+# Obtener listas de opciones disponibles
+efectores_disponibles = sorted(df['efector'].unique().tolist())
+areas_disponibles = sorted(df['area'].unique().tolist())
+dias_disponibles = sorted(df['dia'].unique().tolist())
+tipos_turno_disponibles = sorted(df[df['tipo_turno'] != 'No especificado']['tipo_turno'].unique().tolist())
+
+# Inicializar session state para los filtros si no existe
+if 'efectores_selected' not in st.session_state:
+    st.session_state.efectores_selected = set(efectores_disponibles)
+if 'areas_selected' not in st.session_state:
+    st.session_state.areas_selected = set(areas_disponibles)
+if 'dias_selected' not in st.session_state:
+    st.session_state.dias_selected = set(dias_disponibles)
+if 'tipos_turno_selected' not in st.session_state:
+    st.session_state.tipos_turno_selected = set(tipos_turno_disponibles)
+
+# Función para crear filtro con estilo de tags/chips
+def crear_filtro_tags(titulo, opciones, clave_session, icono=""):
+    st.sidebar.markdown(f"<div class='sidebar-title'>{icono} {titulo}</div>", unsafe_allow_html=True)
+    
+    # Botones de control compactos
+    col1, col2, col3 = st.sidebar.columns(3)
+    with col1:
+        if st.button("✅", key=f"all_{clave_session}", help="Todos", use_container_width=True):
+            st.session_state[clave_session] = set(opciones)
+            st.rerun()
+    with col2:
+        if st.button("❌", key=f"none_{clave_session}", help="Ninguno", use_container_width=True):
+            st.session_state[clave_session] = set()
+            st.rerun()
+    with col3:
+        if st.button("🔄", key=f"toggle_{clave_session}", help="Invertir", use_container_width=True):
+            st.session_state[clave_session] = set(opciones) - st.session_state[clave_session]
+            st.rerun()
+    
+    # Contador con estilo
+    seleccionados = len(st.session_state[clave_session])
+    total = len(opciones)
+    st.sidebar.markdown(f"<div class='filter-count'>{seleccionados}/{total} seleccionados</div>", unsafe_allow_html=True)
+    
+    # Contenedor scrolleable más eficiente
+    max_height = min(200, len(opciones) * 30)  # Altura dinámica
+    
+    # Crear grid de opciones más compacto
+    opciones_por_grupo = 3  # Mostrar hasta 3 opciones por fila para centros pequeños
+    
+    for i in range(0, len(opciones), opciones_por_grupo):
+        grupo = opciones[i:i+opciones_por_grupo]
+        cols = st.sidebar.columns(len(grupo))
+        
+        for j, opcion in enumerate(grupo):
+            with cols[j]:
+                is_selected = opcion in st.session_state[clave_session]
+                
+                # Etiqueta ultra-compacta
+                label = opcion.replace('CAPS ', '').replace('Hospital ', 'H.')
+                if len(label) > 12:
+                    label = label[:10] + "..."
+                
+                # Checkbox compacto
+                if st.checkbox(
+                    label,
+                    value=is_selected,
+                    key=f"tag_{clave_session}_{i}_{j}",
+                    help=opcion
+                ):
+                    st.session_state[clave_session].add(opcion)
+                else:
+                    st.session_state[clave_session].discard(opcion)
+    
+    st.sidebar.markdown("<hr>", unsafe_allow_html=True)
+    return list(st.session_state[clave_session])
+
+# Crear filtros con la nueva función optimizada
+efectores_seleccionados = crear_filtro_tags(
+    "Centros de Salud", efectores_disponibles, "efectores_selected", "🏥"
 )
 
-# Filtro por área médica
-areas_disponibles = ['Todas'] + sorted(df['area'].unique().tolist())
-area_seleccionada = st.sidebar.selectbox(
-    "Área:",
-    areas_disponibles
+areas_seleccionadas = crear_filtro_tags(
+    "Áreas Médicas", areas_disponibles, "areas_selected", "🩺"
 )
 
-# Filtro por día de la semana
-dias_disponibles = ['Todos'] + sorted(df['dia'].unique().tolist())
-dia_seleccionado = st.sidebar.selectbox(
-    "Día:",
-    dias_disponibles
+dias_seleccionados = crear_filtro_tags(
+    "Días de la Semana", dias_disponibles, "dias_selected", "📅"
 )
 
-# Filtro por tipo de turno
-tipos_turno_disponibles = ['Todos'] + sorted(df[df['tipo_turno'] != 'No especificado']['tipo_turno'].unique().tolist())
-tipo_turno_seleccionado = st.sidebar.selectbox(
-    "Tipo de agenda:",
-    tipos_turno_disponibles
+tipos_turno_seleccionados = crear_filtro_tags(
+    "Tipos de Agenda", tipos_turno_disponibles, "tipos_turno_selected", "⏰"
 )
 
 # Aplicar filtros
 df_filtrado = df.copy()
 
-if efector_seleccionado != 'Todos':
-    df_filtrado = df_filtrado[df_filtrado['efector'] == efector_seleccionado]
+# Filtrar por efectores seleccionados (si hay alguno seleccionado)
+if efectores_seleccionados:
+    df_filtrado = df_filtrado[df_filtrado['efector'].isin(efectores_seleccionados)]
 
-if area_seleccionada != 'Todas':
-    df_filtrado = df_filtrado[df_filtrado['area'] == area_seleccionada]
+# Filtrar por áreas seleccionadas (si hay alguna seleccionada)
+if areas_seleccionadas:
+    df_filtrado = df_filtrado[df_filtrado['area'].isin(areas_seleccionadas)]
 
-if dia_seleccionado != 'Todos':
-    df_filtrado = df_filtrado[df_filtrado['dia'] == dia_seleccionado]
+# Filtrar por días seleccionados (si hay alguno seleccionado)
+if dias_seleccionados:
+    df_filtrado = df_filtrado[df_filtrado['dia'].isin(dias_seleccionados)]
 
-if tipo_turno_seleccionado != 'Todos':
-    df_filtrado = df_filtrado[df_filtrado['tipo_turno'] == tipo_turno_seleccionado]
+# Filtrar por tipos de turno seleccionados (si hay alguno seleccionado)
+if tipos_turno_seleccionados:
+    df_filtrado = df_filtrado[df_filtrado['tipo_turno'].isin(tipos_turno_seleccionados)]
 
 # Métricas principales
 col1, col2, col3, col4 = st.columns(4)
@@ -831,16 +975,38 @@ with tab7:
         # Mostrar estado de filtros aplicados
         st.subheader("Estado de filtros aplicados")
         
-        # Crear un resumen visual de los filtros activos
+        # Crear un resumen visual de los filtros activos con mejor formato
         filtros_activos = []
-        if efector_seleccionado != 'Todos':
-            filtros_activos.append(f"**Hospital/CAPS:** {efector_seleccionado}")
-        if area_seleccionada != 'Todas':
-            filtros_activos.append(f"**Área:** {area_seleccionada}")
-        if dia_seleccionado != 'Todos':
-            filtros_activos.append(f"**Día:** {dia_seleccionado}")
-        if tipo_turno_seleccionado != 'Todos':
-            filtros_activos.append(f"**Tipo de agenda:** {tipo_turno_seleccionado}")
+        
+        # Calcular totales disponibles
+        total_efectores = len(efectores_disponibles)
+        total_areas = len(areas_disponibles) 
+        total_dias = len(dias_disponibles)
+        total_tipos = len(tipos_turno_disponibles)
+        
+        if len(efectores_seleccionados) < total_efectores:
+            if len(efectores_seleccionados) == 1:
+                filtros_activos.append(f"🏥 **Centro:** {efectores_seleccionados[0]}")
+            else:
+                filtros_activos.append(f"🏥 **Centros:** {len(efectores_seleccionados)}/{total_efectores} seleccionados")
+        
+        if len(areas_seleccionadas) < total_areas:
+            if len(areas_seleccionadas) == 1:
+                filtros_activos.append(f"🩺 **Área:** {areas_seleccionadas[0]}")
+            else:
+                filtros_activos.append(f"🩺 **Áreas:** {len(areas_seleccionadas)}/{total_areas} seleccionadas")
+        
+        if len(dias_seleccionados) < total_dias:
+            if len(dias_seleccionados) == 1:
+                filtros_activos.append(f"📅 **Día:** {dias_seleccionados[0]}")
+            else:
+                filtros_activos.append(f"📅 **Días:** {len(dias_seleccionados)}/{total_dias} seleccionados")
+        
+        if len(tipos_turno_seleccionados) < total_tipos:
+            if len(tipos_turno_seleccionados) == 1:
+                filtros_activos.append(f"⏰ **Tipo:** {tipos_turno_seleccionados[0]}")
+            else:
+                filtros_activos.append(f"⏰ **Tipos:** {len(tipos_turno_seleccionados)}/{total_tipos} seleccionados")
         
         if filtros_activos:
             st.info("**Filtros activos desde la barra lateral:**\n\n" + " • ".join(filtros_activos))
