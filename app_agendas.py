@@ -86,7 +86,7 @@ efector_seleccionado = st.sidebar.selectbox(
 )
 
 # Filtro por área médica
-areas_disponibles = ['Todas'] + sorted(df['area'].unique().tolist())
+areas_disponibles = ['Todas', 'Sin área'] + sorted(df['area'].unique().tolist())
 area_seleccionada = st.sidebar.selectbox(
     "Área:",
     areas_disponibles
@@ -116,7 +116,14 @@ df_filtrado = df.copy()
 if efector_seleccionado != 'Todos':
     df_filtrado = df_filtrado[df_filtrado['efector'] == efector_seleccionado]
 
-if area_seleccionada != 'Todas':
+if area_seleccionada == 'Sin área':
+    # Filtrar registros sin área o con valores considerados "sin asignar"
+    valores_sin_area = ['Sin área', '', 'nan', None]
+    mask_sin_area = df_filtrado['area'].isin(valores_sin_area) | \
+                   df_filtrado['area'].isna() | \
+                   (df_filtrado['area'].astype(str).str.strip() == '')
+    df_filtrado = df_filtrado[mask_sin_area]
+elif area_seleccionada != 'Todas':
     df_filtrado = df_filtrado[df_filtrado['area'] == area_seleccionada]
 
 if dia_seleccionado != 'Todos':
@@ -734,41 +741,41 @@ with tab5:
 with tab6:
     st.header("Vista calendario - agenda semanal")
     
-    # Selectores específicos para la vista calendario
-    st.subheader("Configuración de vista")
+    # Usar los filtros globales aplicados
+    df_calendario = df_filtrado.copy()
     
-    col1, col2 = st.columns(2)
+    # Verificar si se puede mostrar calendario
+    if df_calendario.empty:
+        st.warning("No hay datos disponibles con los filtros aplicados. Ajusta los filtros en la barra lateral.")
+        st.stop()
     
-    with col1:
-        # Selector de hospital específico (obligatorio)
-        efectores_calendario = sorted(df['efector'].unique().tolist())
-        efector_calendario = st.selectbox(
-            "Hospital/CAPS:",
-            efectores_calendario,
-            key="efector_calendario"
-        )
-    
-    with col2:
-        # Selector de área específica (obligatorio)
-        df_efector = df[df['efector'] == efector_calendario]
-        areas_calendario = sorted(df_efector['area'].unique().tolist())
-        
-        if areas_calendario:
-            area_calendario = st.selectbox(
-                "Especialidad:",
-                areas_calendario,
-                key="area_calendario"
-            )
+    # Determinar qué está siendo mostrado basado en los filtros globales
+    if area_seleccionada == 'Todas':
+        if efector_seleccionado == 'Todos':
+            titulo_vista = "Mostrando agendas de **todos los centros y especialidades**"
         else:
-            st.warning("No hay especialidades disponibles para este centro de salud.")
-            st.stop()
+            titulo_vista = f"Mostrando agendas de **{efector_seleccionado}** - todas las especialidades"
+    else:
+        if efector_seleccionado == 'Todos':
+            titulo_vista = f"Mostrando agendas de **{area_seleccionada}** en todos los centros"
+        else:
+            titulo_vista = f"Mostrando agendas de **{area_seleccionada}** en **{efector_seleccionado}**"
     
-    # Filtrar datos para la vista calendario
-    df_calendario = df[(df['efector'] == efector_calendario) & (df['area'] == area_calendario)]
+    st.success(titulo_vista)
+    
+    # Mostrar información sobre "Sin área asignada" si aplica
+    if area_seleccionada == 'Todas':
+        # Verificar si hay registros sin área en los datos filtrados
+        valores_sin_area = ['Sin área', '', 'nan', None]
+        mask_sin_area = df_calendario['area'].isin(valores_sin_area) | \
+                       df_calendario['area'].isna() | \
+                       (df_calendario['area'].astype(str).str.strip() == '')
+        registros_sin_area = df_calendario[mask_sin_area]
+        
+        if not registros_sin_area.empty:
+            st.info(f"Se encontraron {len(registros_sin_area)} registros sin área asignada. Para verlos específicamente, selecciona 'Sin área' en el filtro de Área.")
     
     if not df_calendario.empty:
-        st.success(f"Mostrando agenda de **{area_calendario}** en **{efector_calendario}**")
-        
         # Métricas específicas del calendario
         col1, col2, col3, col4 = st.columns(4)
         
@@ -829,6 +836,7 @@ with tab6:
                     hora_inicio = turno['hora_inicio']
                     hora_fin = turno['hora_fin']
                     tipo_turno = turno['tipo_turno'] if turno['tipo_turno'] != 'No especificado' else ''
+                    nombre_original = turno['nombre_original_agenda']
                     
                     # Color basado en el tipo de turno - colores más profesionales y legibles
                     color_config = {
@@ -840,6 +848,13 @@ with tab6:
                     }
                     
                     config = color_config.get(tipo_turno, {'bg': '#f5f5f5', 'border': '#757575', 'text': '#424242'})
+                    
+                    # Determinar qué mostrar: si es "Sin área", mostrar nombre original
+                    if area_seleccionada == 'Sin área':
+                        # Mostrar nombre original de la agenda
+                        contenido_agenda = f'<div style="margin-bottom: 2px; font-weight: bold; font-size: 12px;">{nombre_original}</div>'
+                    else:
+                        contenido_agenda = ''
                     
                     # Crear tarjeta del turno
                     st.markdown(
@@ -857,6 +872,7 @@ with tab6:
                             <div style="font-weight: bold; margin-bottom: 4px;">
                                 {hora_inicio} - {hora_fin}
                             </div>
+                            {contenido_agenda}
                             <div style="margin-bottom: 2px;">
                                 <strong>Dr.</strong> {doctor}
                             </div>
@@ -898,6 +914,19 @@ with tab6:
                 mostrar_leyenda = doctor not in doctores_en_leyenda
                 doctores_en_leyenda.add(doctor)
                 
+                # Crear hovertemplate dinámico
+                if area_seleccionada == 'Sin área':
+                    hovertemplate = f"<b>{doctor}</b><br>" + \
+                                  f"Agenda: {turno['nombre_original_agenda']}<br>" + \
+                                  f"Día: {turno['dia']}<br>" + \
+                                  f"Horario: {turno['hora_inicio']} - {turno['hora_fin']}<br>" + \
+                                  f"Tipo: {turno['tipo_turno']}<extra></extra>"
+                else:
+                    hovertemplate = f"<b>{doctor}</b><br>" + \
+                                  f"Día: {turno['dia']}<br>" + \
+                                  f"Horario: {turno['hora_inicio']} - {turno['hora_fin']}<br>" + \
+                                  f"Tipo: {turno['tipo_turno']}<extra></extra>"
+                
                 fig_timeline.add_trace(go.Scatter(
                     x=[turno['hora_inicio_num'], turno['hora_fin_num'], turno['hora_fin_num'], turno['hora_inicio_num'], turno['hora_inicio_num']],
                     y=[turno['dia'], turno['dia'], turno['dia'], turno['dia'], turno['dia']],
@@ -905,15 +934,27 @@ with tab6:
                     fillcolor=color,
                     line=dict(color=color, width=2),
                     name=doctor,
-                    hovertemplate=f"<b>{doctor}</b><br>" +
-                                f"Día: {turno['dia']}<br>" +
-                                f"Horario: {turno['hora_inicio']} - {turno['hora_fin']}<br>" +
-                                f"Tipo: {turno['tipo_turno']}<extra></extra>",
+                    hovertemplate=hovertemplate,
                     showlegend=mostrar_leyenda
                 ))
         
+        # Preparar título para el timeline
+        if area_seleccionada == 'Sin área':
+            titulo_area = 'Sin área asignada'
+        elif area_seleccionada == 'Todas':
+            titulo_area = 'Todas las especialidades'
+        else:
+            titulo_area = area_seleccionada
+            
+        if efector_seleccionado == 'Todos':
+            titulo_efector = 'Todos los centros'
+        else:
+            titulo_efector = efector_seleccionado
+            
+        titulo_timeline = f"Timeline de horarios - {titulo_area} ({titulo_efector})"
+        
         fig_timeline.update_layout(
-            title=f"Timeline de horarios - {area_calendario} ({efector_calendario})",
+            title=titulo_timeline,
             xaxis_title="Hora del día",
             yaxis_title="Día de la semana",
             height=400,
@@ -967,8 +1008,8 @@ with tab6:
             st.markdown("**SOBRETURNO** (Verde)")
         
     else:
-        st.warning(f"No se encontraron agendas para **{area_calendario}** en **{efector_calendario}**")
-        st.info("Intenta seleccionar otra combinación de hospital y especialidad.")
+        st.warning("No se encontraron agendas con los filtros aplicados.")
+        st.info("Intenta ajustar los filtros en la barra lateral.")
 
 with tab7:
     st.header("Gestión")
