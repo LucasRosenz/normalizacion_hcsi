@@ -327,7 +327,8 @@ with tab3:
             'hora_inicio': lambda x: ', '.join(sorted(set(x.astype(str)))),
             'hora_fin': lambda x: ', '.join(sorted(set(x.astype(str)))),
             'efector': lambda x: ', '.join(set(x)),
-            'area': lambda x: ', '.join(set(x))
+            'area': lambda x: ', '.join(set(x)),
+            'tipo_turno': lambda x: ', '.join(set(x))
         }).reset_index()
         
         st.subheader(f"Horarios de {doctor_seleccionado}")
@@ -992,6 +993,10 @@ with tab7:
                 'tipo_conflicto': 'Tipos de conflicto'
             })
             resumen_conflictos['Total conflictos'] = df_superposiciones['medico'].value_counts()
+            
+            # Agregar información de tipos de agenda para cada médico con conflictos
+            tipos_agenda_por_medico = df_gerencial[df_gerencial['doctor'].isin(df_superposiciones['medico'].unique())].groupby('doctor')['tipo_turno'].apply(lambda x: ', '.join(sorted(set(x)))).to_dict()
+            resumen_conflictos['Tipos de agenda'] = resumen_conflictos.index.map(tipos_agenda_por_medico)
             
             st.dataframe(resumen_conflictos, use_container_width=True)
             
