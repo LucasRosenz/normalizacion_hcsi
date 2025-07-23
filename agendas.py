@@ -153,7 +153,7 @@ class AgendaNormalizer:
         # Buscar tipo de turno - patrones mejorados
         tipo_patterns = {
             'GUARDIA': r'\bGUARDIA\b|\bGUARDIA\s+MEDICA\b|\bGUARDIAS\b',
-            'ESPONTANEA': r'\bESPONTANEA\b|\bESPONTÁNEA\b|\bESPONTÃ_x0081_NEA\b',
+            'CAI/Espontánea': r'\bESPONTANEA\b|\bESPONTÁNEA\b|\bESPONTÃ_x0081_NEA\b|\bCAI\b',
             'PROGRAMADA': r'\bPROGRAMADA\b|\bTURNO\s+PROGRAMADO\b|\bPROGRAMADO\b',
             'SOBRETURNO': r'\bSOBRETURNO\b|\bSOBRETURNOS\b',
             'URGENCIA': r'\bURGENCIA\b|\bURGENTE\b',
@@ -162,8 +162,7 @@ class AgendaNormalizer:
             'CONSULTA EXTERNA': r'\bCONSULTA\s+EXTERNA\b|\bEXTERNA\b',
             'TRATAMIENTO': r'\bTRATAMIENTO\b',
             'GENERAL': r'\bGENERAL\b',
-            'PAP': r'\bPAP\b',
-            'CAI': r'\bCAI\b'
+            'PAP': r'\bPAP\b'
         }
         
         for tipo_nombre, pattern in tipo_patterns.items():
@@ -467,7 +466,7 @@ class AgendaNormalizer:
                 if tipo_turno_raw.upper() == "PROGRAMADO":
                     tipo_turno_normalizado = "PROGRAMADA"
                 elif tipo_turno_raw.upper() in ["ESPONTANEO", "ESPONTÁNEO"]:
-                    tipo_turno_normalizado = "ESPONTANEA"
+                    tipo_turno_normalizado = "CAI/Espontánea"
                 else:
                     tipo_turno_normalizado = tipo_turno_raw.upper()
                 
