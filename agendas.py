@@ -135,7 +135,10 @@ class AgendaNormalizer:
                     'EN PSICOLOGIA', 'EN NUTRICION', 'EN TRABAJO', 'EN KINESIOLOGIA',
                     'LICENCIADA', 'LICENCIADO', 'MEDICO', 'MEDICA', 'AGENDA SÁBADOS',
                     'AGENDA SABADOS', 'RESIDENTE', 'AGENDA', 'ESPONTANEA', 'AGENDA BIS',
-                    'BIS', 'DIU', 'IMPLANTE', 'EXTRACCION', 'COLOCACION', 'REUNION EQUIPO'
+                    'BIS', 'DIU', 'IMPLANTE', 'EXTRACCION', 'COLOCACION', 'REUNION EQUIPO',
+                    'ADULTOS', 'ADULTO', 'INFANTIL', 'INFANTILES', 'NINOS', 'NIÑOS',
+                    'ADOLESCENTES', 'DISCAPACIDAD', 'REHABILITACION', 'REHABILITACIÓN',
+                    'PEDIATRICA', 'PEDIÁTRICA', 'CLINICA', 'CLÍNICA', 'EXTERNA'
                 ]
                 # Solo excluir si el nombre candidato es exactamente una de estas palabras o si es muy corto
                 if nombre_candidato.strip() and len(nombre_candidato.strip()) > 2:
