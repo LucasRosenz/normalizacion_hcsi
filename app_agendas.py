@@ -429,9 +429,14 @@ with tab4:
         'area': lambda x: x.nunique()
     })
     
-    # Calcular agendas únicas por separado
+    # Calcular agendas únicas por separado y convertir a DataFrame
     agendas_por_efector = df_filtrado.groupby('efector').apply(contar_agendas_unicas_por_efector)
-    metricas_efector['Total agendas'] = agendas_por_efector
+    
+    # Crear DataFrame con las agendas por efector
+    if not agendas_por_efector.empty:
+        metricas_efector = metricas_efector.join(agendas_por_efector.rename('Total agendas'))
+    else:
+        metricas_efector['Total agendas'] = 0
     
     metricas_efector = metricas_efector.rename(columns={
         'doctor': 'Médicos',
@@ -741,39 +746,74 @@ with tab5:
 with tab6:
     st.header("Vista calendario - agenda semanal")
     
-    # Usar los filtros globales aplicados
-    df_calendario = df_filtrado.copy()
+    # Validar que se haya seleccionado exactamente 1 centro y 1 área
+    condiciones_calendario = []
     
-    # Verificar si se puede mostrar calendario
-    if df_calendario.empty:
-        st.warning("No hay datos disponibles con los filtros aplicados. Ajusta los filtros en la barra lateral.")
+    if efector_seleccionado == 'Todos':
+        condiciones_calendario.append("Debe seleccionar **1 centro específico** (no 'Todos')")
+    
+    if area_seleccionada == 'Todas':
+        condiciones_calendario.append("Debe seleccionar **1 área específica** (no 'Todas')")
+    
+    if condiciones_calendario:
+        st.warning("Para visualizar el calendario debe seleccionar exactamente 1 centro y 1 área específicos.")
+        st.info("**Requisitos para usar el calendario:**")
+        for condicion in condiciones_calendario:
+            st.write(f"• {condicion}")
+        st.info("📍 **Ajusta los filtros en la barra lateral** para cumplir estos requisitos.")
         st.stop()
     
-    # Determinar qué está siendo mostrado basado en los filtros globales
-    if area_seleccionada == 'Todas':
-        if efector_seleccionado == 'Todos':
-            titulo_vista = "Mostrando agendas de **todos los centros y especialidades**"
-        else:
-            titulo_vista = f"Mostrando agendas de **{efector_seleccionado}** - todas las especialidades"
-    else:
-        if efector_seleccionado == 'Todos':
-            titulo_vista = f"Mostrando agendas de **{area_seleccionada}** en todos los centros"
-        else:
-            titulo_vista = f"Mostrando agendas de **{area_seleccionada}** en **{efector_seleccionado}**"
+    # Si llegamos aquí, tenemos exactamente 1 centro y 1 área seleccionados
+    df_calendario = df_filtrado.copy()
     
+    # Verificar si hay datos con los filtros aplicados
+    if df_calendario.empty:
+        st.error(f"❌ **No hay datos disponibles**")
+        st.markdown(f"""
+        **Consulta realizada:**
+        - **Centro:** {efector_seleccionado}
+        - **Área:** {area_seleccionada}
+        - **Día:** {dia_seleccionado}
+        - **Tipo de agenda:** {tipo_turno_seleccionado}
+        """)
+        
+        # Sugerencias específicas según el caso
+        if area_seleccionada == 'Sin área':
+            st.info("""
+            **💡 Sugerencias para "Sin área":**
+            • Esta opción muestra agendas que no tienen área asignada
+            • Verifica que el centro seleccionado tenga agendas sin área asignada
+            • Intenta cambiar los filtros de día o tipo de agenda
+            """)
+        else:
+            # Verificar si el área existe en el centro
+            areas_en_centro = df[df['efector'] == efector_seleccionado]['area'].unique()
+            if area_seleccionada not in areas_en_centro:
+                st.warning(f"⚠️ **El área '{area_seleccionada}' no existe en '{efector_seleccionado}'**")
+                st.info("📍 **Áreas disponibles en este centro:**")
+                areas_validas = [area for area in areas_en_centro if area not in ['Sin área', '', 'nan']]
+                if areas_validas:
+                    for area in sorted(areas_validas):
+                        st.write(f"• {area}")
+                else:
+                    st.write("• No hay áreas válidas en este centro")
+            else:
+                st.info("""
+                **💡 Sugerencias:**
+                • Intenta cambiar el filtro de día (selecciona 'Todos')
+                • Intenta cambiar el filtro de tipo de agenda (selecciona 'Todos')
+                • Verifica que haya agendas activas para esta combinación
+                """)
+        
+        st.stop()
+    
+    # Mostrar información de lo que se está visualizando
+    titulo_vista = f"Calendario de **{area_seleccionada}** en **{efector_seleccionado}**"
     st.success(titulo_vista)
     
-    # Mostrar información sobre "Sin área asignada" si aplica
-    if area_seleccionada == 'Todas':
-        # Verificar si hay registros sin área en los datos filtrados
-        valores_sin_area = ['Sin área', '', 'nan', None]
-        mask_sin_area = df_calendario['area'].isin(valores_sin_area) | \
-                       df_calendario['area'].isna() | \
-                       (df_calendario['area'].astype(str).str.strip() == '')
-        registros_sin_area = df_calendario[mask_sin_area]
-        
-        if not registros_sin_area.empty:
-            st.info(f"Se encontraron {len(registros_sin_area)} registros sin área asignada. Para verlos específicamente, selecciona 'Sin área' en el filtro de Área.")
+    # Mostrar información adicional si es "Sin área"
+    if area_seleccionada == 'Sin área':
+        st.info("Se están mostrando agendas sin área asignada. Los nombres originales aparecen en las tarjetas.")
     
     if not df_calendario.empty:
         # Métricas específicas del calendario
@@ -841,6 +881,7 @@ with tab6:
                     # Color basado en el tipo de turno - colores más profesionales y legibles
                     color_config = {
                         'PROGRAMADA': {'bg': '#e8f4f8', 'border': '#1976d2', 'text': '#0d47a1'},
+                        'CAI/Espontánea': {'bg': '#fff8e1', 'border': '#f57c00', 'text': '#e65100'},
                         'ESPONTANEA': {'bg': '#fff8e1', 'border': '#f57c00', 'text': '#e65100'},
                         'URGENCIA': {'bg': '#ffebee', 'border': '#d32f2f', 'text': '#b71c1c'},
                         'CONTROL': {'bg': '#f3e5f5', 'border': '#7b1fa2', 'text': '#4a148c'},
@@ -850,37 +891,26 @@ with tab6:
                     config = color_config.get(tipo_turno, {'bg': '#f5f5f5', 'border': '#757575', 'text': '#424242'})
                     
                     # Determinar qué mostrar: si es "Sin área", mostrar nombre original
+                    contenido_agenda = ""
                     if area_seleccionada == 'Sin área':
-                        # Mostrar nombre original de la agenda
-                        contenido_agenda = f'<div style="margin-bottom: 2px; font-weight: bold; font-size: 12px;">{nombre_original}</div>'
-                    else:
-                        contenido_agenda = ''
+                        contenido_agenda = nombre_original
                     
-                    # Crear tarjeta del turno
-                    st.markdown(
-                        f"""
-                        <div style="
-                            background-color: {config['bg']};
-                            color: {config['text']};
-                            padding: 12px;
-                            border-radius: 6px;
-                            border-left: 4px solid {config['border']};
-                            margin-bottom: 10px;
-                            font-size: 13px;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        ">
-                            <div style="font-weight: bold; margin-bottom: 4px;">
-                                {hora_inicio} - {hora_fin}
-                            </div>
-                            {contenido_agenda}
-                            <div style="margin-bottom: 2px;">
-                                <strong>Dr.</strong> {doctor}
-                            </div>
-                            {f'<div style="font-size: 11px; opacity: 0.8;">{tipo_turno}</div>' if tipo_turno else ''}
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
+                    # Crear tarjeta del turno usando HTML más simple
+                    tarjeta_html = f"""
+                    <div style="background-color: {config['bg']}; color: {config['text']}; padding: 12px; border-radius: 6px; border-left: 4px solid {config['border']}; margin-bottom: 10px; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="font-weight: bold; margin-bottom: 4px;">{hora_inicio} - {hora_fin}</div>"""
+                    
+                    if contenido_agenda:
+                        tarjeta_html += f"""<div style="margin-bottom: 2px; font-weight: bold; font-size: 12px;">{contenido_agenda}</div>"""
+                    
+                    tarjeta_html += f"""<div style="margin-bottom: 2px;"><strong>Dr.</strong> {doctor}</div>"""
+                    
+                    if tipo_turno:
+                        tarjeta_html += f"""<div style="font-size: 11px; opacity: 0.8;">{tipo_turno}</div>"""
+                    
+                    tarjeta_html += "</div>"
+                    
+                    st.markdown(tarjeta_html, unsafe_allow_html=True)
         
         st.markdown("---")
         
