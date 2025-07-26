@@ -1,0 +1,231 @@
+with tab7:
+    st.header("Gestión")
+    
+    # Sistema de autenticación
+    if 'authenticated_gerencial' not in st.session_state:
+        st.session_state.authenticated_gerencial = False
+    
+    if not st.session_state.authenticated_gerencial:
+        st.info("Esta sección requiere autenticación")
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            password_input = st.text_input(
+                "Contraseña:", 
+                type="password",
+                key="password_gerencial"
+            )
+            
+            col_btn1, col_btn2 = st.columns(2)
+            with col_btn1:
+                if st.button("Ingresar", type="primary", use_container_width=True):
+                    # Contraseña
+                    if password_input == "maxisalas":
+                        st.session_state.authenticated_gerencial = True
+                        st.rerun()
+                    else:
+                        st.error("Contraseña incorrecta")
+            
+            with col_btn2:
+                if st.button("Cancelar", use_container_width=True):
+                    st.session_state.password_gerencial = ""
+        
+        
+    else:
+        # Botón de logout
+        col1, col2, col3 = st.columns([4, 1, 1])
+        with col3:
+            if st.button("Cerrar sesión"):
+                st.session_state.authenticated_gerencial = False
+                st.rerun()
+        
+        st.success("Acceso autorizado")
+        
+        # Mostrar estado de filtros aplicados
+        st.subheader("Estado de filtros aplicados")
+        
+        # Crear un resumen visual de los filtros activos
+        filtros_activos = []
+        if efector_seleccionado != 'Todos':
+            filtros_activos.append(f"**Hospital/CAPS:** {efector_seleccionado}")
+        if area_seleccionada != 'Todas':
+            filtros_activos.append(f"**Área:** {area_seleccionada}")
+        if dia_seleccionado != 'Todos':
+            filtros_activos.append(f"**Día:** {dia_seleccionado}")
+        if tipo_turno_seleccionado != 'Todos':
+            filtros_activos.append(f"**Tipo de agenda:** {tipo_turno_seleccionado}")
+        
+        if filtros_activos:
+            st.info("**Filtros activos desde la barra lateral:**\n\n" + " • ".join(filtros_activos))
+        else:
+            st.info("**Mostrando todos los datos** (sin filtros aplicados)")
+        
+        # Filtro adicional específico para gestión
+        st.subheader("Filtro adicional de gestión")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            # Filtro por médico específico (usando datos ya filtrados)
+            medicos_gerencial = ['Todos'] + sorted(df_filtrado[df_filtrado['doctor'] != 'Sin asignar']['doctor'].unique().tolist())
+            medico_gerencial = st.selectbox(
+                "Médico específico:",
+                medicos_gerencial,
+                key="medico_gerencial",
+                help="Filtro adicional que se aplica sobre los filtros de la barra lateral"
+            )
+        
+        with col2:
+            # Mostrar estadísticas de los datos filtrados
+            total_registros_filtrados = len(df_filtrado)
+            medicos_disponibles = len(medicos_gerencial) - 1  # -1 para excluir "Todos"
+            st.metric("Registros filtrados", f"{total_registros_filtrados:,}")
+        
+        with col3:
+            st.metric("Médicos disponibles", f"{medicos_disponibles:,}")
+        
+        # Aplicar filtro adicional de médico específico a los datos ya filtrados
+        df_gerencial = df_filtrado.copy()
+        
+        if medico_gerencial != 'Todos':
+            df_gerencial = df_gerencial[df_gerencial['doctor'] == medico_gerencial]
+            st.success(f"Análisis enfocado en: **{medico_gerencial}**")
+        
+        # NUEVA FUNCIONALIDAD: Análisis de superposición de horarios
+        st.markdown("---")
+        st.subheader("Superposición de horarios")
+        
+        def detectar_superposiciones(df_analisis):
+            """Detecta médicos con horarios superpuestos"""
+            superposiciones = []
+            
+            # Agrupar por médico
+            medicos_horarios = df_analisis[df_analisis['doctor'] != 'Sin asignar'].groupby('doctor')
+            
+            for medico, datos_medico in medicos_horarios:
+                # Convertir horas a formato datetime para comparación
+                datos_medico = datos_medico.copy()
+                datos_medico['hora_inicio_dt'] = pd.to_datetime(datos_medico['hora_inicio'], format='%H:%M', errors='coerce')
+                datos_medico['hora_fin_dt'] = pd.to_datetime(datos_medico['hora_fin'], format='%H:%M', errors='coerce')
+                
+                # Agrupar por día
+                dias_medico = datos_medico.groupby('dia')
+                
+                for dia, horarios_dia in dias_medico:
+                    horarios_dia = horarios_dia.sort_values('hora_inicio_dt')
+                    
+                    # Comparar horarios del mismo día
+                    for i, (idx1, row1) in enumerate(horarios_dia.iterrows()):
+                        for idx2, row2 in horarios_dia.iloc[i+1:].iterrows():
+                            # Verificar superposición
+                            if (row1['hora_inicio_dt'] < row2['hora_fin_dt'] and 
+                                row1['hora_fin_dt'] > row2['hora_inicio_dt']):
+                                
+                                superposiciones.append({
+                                    'medico': medico,
+                                    'dia': dia,
+                                    'centro_1': row1['efector'],
+                                    'area_1': row1['area'],
+                                    'horario_1': f"{row1['hora_inicio']} - {row1['hora_fin']}",
+                                    'tipo_agenda_1': row1['tipo_turno'],
+                                    'centro_2': row2['efector'],
+                                    'area_2': row2['area'],
+                                    'horario_2': f"{row2['hora_inicio']} - {row2['hora_fin']}",
+                                    'tipo_agenda_2': row2['tipo_turno'],
+                                    'tipo_conflicto': 'Mismo centro' if row1['efector'] == row2['efector'] else 'Centros diferentes'
+                                })
+            
+            return pd.DataFrame(superposiciones)
+        
+        # Detectar superposiciones en los datos filtrados
+        df_superposiciones = detectar_superposiciones(df_gerencial)
+        
+        if not df_superposiciones.empty:
+            # Métricas de superposiciones
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                medicos_con_conflictos = df_superposiciones['medico'].nunique()
+                st.metric("Médicos con conflictos", medicos_con_conflictos)
+            
+            with col2:
+                total_conflictos = len(df_superposiciones)
+                st.metric("Total conflictos", total_conflictos)
+            
+            with col3:
+                conflictos_mismo_centro = len(df_superposiciones[df_superposiciones['tipo_conflicto'] == 'Mismo centro'])
+                st.metric("Conflictos mismo centro", conflictos_mismo_centro)
+            
+            with col4:
+                conflictos_centros_diferentes = len(df_superposiciones[df_superposiciones['tipo_conflicto'] == 'Centros diferentes'])
+                st.metric("Conflictos entre centros", conflictos_centros_diferentes)
+            
+            # Tabla de conflictos
+            st.subheader("Detalle de conflictos de horarios")
+            
+            # Aplicar colores según el tipo de conflicto
+            def color_conflictos(val):
+                if val == 'Mismo centro':
+                    return 'background-color: #ffebee'  # Rojo claro
+                elif val == 'Centros diferentes':
+                    return 'background-color: #fff3e0'  # Naranja claro
+                return ''
+            
+            # Renombrar columnas para mejor visualización
+            df_superposiciones_display = df_superposiciones.rename(columns={
+                'medico': 'Médico',
+                'dia': 'Día',
+                'centro_1': 'Centro 1',
+                'area_1': 'Área 1',
+                'horario_1': 'Horario 1',
+                'tipo_agenda_1': 'Tipo Agenda 1',
+                'centro_2': 'Centro 2',
+                'area_2': 'Área 2',
+                'horario_2': 'Horario 2',
+                'tipo_agenda_2': 'Tipo Agenda 2',
+                'tipo_conflicto': 'Tipo de conflicto'
+            })
+            
+            st.dataframe(
+                df_superposiciones_display,
+                use_container_width=True,
+                height=400
+            )
+            
+            # Resumen por médico
+            st.subheader("Resumen de conflictos por médico")
+            resumen_conflictos = df_superposiciones.groupby('medico').agg({
+                'dia': lambda x: ', '.join(sorted(set(x))),
+                'tipo_conflicto': lambda x: ', '.join(set(x))
+            }).rename(columns={
+                'dia': 'Días con conflictos',
+                'tipo_conflicto': 'Tipos de conflicto'
+            })
+            resumen_conflictos['Total conflictos'] = df_superposiciones['medico'].value_counts()
+            
+            # Agregar información de tipos de agenda para cada médico con conflictos
+            tipos_agenda_por_medico = df_gerencial[df_gerencial['doctor'].isin(df_superposiciones['medico'].unique())].groupby('doctor')['tipo_turno'].apply(lambda x: ', '.join(sorted(set(x)))).to_dict()
+            resumen_conflictos['Tipos de agenda'] = resumen_conflictos.index.map(tipos_agenda_por_medico)
+            
+            st.dataframe(resumen_conflictos, use_container_width=True)
+            
+            # Gráfico de conflictos por día
+            if len(df_superposiciones) > 0:
+                conflictos_por_dia = df_superposiciones['dia'].value_counts()
+                
+                fig_conflictos = px.bar(
+                    x=conflictos_por_dia.index,
+                    y=conflictos_por_dia.values,
+                    title="Conflictos de horarios por día de la semana",
+                    labels={'x': 'Día', 'y': 'Número de conflictos'},
+                    color=conflictos_por_dia.values,
+                    color_continuous_scale='Reds'
+                )
+                fig_conflictos.update_layout(height=400, showlegend=False)
+                st.plotly_chart(fig_conflictos, use_container_width=True)
+            
+        else:
+            st.success("No se detectaron conflictos de horarios en los datos filtrados.")
+            st.info("Todos los médicos tienen horarios sin superposiciones.")
+
+# TAB 8: CONTROL DE CALIDAD

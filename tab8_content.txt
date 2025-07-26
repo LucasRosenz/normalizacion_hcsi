@@ -1,0 +1,123 @@
+with tab8:
+    st.header("Control de calidad de datos")
+    
+    # Verificar si existe la columna agenda_id
+    if 'agenda_id' in df.columns:
+        # Métricas generales
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            total_registros = len(df_filtrado)
+            st.metric("Total registros", total_registros)
+        
+        with col2:
+            agendas_unicas_id = df_filtrado['agenda_id'].nunique()
+            st.metric("Agendas únicas (ID)", agendas_unicas_id)
+        
+        with col3:
+            agendas_unicas_nombre = df_filtrado['nombre_original_agenda'].nunique()
+            st.metric("Nombres únicos", agendas_unicas_nombre)
+        
+        with col4:
+            duplicados_detectados = agendas_unicas_id - agendas_unicas_nombre
+            if duplicados_detectados > 0:
+                st.metric("Duplicados detectados", duplicados_detectados, delta=f"+{duplicados_detectados}")
+            else:
+                st.metric("Duplicados detectados", duplicados_detectados)
+
+        st.markdown("---")
+        
+        # Análisis de duplicados
+        st.subheader("Análisis de agendas duplicadas")
+        
+        # Encontrar agendas con el mismo nombre pero diferentes IDs
+        nombre_counts = df_filtrado.groupby(['nombre_original_agenda', 'efector']).agg({
+            'agenda_id': 'nunique'
+        }).reset_index()
+        
+        duplicados = nombre_counts[nombre_counts['agenda_id'] > 1]
+        
+        if len(duplicados) > 0:
+            st.warning(f"Se encontraron {len(duplicados)} agendas con nombres duplicados en el mismo centro:")
+            
+            for _, row in duplicados.iterrows():
+                nombre_agenda = row['nombre_original_agenda']
+                efector = row['efector']
+                num_duplicados = row['agenda_id']
+                
+                st.write(f"**{efector}**")
+                st.write(f"Agenda: `{nombre_agenda}`")
+                st.write(f"Instancias: {num_duplicados}")
+                
+                # Mostrar los IDs específicos
+                ids_agenda = df_filtrado[
+                    (df_filtrado['nombre_original_agenda'] == nombre_agenda) & 
+                    (df_filtrado['efector'] == efector)
+                ]['agenda_id'].unique()
+                
+                st.write(f"IDs: {', '.join(ids_agenda)}")
+                
+                # Mostrar tabla detallada de estas agendas duplicadas
+                df_duplicado = df_filtrado[
+                    (df_filtrado['nombre_original_agenda'] == nombre_agenda) & 
+                    (df_filtrado['efector'] == efector)
+                ].groupby(['agenda_id', 'dia']).agg({
+                    'hora_inicio': 'first',
+                    'hora_fin': 'first',
+                    'doctor': 'first',
+                    'area': 'first'
+                }).reset_index()
+                
+                st.dataframe(
+                    df_duplicado.rename(columns={
+                        'agenda_id': 'ID de agenda',
+                        'dia': 'Día',
+                        'hora_inicio': 'Hora inicio',
+                        'hora_fin': 'Hora fin',
+                        'doctor': 'Médico',
+                        'area': 'Área'
+                    }),
+                    use_container_width=True,
+                    hide_index=True
+                )
+                st.markdown("---")
+        else:
+            st.success("No se detectaron agendas duplicadas en los datos filtrados.")
+        
+        # Análisis por centro
+        st.subheader("Análisis por centro de salud")
+        
+        resumen_centros = df_filtrado.groupby('efector').agg({
+            'agenda_id': 'nunique',
+            'nombre_original_agenda': 'nunique'
+        }).reset_index()
+        
+        resumen_centros['duplicados'] = resumen_centros['agenda_id'] - resumen_centros['nombre_original_agenda']
+        resumen_centros = resumen_centros.sort_values('duplicados', ascending=False)
+        
+        st.dataframe(
+            resumen_centros.rename(columns={
+                'efector': 'Centro de salud',
+                'agenda_id': 'Agendas únicas (ID)',
+                'nombre_original_agenda': 'Nombres únicos',
+                'duplicados': 'Duplicados'
+            }),
+            use_container_width=True,
+            hide_index=True
+        )
+        
+        # Gráfico de duplicados por centro
+        fig_duplicados = px.bar(
+            resumen_centros[resumen_centros['duplicados'] > 0],
+            x='efector',
+            y='duplicados',
+            title='Duplicados por centro de salud',
+            labels={'efector': 'Centro de salud', 'duplicados': 'Número de duplicados'}
+        )
+        fig_duplicados.update_layout(xaxis_tickangle=-45)
+        st.plotly_chart(fig_duplicados, use_container_width=True)
+        
+    else:
+        st.error("La columna 'agenda_id' no está disponible en los datos.")
+        st.info("Para usar esta funcionalidad, reprocesa los datos con la versión actualizada del sistema.")
+
