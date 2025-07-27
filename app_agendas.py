@@ -925,7 +925,7 @@ with tab7:
             filtros_activos.append(f"**Tipo de agenda:** {tipo_turno_seleccionado}")
         
         if filtros_activos:
-            st.info("**Filtros activos desde la barra lateral:**\n\n" + " ÔÇó ".join(filtros_activos))
+            st.info("**Filtros activos desde la barra lateral:**\n\n" + " • ".join(filtros_activos))
         else:
             st.info("**Mostrando todos los datos** (sin filtros aplicados)")
         
