@@ -164,7 +164,7 @@ with col4:
 st.markdown("---")
 
 # Layout principal con tabs
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión", "Control de calidad", "Sin asignar"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Resumen general", "Horarios por día", "Análisis por médico", "Comparativa centros", "Tabla completa", "Calendario", "Gestión", "Control de calidad", "Sin asignar", "Ventanillas"])
 
 with tab1:
     st.header("Resumen general")
@@ -1388,6 +1388,187 @@ with tab9:
     
     else:
         st.success(f"No se encontraron registros sin {campos_disponibles[campo_seleccionado].lower()} con los filtros aplicados.")
+
+with tab10:
+    st.header("Análisis de Ventanillas - Hospital Materno")
+    
+    # Definir horarios de ventanilla por área
+    horarios_ventanilla = {
+        'Pediatría': {'inicio': '08:00', 'fin': '14:00'},
+        'Obstetricia': {'inicio': '08:00', 'fin': '13:00'},
+        'Guardia Vieja': {'inicio': '08:00', 'fin': '13:30'}
+    }
+    
+    # Filtrar solo datos del Hospital Materno
+    df_materno = df_filtrado[df_filtrado['efector'] == 'Hospital Materno']
+    
+    if df_materno.empty:
+        st.warning("No hay datos del Hospital Materno en los filtros actuales.")
+        st.info("Ajusta los filtros del sidebar para incluir el Hospital Materno.")
+    else:
+        # Filtrar solo las áreas con horarios de ventanilla definidos
+        areas_ventanilla = list(horarios_ventanilla.keys())
+        df_ventanillas = df_materno[df_materno['area'].isin(areas_ventanilla)]
+        
+        if df_ventanillas.empty:
+            st.warning(f"No hay datos para las áreas con horarios de ventanilla definidos: {', '.join(areas_ventanilla)}")
+        else:
+            # Métricas generales
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                total_medicos = df_ventanillas['doctor'].nunique()
+                st.metric(
+                    label="Total Médicos",
+                    value=total_medicos
+                )
+            
+            with col2:
+                total_agendas = df_ventanillas.groupby(['nombre_original_agenda', 'efector']).ngroups
+                st.metric(
+                    label="Total Agendas",
+                    value=total_agendas
+                )
+            
+            with col3:
+                # Calcular horarios fuera de ventanilla
+                def esta_fuera_ventanilla(row):
+                    area = row['area']
+                    if area not in horarios_ventanilla:
+                        return False
+                    
+                    try:
+                        inicio_agenda = pd.to_datetime(row['hora_inicio'], format='%H:%M').time()
+                        fin_agenda = pd.to_datetime(row['hora_fin'], format='%H:%M').time()
+                        inicio_ventanilla = pd.to_datetime(horarios_ventanilla[area]['inicio'], format='%H:%M').time()
+                        fin_ventanilla = pd.to_datetime(horarios_ventanilla[area]['fin'], format='%H:%M').time()
+                        
+                        # Verificar si hay superposición fuera del horario de ventanilla
+                        return inicio_agenda < inicio_ventanilla or fin_agenda > fin_ventanilla
+                    except:
+                        return False
+                
+                df_ventanillas['fuera_ventanilla'] = df_ventanillas.apply(esta_fuera_ventanilla, axis=1)
+                agendas_fuera = df_ventanillas[df_ventanillas['fuera_ventanilla']].groupby(['nombre_original_agenda', 'efector']).ngroups
+                
+                st.metric(
+                    label="Agendas fuera de horario",
+                    value=agendas_fuera,
+                    delta=f"{(agendas_fuera/total_agendas*100):.1f}% del total" if total_agendas > 0 else "0%"
+                )
+            
+            st.markdown("---")
+            
+            # Análisis detallado por área
+            st.subheader("Análisis detallado por área")
+            
+            for area in areas_ventanilla:
+                if area in df_ventanillas['area'].values:
+                    st.markdown(f"### {area}")
+                    
+                    df_area = df_ventanillas[df_ventanillas['area'] == area]
+                    horario_ventanilla = horarios_ventanilla[area]
+                    
+                    col1, col2, col3, col4 = st.columns(4)
+                    
+                    with col1:
+                        medicos_area = df_area['doctor'].nunique()
+                        st.metric(f"Médicos en {area}", medicos_area)
+                    
+                    with col2:
+                        agendas_area = df_area.groupby(['nombre_original_agenda', 'efector']).ngroups
+                        st.metric(f"Agendas en {area}", agendas_area)
+                    
+                    with col3:
+                        st.info(f"**Horario de ventanilla:**\n{horario_ventanilla['inicio']} - {horario_ventanilla['fin']}")
+                    
+                    with col4:
+                        agendas_fuera_area = df_area[df_area['fuera_ventanilla']].groupby(['nombre_original_agenda', 'efector']).ngroups
+                        st.metric(
+                            "Fuera de horario", 
+                            agendas_fuera_area,
+                            delta=f"{(agendas_fuera_area/agendas_area*100):.1f}%" if agendas_area > 0 else "0%"
+                        )
+                    
+                    # Tabla de agendas fuera de horario
+                    if agendas_fuera_area > 0:
+                        st.markdown(f"#### Agendas de {area} fuera del horario de ventanilla")
+                        
+                        df_fuera_area = df_area[df_area['fuera_ventanilla']].copy()
+                        
+                        # Preparar tabla resumen
+                        tabla_fuera = df_fuera_area.groupby(['doctor', 'nombre_original_agenda']).agg({
+                            'hora_inicio': 'first',
+                            'hora_fin': 'first',
+                            'dia': lambda x: ', '.join(sorted(x.unique()))
+                        }).reset_index()
+                        
+                        tabla_fuera.columns = ['Médico', 'Agenda', 'Hora Inicio', 'Hora Fin', 'Días']
+                        
+                        # Agregar columna de observaciones
+                        def generar_observacion(row):
+                            inicio = pd.to_datetime(row['Hora Inicio'], format='%H:%M').time()
+                            fin = pd.to_datetime(row['Hora Fin'], format='%H:%M').time()
+                            inicio_ventanilla = pd.to_datetime(horario_ventanilla['inicio'], format='%H:%M').time()
+                            fin_ventanilla = pd.to_datetime(horario_ventanilla['fin'], format='%H:%M').time()
+                            
+                            observaciones = []
+                            if inicio < inicio_ventanilla:
+                                observaciones.append(f"Inicia antes ({row['Hora Inicio']} < {horario_ventanilla['inicio']})")
+                            if fin > fin_ventanilla:
+                                observaciones.append(f"Termina después ({row['Hora Fin']} > {horario_ventanilla['fin']})")
+                            
+                            return " | ".join(observaciones)
+                        
+                        tabla_fuera['Observaciones'] = tabla_fuera.apply(generar_observacion, axis=1)
+                        
+                        st.dataframe(
+                            tabla_fuera,
+                            use_container_width=True,
+                            hide_index=True
+                        )
+                        
+                        # Opción de descarga
+                        csv_fuera = tabla_fuera.to_csv(index=False)
+                        st.download_button(
+                            label=f"Descargar agendas fuera de horario - {area}",
+                            data=csv_fuera,
+                            file_name=f"agendas_fuera_horario_{area}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                            mime="text/csv"
+                        )
+                    else:
+                        st.success(f"Todas las agendas de {area} están dentro del horario de ventanilla")
+                    
+                    st.markdown("---")
+            
+            # Resumen general de horarios problemáticos
+            st.subheader("Resumen de horarios problemáticos")
+            
+            if agendas_fuera > 0:
+                # Gráfico de agendas por hora de inicio
+                fig_horarios = px.histogram(
+                    df_ventanillas[df_ventanillas['fuera_ventanilla']], 
+                    x='hora_inicio',
+                    color='area',
+                    title='Distribución de horarios de inicio fuera de ventanilla',
+                    labels={'hora_inicio': 'Hora de Inicio', 'count': 'Cantidad de Registros'}
+                )
+                fig_horarios.update_layout(height=400)
+                st.plotly_chart(fig_horarios, use_container_width=True)
+                
+                # Gráfico de agendas por hora de fin
+                fig_fin = px.histogram(
+                    df_ventanillas[df_ventanillas['fuera_ventanilla']], 
+                    x='hora_fin',
+                    color='area',
+                    title='Distribución de horarios de fin fuera de ventanilla',
+                    labels={'hora_fin': 'Hora de Fin', 'count': 'Cantidad de Registros'}
+                )
+                fig_fin.update_layout(height=400)
+                st.plotly_chart(fig_fin, use_container_width=True)
+                
+            else:
+                st.success("Excelente! Todas las agendas están dentro de los horarios de ventanilla establecidos.")
 
 # Footer
 st.markdown("---")
