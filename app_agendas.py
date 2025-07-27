@@ -26,11 +26,11 @@ def cargar_datos():
         
         # Limpiar datos
         df['doctor'] = df['doctor'].fillna('Sin asignar')
-        df['area'] = df['area'].fillna('Sin ├írea')
+        df['area'] = df['area'].fillna('Sin área')
         df['tipo_turno'] = df['tipo_turno'].fillna('No especificado')
         
-        # Normalizar d├¡as de la semana (corregir "S├íb" -> "S├íbado")
-        df['dia'] = df['dia'].replace({'S├íb': 'S├íbado'})
+        # Normalizar días de la semana (corregir "Sáb" -> "Sábado")
+        df['dia'] = df['dia'].replace({'Sáb': 'Sábado'})
         
         # Convertir horas a datetime para mejor manejo
         df['hora_inicio_dt'] = pd.to_datetime(df['hora_inicio'], format='%H:%M', errors='coerce').dt.time
@@ -86,7 +86,7 @@ efector_seleccionado = st.sidebar.selectbox(
     efectores_disponibles
 )
 
-# Filtro por ├írea m├®dica
+# Filtro por área médica
 areas_disponibles = ['Todas'] + sorted(df['area'].unique().tolist())
 area_seleccionada = st.sidebar.selectbox(
     "Área:",
@@ -173,7 +173,7 @@ with tab1:
     
     with col1:
         # Gráfico de agendas únicas por área médica
-        df_areas = df_filtrado[df_filtrado['area'] != 'Sin ├írea']
+        df_areas = df_filtrado[df_filtrado['area'] != 'Sin área']
         if not df_areas.empty:
             areas_count_series = df_areas.groupby('area').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
             
@@ -229,17 +229,17 @@ with tab1:
         st.info("No hay datos disponibles con los filtros aplicados.")
 
 with tab2:
-    st.header("An├ílisis de horarios por d├¡a")
+    st.header("Análisis de horarios por día")
     
-    # Selector de d├¡a espec├¡fico para an├ílisis detallado
-    dias_orden = ['TODOS', 'Lunes', 'Martes', 'Mi├®rcoles', 'Jueves', 'Viernes', 'S├íbado', 'Domingo']
+    # Selector de día específico para análisis detallado
+    dias_orden = ['TODOS', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
     dia_analisis = st.selectbox(
-        "D├¡a para an├ílisis detallado:",
+        "Día para análisis detallado:",
         dias_orden,
         key="dia_analisis"
     )
     
-    # Filtrar datos seg├║n selecci├│n
+    # Filtrar datos según selección
     if dia_analisis == 'TODOS':
         df_dia = df_filtrado.copy()
     else:
@@ -256,13 +256,13 @@ with tab2:
                 df_dia_copy['hora_inicio_num'] = pd.to_datetime(df_dia_copy['hora_inicio'], format='%H:%M', errors='coerce').dt.hour
                 
                 if dia_analisis == 'TODOS':
-                    # Para TODOS los d├¡as, agrupar por d├¡a y hora
+                    # Para TODOS los días, agrupar por día y hora
                     heatmap_data = df_dia_copy.groupby(['dia', 'hora_inicio_num']).size().reset_index(name='count')
-                    titulo_heatmap = "Intensidad de agendas - Todos los d├¡as"
-                    y_label = 'D├¡a'
+                    titulo_heatmap = "Intensidad de agendas - Todos los días"
+                    y_label = 'Día'
                     y_column = 'dia'
                 else:
-                    # Para un d├¡a espec├¡fico, agrupar por efector y hora
+                    # Para un día específico, agrupar por efector y hora
                     heatmap_data = df_dia_copy.groupby(['efector', 'hora_inicio_num']).size().reset_index(name='count')
                     titulo_heatmap = f"Intensidad de agendas - {dia_analisis}"
                     y_label = 'Centro de salud'
@@ -275,41 +275,41 @@ with tab2:
                         y=y_column,
                         z='count',
                         title=titulo_heatmap,
-                        labels={'hora_inicio_num': 'Hora', y_column: y_label, 'count': 'N├║mero de agendas'}
+                        labels={'hora_inicio_num': 'Hora', y_column: y_label, 'count': 'Número de agendas'}
                     )
                     fig_heatmap.update_layout(height=400)
                     st.plotly_chart(fig_heatmap, use_container_width=True)
         
         with col2:
-            # Top m├®dicos del d├¡a/todos los d├¡as (agendas ├║nicas)
+            # Top médicos del día/todos los días (agendas únicas)
             df_medicos_dia = df_dia[df_dia['doctor'] != 'Sin asignar']
             if not df_medicos_dia.empty:
                 medicos_dia = df_medicos_dia.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(10)
 
-                titulo_medicos = f"Top m├®dicos - {dia_analisis}" if dia_analisis != 'TODOS' else "Top m├®dicos - Todos los d├¡as"
+                titulo_medicos = f"Top médicos - {dia_analisis}" if dia_analisis != 'TODOS' else "Top médicos - Todos los días"
                 fig_medicos = px.bar(
                     x=medicos_dia.values,
                     y=medicos_dia.index,
                     orientation='h',
                     title=titulo_medicos,
-                    labels={'x': 'N├║mero de agendas', 'y': 'M├®dico'}
+                    labels={'x': 'Número de agendas', 'y': 'Médico'}
                 )
                 fig_medicos.update_layout(height=400)
                 st.plotly_chart(fig_medicos, use_container_width=True)
             else:
-                mensaje_medicos = f"No hay m├®dicos con agendas disponibles para {dia_analisis}." if dia_analisis != 'TODOS' else "No hay m├®dicos con agendas disponibles."
+                mensaje_medicos = f"No hay médicos con agendas disponibles para {dia_analisis}." if dia_analisis != 'TODOS' else "No hay médicos con agendas disponibles."
                 st.info(mensaje_medicos)
 
-        # Tabla detallada del d├¡a/todos los d├¡as
-        titulo_tabla = f"Detalle de agendas - {dia_analisis}" if dia_analisis != 'TODOS' else "Detalle de agendas - Todos los d├¡as"
+        # Tabla detallada del día/todos los días
+        titulo_tabla = f"Detalle de agendas - {dia_analisis}" if dia_analisis != 'TODOS' else "Detalle de agendas - Todos los días"
         st.subheader(titulo_tabla)
         
         if dia_analisis == 'TODOS':
-            # Para TODOS, incluir la columna d├¡a
+            # Para TODOS, incluir la columna día
             df_mostrar = df_dia[['agenda_id', 'dia', 'efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
             df_mostrar = df_mostrar.sort_values(['dia', 'efector', 'hora_inicio'])
         else:
-            # Para un d├¡a espec├¡fico, no incluir la columna d├¡a
+            # Para un día específico, no incluir la columna día
             df_mostrar = df_dia[['agenda_id', 'efector', 'area', 'doctor', 'hora_inicio', 'hora_fin', 'tipo_turno']].copy()
             df_mostrar = df_mostrar.sort_values(['efector', 'hora_inicio'])
         
@@ -323,14 +323,14 @@ with tab2:
         st.warning(mensaje_warning)
 
 with tab3:
-    st.header("An├ílisis por m├®dico")
+    st.header("Análisis por médico")
     
     # Selector de doctor
     doctores_disponibles = sorted(df_filtrado[df_filtrado['doctor'] != 'Sin asignar']['doctor'].unique().tolist())
     
     if doctores_disponibles:
         doctor_seleccionado = st.selectbox(
-            "M├®dico:",
+            "Médico:",
             doctores_disponibles
         )
         
@@ -342,7 +342,7 @@ with tab3:
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            # Contar agendas ├║nicas del m├®dico
+            # Contar agendas únicas del médico
             agendas_unicas_doctor = df_doctor.groupby(['nombre_original_agenda', 'efector']).ngroups
             st.metric("Total de agendas", agendas_unicas_doctor)
         
@@ -357,34 +357,34 @@ with tab3:
         with col4:
             st.metric("Horas semanales", f"{horas_semanales}h")
         
-        # Informaci├│n detallada de horas por d├¡a
+        # Información detallada de horas por día
         if horas_semanales > 0:
-            st.subheader("Distribuci├│n de horas por d├¡a")
+            st.subheader("Distribución de horas por día")
             
             horas_por_dia = []
-            for dia in ['Lunes', 'Martes', 'Mi├®rcoles', 'Jueves', 'Viernes', 'S├íbado', 'Domingo']:
+            for dia in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']:
                 df_dia = df_doctor[df_doctor['dia'] == dia]
                 if not df_dia.empty:
                     horas_dia = calcular_horas_medico(df_dia)
                     if horas_dia > 0:
-                        horas_por_dia.append({'D├¡a': dia, 'Horas': horas_dia})
+                        horas_por_dia.append({'Día': dia, 'Horas': horas_dia})
             
             if horas_por_dia:
                 df_horas_dia = pd.DataFrame(horas_por_dia)
                 
-                # Gr├ífico de barras para distribuci├│n de horas
+                # Gráfico de barras para distribución de horas
                 fig_horas = px.bar(
                     df_horas_dia, 
-                    x='D├¡a', 
+                    x='Día', 
                     y='Horas',
-                    title=f"Distribuci├│n de horas semanales - {doctor_seleccionado}",
+                    title=f"Distribución de horas semanales - {doctor_seleccionado}",
                     color='Horas',
                     color_continuous_scale='viridis'
                 )
                 fig_horas.update_layout(height=400)
                 st.plotly_chart(fig_horas, use_container_width=True)
                 
-                # Tabla resumen de horas por d├¡a
+                # Tabla resumen de horas por día
                 col1, col2 = st.columns([1, 1])
                 with col1:
                     st.dataframe(df_horas_dia, use_container_width=True)
@@ -393,10 +393,10 @@ with tab3:
                     **Resumen de carga horaria:**
                     - Total semanal: **{horas_semanales}h**
                     - Promedio diario: **{round(horas_semanales/7, 2)}h**
-                    - D├¡as activos: **{len(df_horas_dia)}**
+                    - Días activos: **{len(df_horas_dia)}**
                     """)
         
-        # Horarios del doctor por d├¡a (tabla existente)
+        # Horarios del doctor por día (tabla existente)
         horarios_doctor = df_doctor.groupby('dia').agg({
             'hora_inicio': lambda x: ', '.join(sorted(set(x.astype(str)))),
             'hora_fin': lambda x: ', '.join(sorted(set(x.astype(str)))),
@@ -409,7 +409,7 @@ with tab3:
         st.dataframe(horarios_doctor, use_container_width=True)
         
     else:
-        st.warning("No hay m├®dicos disponibles con los filtros aplicados.")
+        st.warning("No hay médicos disponibles con los filtros aplicados.")
 
 with tab4:
     st.header("Comparativa entre centros de salud")
@@ -428,19 +428,19 @@ with tab4:
     metricas_efector['Total agendas'] = agendas_por_efector
     
     metricas_efector = metricas_efector.rename(columns={
-        'doctor': 'M├®dicos',
+        'doctor': 'Médicos',
         'area': 'Especialidades'
     }).reset_index()
     
-    # Gr├ífico comparativo
+    # Gráfico comparativo
     fig_comparativa = make_subplots(
         rows=1, cols=3,
-        subplot_titles=('M├®dicos', 'Especialidades', 'Total agendas'),
+        subplot_titles=('Médicos', 'Especialidades', 'Total agendas'),
         specs=[[{"secondary_y": False}, {"secondary_y": False}, {"secondary_y": False}]]
     )
     
     fig_comparativa.add_trace(
-        go.Bar(x=metricas_efector['efector'], y=metricas_efector['M├®dicos'], name='M├®dicos'),
+        go.Bar(x=metricas_efector['efector'], y=metricas_efector['Médicos'], name='Médicos'),
         row=1, col=1
     )
     
@@ -457,7 +457,7 @@ with tab4:
     fig_comparativa.update_layout(
         height=500,
         showlegend=False,
-        title_text="Comparativa de m├®tricas por centro de salud"
+        title_text="Comparativa de métricas por centro de salud"
     )
     
     # Rotar etiquetas del eje x
@@ -489,8 +489,8 @@ with tab5:
             mime="text/csv"
         )
     
-    # Opciones de visualizaci├│n
-    st.subheader("Opciones de visualizaci├│n")
+    # Opciones de visualización
+    st.subheader("Opciones de visualización")
     
     col1, col2, col3 = st.columns(3)
     
@@ -499,7 +499,7 @@ with tab5:
     
     with col2:
         filas_por_pagina = st.selectbox(
-            "Registros por p├ígina:",
+            "Registros por página:",
             [10, 25, 50, 100, 500, "Todos"],
             index=2
         )
@@ -532,7 +532,7 @@ with tab5:
         
         if total_paginas > 1:
             pagina_actual = st.selectbox(
-                f"P├ígina (de {total_paginas}):",
+                f"Página (de {total_paginas}):",
                 range(1, total_paginas + 1),
                 key="pagina_tabla"
             )
@@ -555,9 +555,9 @@ with tab5:
         'nombre_original_agenda': 'Nombre original de agenda',
         'efector': 'Centro de salud',
         'area': 'Especialidad',
-        'doctor': 'M├®dico',
+        'doctor': 'Médico',
         'tipo_turno': 'Tipo de agenda',
-        'dia': 'D├¡a',
+        'dia': 'Día',
         'hora_inicio': 'Hora inicio',
         'hora_fin': 'Hora fin'
     }
@@ -582,7 +582,7 @@ with tab5:
     
     with col2:
         doctores_tabla = df_mostrar[df_mostrar['doctor'] != 'Sin asignar']['doctor'].nunique()
-        st.metric("M├®dicos", doctores_tabla)
+        st.metric("Médicos", doctores_tabla)
     
     with col3:
         areas_tabla = df_mostrar['area'].nunique()
@@ -592,9 +592,9 @@ with tab5:
         efectores_tabla = df_mostrar['efector'].nunique()
         st.metric("Centros", efectores_tabla)
     
-    # Estad├¡sticas adicionales
+    # Estadísticas adicionales
     if len(df_mostrar) > 0:
-        st.subheader("Estad├¡sticas de la vista actual")
+        st.subheader("Estadísticas de la vista actual")
         
         col1, col2 = st.columns(2)
         
@@ -1329,11 +1329,11 @@ with tab9:
         df_detalle_renamed = df_detalle.rename(columns={
             'nombre_original_agenda': 'Nombre original de agenda',
             'efector': 'Centro de salud',
-            'dia': 'D├¡a',
+            'dia': 'Día',
             'hora_inicio': 'Hora inicio',
             'hora_fin': 'Hora fin',
-            'doctor': 'M├®dico',
-            'area': '├ürea',
+            'doctor': 'Médico',
+            'area': 'Área',
             'tipo_turno': 'Tipo de turno'
         })
         
@@ -1353,7 +1353,7 @@ with tab9:
             if campo_seleccionado != 'area':
                 areas_sin_asignar = ['Todas'] + sorted(df_sin_asignar['area'].dropna().unique().tolist())
                 area_filtro = st.selectbox(
-                    "Filtrar por ├írea:",
+                    "Filtrar por área:",
                     areas_sin_asignar,
                     key="filtro_area_sin_asignar"
                 )
@@ -1367,7 +1367,7 @@ with tab9:
             df_tabla_filtrada = df_tabla_filtrada[df_tabla_filtrada['Centro de salud'] == efector_filtro]
         
         if area_filtro != 'Todas' and campo_seleccionado != 'area':
-            df_tabla_filtrada = df_tabla_filtrada[df_tabla_filtrada['├ürea'] == area_filtro]
+            df_tabla_filtrada = df_tabla_filtrada[df_tabla_filtrada['Área'] == area_filtro]
         
         # Mostrar la tabla
         st.dataframe(
