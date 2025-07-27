@@ -414,7 +414,7 @@ with tab3:
 with tab4:
     st.header("Comparativa entre centros de salud")
     
-    # Comparativa de m├®tricas por efector
+    # Comparativa de métricas por efector
     def contar_agendas_unicas_por_efector(x):
         return x.groupby(['nombre_original_agenda', 'efector']).ngroups
     
@@ -423,7 +423,7 @@ with tab4:
         'area': lambda x: x.nunique()
     })
     
-    # Calcular agendas ├║nicas por separado
+    # Calcular agendas únicas por separado
     agendas_por_efector = df_filtrado.groupby('efector').apply(contar_agendas_unicas_por_efector)
     metricas_efector['Total agendas'] = agendas_por_efector
     
@@ -473,14 +473,14 @@ with tab4:
 with tab5:
     st.header("Tabla completa de agendas")
     
-    # Informaci├│n sobre los datos mostrados
+    # Información sobre los datos mostrados
     col1, col2 = st.columns([3, 1])
     
     with col1:
         st.info(f"Mostrando **{len(df_filtrado):,} registros** de un total de **{len(df):,}** agendas")
     
     with col2:
-        # Bot├│n para descargar datos filtrados
+        # Botón para descargar datos filtrados
         csv = df_filtrado.to_csv(index=False)
         st.download_button(
             label="Descargar CSV",
@@ -523,11 +523,11 @@ with tab5:
     df_mostrar = df_filtrado[columnas_mostrar].copy()
     df_mostrar = df_mostrar.sort_values(ordenar_por)
     
-    # Aplicar paginaci├│n si es necesario
+    # Aplicar paginación si es necesario
     if filas_por_pagina != "Todos":
         filas_por_pagina = int(filas_por_pagina)
         
-        # Calcular n├║mero de p├íginas
+        # Calcular número de páginas
         total_paginas = (len(df_mostrar) - 1) // filas_por_pagina + 1
         
         if total_paginas > 1:
@@ -549,7 +549,7 @@ with tab5:
         """Aplica estilos alternados a las filas"""
         return ['background-color: #f0f2f6' if i % 2 == 0 else '' for i in range(len(val))]
     
-    # Renombrar columnas para mejor visualizaci├│n
+    # Renombrar columnas para mejor visualización
     nombres_columnas = {
         'agenda_id': 'ID de Agenda',
         'nombre_original_agenda': 'Nombre original de agenda',
@@ -599,24 +599,24 @@ with tab5:
         col1, col2 = st.columns(2)
         
         with col1:
-            # Top 5 m├®dicos en la vista actual (agendas ├║nicas)
+            # Top 5 médicos en la vista actual (agendas únicas)
             if 'doctor' in df_mostrar.columns:
                 df_medicos_vista = df_mostrar[df_mostrar['doctor'] != 'Sin asignar']
                 if not df_medicos_vista.empty:
                     top_doctores = df_medicos_vista.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(5)
                     if not top_doctores.empty:
-                        st.write("**Top 5 m├®dicos:**")
+                        st.write("**Top 5 médicos:**")
                         for i, (doctor, count) in enumerate(top_doctores.items(), 1):
                             st.write(f"{i}. {doctor}: {count} agendas")
                     else:
-                        st.info("No hay m├®dicos disponibles.")
+                        st.info("No hay médicos disponibles.")
                 else:
-                    st.info("No hay m├®dicos con agendas disponibles.")
+                    st.info("No hay médicos con agendas disponibles.")
         
         with col2:
-            # Top 5 especialidades en la vista actual (agendas ├║nicas)
+            # Top 5 especialidades en la vista actual (agendas únicas)
             if 'area' in df_mostrar.columns:
-                df_areas_vista = df_mostrar[df_mostrar['area'] != 'Sin ├írea']
+                df_areas_vista = df_mostrar[df_mostrar['area'] != 'Sin área']
                 if not df_areas_vista.empty:
                     top_areas = df_areas_vista.groupby('area').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups).sort_values(ascending=False).head(5)
                     if not top_areas.empty:
@@ -631,13 +631,13 @@ with tab5:
 with tab6:
     st.header("Vista calendario - agenda semanal")
     
-    # Selectores espec├¡ficos para la vista calendario
-    st.subheader("Configuraci├│n de vista")
+    # Selectores específicos para la vista calendario
+    st.subheader("Configuración de vista")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        # Selector de hospital espec├¡fico (obligatorio)
+        # Selector de hospital específico (obligatorio)
         efectores_calendario = sorted(df['efector'].unique().tolist())
         efector_calendario = st.selectbox(
             "Hospital/CAPS:",
@@ -646,7 +646,7 @@ with tab6:
         )
     
     with col2:
-        # Selector de ├írea espec├¡fica (obligatorio)
+        # Selector de área específica (obligatorio)
         df_efector = df[df['efector'] == efector_calendario]
         areas_calendario = sorted(df_efector['area'].unique().tolist())
         
@@ -666,22 +666,22 @@ with tab6:
     if not df_calendario.empty:
         st.success(f"Mostrando agenda de **{area_calendario}** en **{efector_calendario}**")
         
-        # M├®tricas espec├¡ficas del calendario
+        # Métricas específicas del calendario
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            # Contar agendas ├║nicas en el calendario
+            # Contar agendas únicas en el calendario
             total_agendas_calendario = df_calendario.groupby(['nombre_original_agenda', 'efector']).ngroups
             total_horarios_calendario = len(df_calendario)
             st.metric("Total agendas", total_agendas_calendario, delta=f"{total_horarios_calendario} horarios")
         
         with col2:
             doctores_calendario = df_calendario[df_calendario['doctor'] != 'Sin asignar']['doctor'].nunique()
-            st.metric("M├®dicos", doctores_calendario)
+            st.metric("Médicos", doctores_calendario)
         
         with col3:
             dias_calendario = df_calendario['dia'].nunique()
-            st.metric("D├¡as activos", dias_calendario)
+            st.metric("Días activos", dias_calendario)
         
         with col4:
             # Calcular rango horario
@@ -696,15 +696,15 @@ with tab6:
         # Crear la vista de calendario
         st.subheader("Agenda Semanal")
         
-        # Ordenar d├¡as de la semana
-        dias_orden = ['Lunes', 'Martes', 'Mi├®rcoles', 'Jueves', 'Viernes', 'S├íbado', 'Domingo']
+        # Ordenar días de la semana
+        dias_orden = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
         dias_disponibles = [dia for dia in dias_orden if dia in df_calendario['dia'].values]
         
-        # Crear columnas para cada d├¡a
+        # Crear columnas para cada día
         if len(dias_disponibles) <= 3:
             cols = st.columns(len(dias_disponibles))
         else:
-            # Si hay m├ís de 3 d├¡as, dividir en dos filas
+            # Si hay más de 3 días, dividir en dos filas
             cols_fila1 = st.columns(min(4, len(dias_disponibles)))
             if len(dias_disponibles) > 4:
                 cols_fila2 = st.columns(len(dias_disponibles) - 4)
@@ -716,7 +716,7 @@ with tab6:
             with cols[i]:
                 st.markdown(f"### {dia}")
                 
-                # Filtrar turnos del d├¡a
+                # Filtrar turnos del día
                 turnos_dia = df_calendario[df_calendario['dia'] == dia].copy()
                 turnos_dia = turnos_dia.sort_values(['hora_inicio', 'doctor'])
                 
@@ -727,7 +727,7 @@ with tab6:
                     hora_fin = turno['hora_fin']
                     tipo_turno = turno['tipo_turno'] if turno['tipo_turno'] != 'No especificado' else ''
                     
-                    # Color basado en el tipo de turno - colores m├ís profesionales y legibles
+                    # Color basado en el tipo de turno - colores más profesionales y legibles
                     color_config = {
                         'PROGRAMADA': {'bg': '#e8f4f8', 'border': '#1976d2', 'text': '#0d47a1'},
                         'ESPONTANEA': {'bg': '#fff8e1', 'border': '#f57c00', 'text': '#e65100'},
@@ -775,7 +775,7 @@ with tab6:
         df_timeline['hora_fin_num'] = pd.to_datetime(df_timeline['hora_fin'], format='%H:%M', errors='coerce').dt.hour + \
                                     pd.to_datetime(df_timeline['hora_fin'], format='%H:%M', errors='coerce').dt.minute / 60
         
-        # Crear gr├ífico Gantt-style
+        # Crear gráfico Gantt-style
         fig_timeline = go.Figure()
         
         # Asignar colores a cada doctor
@@ -803,7 +803,7 @@ with tab6:
                     line=dict(color=color, width=2),
                     name=doctor,
                     hovertemplate=f"<b>{doctor}</b><br>" +
-                                f"D├¡a: {turno['dia']}<br>" +
+                                f"Día: {turno['dia']}<br>" +
                                 f"Horario: {turno['hora_inicio']} - {turno['hora_fin']}<br>" +
                                 f"Tipo: {turno['tipo_turno']}<extra></extra>",
                     showlegend=mostrar_leyenda
@@ -811,8 +811,8 @@ with tab6:
         
         fig_timeline.update_layout(
             title=f"Timeline de horarios - {area_calendario} ({efector_calendario})",
-            xaxis_title="Hora del d├¡a",
-            yaxis_title="D├¡a de la semana",
+            xaxis_title="Hora del día",
+            yaxis_title="Día de la semana",
             height=400,
             hovermode='closest'
         )
@@ -827,8 +827,8 @@ with tab6:
         
         st.plotly_chart(fig_timeline, use_container_width=True)
         
-        # Tabla resumen por m├®dico
-        st.subheader("Resumen por m├®dico")
+        # Tabla resumen por médico
+        st.subheader("Resumen por médico")
         
         if not df_calendario.empty:
             resumen_doctores = df_calendario.groupby('doctor').agg({
@@ -836,17 +836,17 @@ with tab6:
                 'hora_inicio': lambda x: f"{min(x)} - {max(x)}",
                 'tipo_turno': lambda x: ', '.join(set(x.dropna()))
             }).rename(columns={
-                'dia': 'D├¡as que atiende',
+                'dia': 'Días que atiende',
                 'hora_inicio': 'Rango horario',
                 'tipo_turno': 'Tipos de agenda'
             })
             
-            # Contar agendas ├║nicas por m├®dico
+            # Contar agendas únicas por médico
             resumen_doctores['Total agendas'] = df_calendario.groupby('doctor').apply(lambda x: x.groupby(['nombre_original_agenda', 'efector']).ngroups)
             
             st.dataframe(resumen_doctores, use_container_width=True)
         else:
-            st.info("No hay datos disponibles para mostrar el resumen por m├®dico.")
+            st.info("No hay datos disponibles para mostrar el resumen por médico.")
         
         # Leyenda de colores para tipos de turno
         st.subheader("Leyenda de colores")
@@ -865,7 +865,7 @@ with tab6:
         
     else:
         st.warning(f"No se encontraron agendas para **{area_calendario}** en **{efector_calendario}**")
-        st.info("Intenta seleccionar otra combinaci├│n de hospital y especialidad.")
+        st.info("Intenta seleccionar otra combinación de hospital y especialidad.")
 
 with tab7:
     st.header("Gestión")
@@ -901,7 +901,7 @@ with tab7:
         
         
     else:
-        # Bot├│n de logout
+        # Botón de logout
         col1, col2, col3 = st.columns([4, 1, 1])
         with col3:
             if st.button("Cerrar sesión"):
@@ -918,9 +918,9 @@ with tab7:
         if efector_seleccionado != 'Todos':
             filtros_activos.append(f"**Hospital/CAPS:** {efector_seleccionado}")
         if area_seleccionada != 'Todas':
-            filtros_activos.append(f"**├ürea:** {area_seleccionada}")
+            filtros_activos.append(f"**Área:** {area_seleccionada}")
         if dia_seleccionado != 'Todos':
-            filtros_activos.append(f"**D├¡a:** {dia_seleccionado}")
+            filtros_activos.append(f"**Día:** {dia_seleccionado}")
         if tipo_turno_seleccionado != 'Todos':
             filtros_activos.append(f"**Tipo de agenda:** {tipo_turno_seleccionado}")
         
@@ -968,25 +968,25 @@ with tab7:
             """Detecta médicos con horarios superpuestos"""
             superposiciones = []
             
-            # Agrupar por m├®dico
+            # Agrupar por médico
             medicos_horarios = df_analisis[df_analisis['doctor'] != 'Sin asignar'].groupby('doctor')
             
             for medico, datos_medico in medicos_horarios:
-                # Convertir horas a formato datetime para comparaci├│n
+                # Convertir horas a formato datetime para comparación
                 datos_medico = datos_medico.copy()
                 datos_medico['hora_inicio_dt'] = pd.to_datetime(datos_medico['hora_inicio'], format='%H:%M', errors='coerce')
                 datos_medico['hora_fin_dt'] = pd.to_datetime(datos_medico['hora_fin'], format='%H:%M', errors='coerce')
                 
-                # Agrupar por d├¡a
+                # Agrupar por día
                 dias_medico = datos_medico.groupby('dia')
                 
                 for dia, horarios_dia in dias_medico:
                     horarios_dia = horarios_dia.sort_values('hora_inicio_dt')
                     
-                    # Comparar horarios del mismo d├¡a
+                    # Comparar horarios del mismo día
                     for i, (idx1, row1) in enumerate(horarios_dia.iterrows()):
                         for idx2, row2 in horarios_dia.iloc[i+1:].iterrows():
-                            # Verificar superposici├│n
+                            # Verificar superposición
                             if (row1['hora_inicio_dt'] < row2['hora_fin_dt'] and 
                                 row1['hora_fin_dt'] > row2['hora_inicio_dt']):
                                 
@@ -1010,12 +1010,12 @@ with tab7:
         df_superposiciones = detectar_superposiciones(df_gerencial)
         
         if not df_superposiciones.empty:
-            # M├®tricas de superposiciones
+            # Métricas de superposiciones
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
                 medicos_con_conflictos = df_superposiciones['medico'].nunique()
-                st.metric("M├®dicos con conflictos", medicos_con_conflictos)
+                st.metric("Médicos con conflictos", medicos_con_conflictos)
             
             with col2:
                 total_conflictos = len(df_superposiciones)
@@ -1032,7 +1032,7 @@ with tab7:
             # Tabla de conflictos
             st.subheader("Detalle de conflictos de horarios")
             
-            # Aplicar colores seg├║n el tipo de conflicto
+            # Aplicar colores según el tipo de conflicto
             def color_conflictos(val):
                 if val == 'Mismo centro':
                     return 'background-color: #ffebee'  # Rojo claro
@@ -1040,16 +1040,16 @@ with tab7:
                     return 'background-color: #fff3e0'  # Naranja claro
                 return ''
             
-            # Renombrar columnas para mejor visualizaci├│n
+            # Renombrar columnas para mejor visualización
             df_superposiciones_display = df_superposiciones.rename(columns={
-                'medico': 'M├®dico',
-                'dia': 'D├¡a',
+                'medico': 'Médico',
+                'dia': 'Día',
                 'centro_1': 'Centro 1',
-                'area_1': '├ürea 1',
+                'area_1': 'Área 1',
                 'horario_1': 'Horario 1',
                 'tipo_agenda_1': 'Tipo Agenda 1',
                 'centro_2': 'Centro 2',
-                'area_2': '├ürea 2',
+                'area_2': 'Área 2',
                 'horario_2': 'Horario 2',
                 'tipo_agenda_2': 'Tipo Agenda 2',
                 'tipo_conflicto': 'Tipo de conflicto'
@@ -1061,32 +1061,32 @@ with tab7:
                 height=400
             )
             
-            # Resumen por m├®dico
-            st.subheader("Resumen de conflictos por m├®dico")
+            # Resumen por médico
+            st.subheader("Resumen de conflictos por médico")
             resumen_conflictos = df_superposiciones.groupby('medico').agg({
                 'dia': lambda x: ', '.join(sorted(set(x))),
                 'tipo_conflicto': lambda x: ', '.join(set(x))
             }).rename(columns={
-                'dia': 'D├¡as con conflictos',
+                'dia': 'Días con conflictos',
                 'tipo_conflicto': 'Tipos de conflicto'
             })
             resumen_conflictos['Total conflictos'] = df_superposiciones['medico'].value_counts()
             
-            # Agregar informaci├│n de tipos de agenda para cada m├®dico con conflictos
+            # Agregar información de tipos de agenda para cada médico con conflictos
             tipos_agenda_por_medico = df_gerencial[df_gerencial['doctor'].isin(df_superposiciones['medico'].unique())].groupby('doctor')['tipo_turno'].apply(lambda x: ', '.join(sorted(set(x)))).to_dict()
             resumen_conflictos['Tipos de agenda'] = resumen_conflictos.index.map(tipos_agenda_por_medico)
             
             st.dataframe(resumen_conflictos, use_container_width=True)
             
-            # Gr├ífico de conflictos por d├¡a
+            # Gráfico de conflictos por día
             if len(df_superposiciones) > 0:
                 conflictos_por_dia = df_superposiciones['dia'].value_counts()
                 
                 fig_conflictos = px.bar(
                     x=conflictos_por_dia.index,
                     y=conflictos_por_dia.values,
-                    title="Conflictos de horarios por d├¡a de la semana",
-                    labels={'x': 'D├¡a', 'y': 'N├║mero de conflictos'},
+                    title="Conflictos de horarios por día de la semana",
+                    labels={'x': 'Día', 'y': 'Número de conflictos'},
                     color=conflictos_por_dia.values,
                     color_continuous_scale='Reds'
                 )
@@ -1095,7 +1095,7 @@ with tab7:
             
         else:
             st.success("No se detectaron conflictos de horarios en los datos filtrados.")
-            st.info("Todos los m├®dicos tienen horarios sin superposiciones.")
+            st.info("Todos los médicos tienen horarios sin superposiciones.")
 
 # TAB 8: CONTROL DE CALIDAD
 with tab8:
@@ -1103,7 +1103,7 @@ with tab8:
     
     # Verificar si existe la columna agenda_id
     if 'agenda_id' in df.columns:
-        # M├®tricas generales
+        # Métricas generales
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
@@ -1112,11 +1112,11 @@ with tab8:
         
         with col2:
             agendas_unicas_id = df_filtrado['agenda_id'].nunique()
-            st.metric("Agendas ├║nicas (ID)", agendas_unicas_id)
+            st.metric("Agendas únicas (ID)", agendas_unicas_id)
         
         with col3:
             agendas_unicas_nombre = df_filtrado['nombre_original_agenda'].nunique()
-            st.metric("Nombres ├║nicos", agendas_unicas_nombre)
+            st.metric("Nombres únicos", agendas_unicas_nombre)
         
         with col4:
             duplicados_detectados = agendas_unicas_id - agendas_unicas_nombre
@@ -1127,8 +1127,8 @@ with tab8:
 
         st.markdown("---")
         
-        # An├ílisis de duplicados
-        st.subheader("An├ílisis de agendas duplicadas")
+        # Análisis de duplicados
+        st.subheader("Análisis de agendas duplicadas")
         
         # Encontrar agendas con el mismo nombre pero diferentes IDs
         nombre_counts = df_filtrado.groupby(['nombre_original_agenda', 'efector']).agg({
@@ -1149,7 +1149,7 @@ with tab8:
                 st.write(f"Agenda: `{nombre_agenda}`")
                 st.write(f"Instancias: {num_duplicados}")
                 
-                # Mostrar los IDs espec├¡ficos
+                # Mostrar los IDs específicos
                 ids_agenda = df_filtrado[
                     (df_filtrado['nombre_original_agenda'] == nombre_agenda) & 
                     (df_filtrado['efector'] == efector)
@@ -1171,11 +1171,11 @@ with tab8:
                 st.dataframe(
                     df_duplicado.rename(columns={
                         'agenda_id': 'ID de agenda',
-                        'dia': 'D├¡a',
+                        'dia': 'Día',
                         'hora_inicio': 'Hora inicio',
                         'hora_fin': 'Hora fin',
-                        'doctor': 'M├®dico',
-                        'area': '├ürea'
+                        'doctor': 'Médico',
+                        'area': 'Área'
                     }),
                     use_container_width=True,
                     hide_index=True
@@ -1184,8 +1184,8 @@ with tab8:
         else:
             st.success("No se detectaron agendas duplicadas en los datos filtrados.")
         
-        # An├ílisis por centro
-        st.subheader("An├ílisis por centro de salud")
+        # Análisis por centro
+        st.subheader("Análisis por centro de salud")
         
         resumen_centros = df_filtrado.groupby('efector').agg({
             'agenda_id': 'nunique',
@@ -1198,28 +1198,28 @@ with tab8:
         st.dataframe(
             resumen_centros.rename(columns={
                 'efector': 'Centro de salud',
-                'agenda_id': 'Agendas ├║nicas (ID)',
-                'nombre_original_agenda': 'Nombres ├║nicos',
+                'agenda_id': 'Agendas únicas (ID)',
+                'nombre_original_agenda': 'Nombres únicos',
                 'duplicados': 'Duplicados'
             }),
             use_container_width=True,
             hide_index=True
         )
         
-        # Gr├ífico de duplicados por centro
+        # Gráfico de duplicados por centro
         fig_duplicados = px.bar(
             resumen_centros[resumen_centros['duplicados'] > 0],
             x='efector',
             y='duplicados',
             title='Duplicados por centro de salud',
-            labels={'efector': 'Centro de salud', 'duplicados': 'N├║mero de duplicados'}
+            labels={'efector': 'Centro de salud', 'duplicados': 'Número de duplicados'}
         )
         fig_duplicados.update_layout(xaxis_tickangle=-45)
         st.plotly_chart(fig_duplicados, use_container_width=True)
         
     else:
-        st.error("La columna 'agenda_id' no est├í disponible en los datos.")
-        st.info("Para usar esta funcionalidad, reprocesa los datos con la versi├│n actualizada del sistema.")
+        st.error("La columna 'agenda_id' no está disponible en los datos.")
+        st.info("Para usar esta funcionalidad, reprocesa los datos con la versión actualizada del sistema.")
 
 with tab9:
     st.header("Sin asignar")
@@ -1244,7 +1244,7 @@ with tab9:
     # Definir qué valores se consideran "sin asignar" para cada campo
     valores_sin_asignar = {
         'doctor': ['Sin asignar', '', 'nan', None],
-        'area': ['Sin ├írea', '', 'nan', None],
+        'area': ['Sin área', '', 'nan', None],
         'tipo_turno': ['No especificado', '', 'nan', None],
         'dia': ['', 'nan', None],
         'hora_inicio': ['', 'nan', None],
@@ -1261,7 +1261,7 @@ with tab9:
     
     df_sin_asignar = df_filtrado[mask_sin_asignar]
     
-    # M├®tricas
+    # Métricas
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -1283,8 +1283,8 @@ with tab9:
         st.metric("Centros afectados", efectores_afectados)
     
     if not df_sin_asignar.empty:
-        # An├ílisis por efector
-        st.subheader(f"Distribuci├│n por centro de salud")
+        # Análisis por efector
+        st.subheader(f"Distribución por centro de salud")
         
         resumen_efector = df_sin_asignar.groupby('efector').agg({
             'nombre_original_agenda': 'nunique',
@@ -1296,7 +1296,7 @@ with tab9:
             campo_seleccionado: 'Registros sin asignar'
         }).sort_values('Registros sin asignar', ascending=False)
         
-        # Gr├ífico de barras
+        # Gráfico de barras
         fig_efector = px.bar(
             resumen_efector,
             x='Centro de salud',
@@ -1325,7 +1325,7 @@ with tab9:
         
         df_detalle = df_sin_asignar[columnas_mostrar].drop_duplicates()
         
-        # Renombrar columnas para mejor presentaci├│n
+        # Renombrar columnas para mejor presentación
         df_detalle_renamed = df_detalle.rename(columns={
             'nombre_original_agenda': 'Nombre original de agenda',
             'efector': 'Centro de salud',
@@ -1376,7 +1376,7 @@ with tab9:
             hide_index=True
         )
         
-        # Bot├│n para descargar
+        # Botón para descargar
         if st.button(f"Descargar registros sin {campos_disponibles[campo_seleccionado].lower()}"):
             csv = df_tabla_filtrada.to_csv(index=False)
             st.download_button(
