@@ -1394,9 +1394,9 @@ with tab10:
     
     # Definir horarios de ventanilla por área
     horarios_ventanilla = {
-        'Pediatría': {'inicio': '08:00', 'fin': '14:00'},
-        'Obstetricia': {'inicio': '08:00', 'fin': '13:00'},
-        'Guardia Vieja': {'inicio': '08:00', 'fin': '13:30'}
+        'PEDIATRIA': {'inicio': '08:00', 'fin': '14:00'},
+        'OBSTETRICIA': {'inicio': '08:00', 'fin': '13:00'},
+        'GUARDIA PEDIATRICA': {'inicio': '08:00', 'fin': '13:30'}
     }
     
     # Filtrar solo datos del Hospital Materno
