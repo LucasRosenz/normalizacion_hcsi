@@ -35,6 +35,12 @@ df.loc[df['doctor'].str.contains(r'CONSULTORIO\s+\d+', case=False, na=False), 'd
    - **Ejemplo**: `"Sáb"` → `"Sábado"`
    - **Implementación**: `df['dia'].replace({'Sáb': 'Sábado'})` en `agendas.py`, método `procesar_directorio`
 
+3. **Procedimientos médicos como doctor**: Si el valor es exactamente una sigla de procedimiento médico → se asigna campo vacío `''`
+   - **Patrones detectados**: `ECG`, `EKG`, `RX`, `LAB`, `LABORATORIO`, `RADIOLOGIA`, `ECOGRAFIA`, `TAC`, `RMN`, `PREOCUPACIONAL`
+   - **Motivo**: Las siglas de procedimientos y tipos de exámenes no son nombres de doctores
+   - **Ejemplo**: `"ECG"` → `""`, `"PREOCUPACIONAL"` → `""`
+   - **Implementación**: Lista de procedimientos médicos con comparación exacta en `agendas.py`, método `extraer_componentes_agenda`
+
 ---
 
 ## 2. Variable: ÁREA
@@ -97,6 +103,7 @@ df['dia'] = df['dia'].replace({'Sáb': 'Sábado'})
 - **29/07/2025**: Actualización para incluir sección "Reglas de Asignación" en lugar de solo valores únicos
 - **29/07/2025**: **Corrección #1** - Variable DOCTOR: Agregada regla para detectar y corregir "CONSULTORIO + número" como doctor incorrecta. Implementación en `agendas.py`, método `extraer_componentes_agenda`
 - **29/07/2025**: **Corrección #2** - Variable DIA: Agregada normalización de "Sáb" → "Sábado" para mantener consistencia. Movido de `app_agendas.py` a `agendas.py`, método `procesar_directorio`
+- **29/07/2025**: **Corrección #3** - Variable DOCTOR: Agregada regla para detectar procedimientos médicos (ECG, RX, LAB, etc.) que aparecen incorrectamente como doctores. Implementación en `agendas.py`, método `extraer_componentes_agenda`
 
 ---
 

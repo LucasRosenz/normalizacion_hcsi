@@ -178,6 +178,11 @@ class AgendaNormalizer:
         if doctor and re.search(r'CONSULTORIO\s+\d+', doctor, re.IGNORECASE):
             doctor = ""
         
+        # Corrección #3: Procedimientos/siglas médicas no son doctores
+        procedimientos_medicos = ['ECG', 'EKG', 'RX', 'LAB', 'LABORATORIO', 'RADIOLOGIA', 'ECOGRAFIA', 'TAC', 'RMN', 'PREOCUPACIONAL']
+        if doctor and any(proc.upper() == doctor.upper().strip() for proc in procedimientos_medicos):
+            doctor = ""
+        
         return {
             'doctor': doctor,
             'area': area,
