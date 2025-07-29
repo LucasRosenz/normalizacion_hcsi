@@ -565,11 +565,8 @@ class AgendaNormalizer:
         return nombre_base
     
     def exportar_consolidado(self, df: pd.DataFrame, archivo_salida: str):
-        """Exporta el DataFrame consolidado a Excel y CSV"""
+        """Exporta el DataFrame consolidado solo a CSV"""
         try:
-            # Exportar a Excel
-            df.to_excel(archivo_salida.replace('.csv', '.xlsx'), index=False)
-            
             # Exportar a CSV
             df.to_csv(archivo_salida, index=False, encoding='utf-8')
             
