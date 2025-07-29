@@ -12,26 +12,26 @@ from datetime import datetime
 def main():
     # Cambiar al directorio de datos
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    datos_dir = os.path.join(script_dir, '..', 'datos', 'csv_procesado')
-    os.chdir(datos_dir)
+    directorio_procesado = os.path.join(script_dir, '..', 'datos', 'csv_procesado')
+    directorio_backup = os.path.join(script_dir, '..', 'datos', 'backup')
     
-    # Buscar último backup
-    archivos_backup = glob.glob('agendas_consolidadas_backup_*.xlsx')
+    # Buscar último backup en la carpeta backup
+    archivos_backup = glob.glob(os.path.join(directorio_backup, 'agendas_consolidadas_backup_*.xlsx'))
     if not archivos_backup:
-        print("❌ No se encontraron archivos de backup")
+        print("❌ No se encontraron archivos de backup en datos/backup/")
         return
     
     archivos_backup.sort(reverse=True)
     archivo_backup = archivos_backup[0]
-    archivo_actual = 'agendas_consolidadas.xlsx'
+    archivo_actual = os.path.join(directorio_procesado, 'agendas_consolidadas.xlsx')
     
     if not os.path.exists(archivo_actual):
         print("❌ No se encontró agendas_consolidadas.xlsx")
         return
     
     print(f"🔍 Comparando:")
-    print(f"   Backup: {archivo_backup}")
-    print(f"   Actual: {archivo_actual}")
+    print(f"   Backup: {os.path.basename(archivo_backup)}")
+    print(f"   Actual: agendas_consolidadas.xlsx")
     print()
     
     try:
@@ -112,16 +112,16 @@ def main():
                     'cambios': cambios_agenda
                 })
     
-    # Generar reporte en archivo txt
+    # Generar reporte en archivo txt en la carpeta backup
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    archivo_reporte = f"reporte_cambios_{timestamp}.txt"
+    archivo_reporte = os.path.join(directorio_backup, f"reporte_cambios_{timestamp}.txt")
     
     with open(archivo_reporte, 'w', encoding='utf-8') as f:
         f.write("REPORTE DE CAMBIOS EN AGENDAS\n")
         f.write("=" * 50 + "\n\n")
         f.write(f"Fecha del reporte: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write(f"Archivo backup: {archivo_backup}\n")
-        f.write(f"Archivo actual: {archivo_actual}\n\n")
+        f.write(f"Archivo backup: {os.path.basename(archivo_backup)}\n")
+        f.write(f"Archivo actual: agendas_consolidadas.xlsx\n\n")
         f.write(f"Registros antes: {len(df_antes)}\n")
         f.write(f"Registros después: {len(df_despues)}\n\n")
         
@@ -159,7 +159,8 @@ def main():
         else:
             f.write("RESULTADO: No se detectaron cambios en las agendas\n")
     
-    print(f"📄 Reporte generado: {archivo_reporte}")
+    print(f"📄 Reporte generado: {os.path.basename(archivo_reporte)}")
+    print(f"📂 Ubicación: datos/backup/")
     if cambios_encontrados:
         print(f"🔄 Se encontraron {len(cambios_encontrados)} agendas con cambios")
     else:

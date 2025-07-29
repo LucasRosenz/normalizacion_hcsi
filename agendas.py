@@ -561,7 +561,12 @@ class AgendaNormalizer:
                             if len(partes) >= 2:
                                 apellido = partes[0].strip()
                                 nombre = partes[1].strip()
-                                doctor_limpio = f"{nombre} {apellido}"
+                                doctor_candidato = f"{nombre} {apellido}"
+                                
+                                # VERIFICAR TAMBIÉN después del procesamiento del formato
+                                es_procedimiento_procesado = any(proc.upper() == doctor_candidato.upper().strip() for proc in procedimientos_medicos)
+                                if not es_procedimiento_procesado:
+                                    doctor_limpio = doctor_candidato
                             else:
                                 doctor_limpio = profesional
                         else:

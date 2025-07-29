@@ -1,0 +1,11 @@
+REPORTE DE CAMBIOS EN AGENDAS
+==================================================
+
+Fecha del reporte: 2025-07-29 17:49:17
+Archivo backup: agendas_consolidadas_backup_20250729_174901.xlsx
+Archivo actual: agendas_consolidadas.xlsx
+
+Registros antes: 2441
+Registros después: 2441
+
+RESULTADO: No se detectaron cambios en las agendas
