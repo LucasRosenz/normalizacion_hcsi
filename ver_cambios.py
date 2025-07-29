@@ -10,6 +10,7 @@ import glob
 from datetime import datetime
 
 def encontrar_ultimo_backup():
+    os.chdir('datos/csv_procesado')
     """Encuentra el backup más reciente"""
     archivos_backup = glob.glob('agendas_consolidadas_backup_*.xlsx')
     if not archivos_backup:
@@ -21,6 +22,8 @@ def encontrar_ultimo_backup():
     return archivos_backup[0]
 
 def comparar_cambios():
+    os.chdir('datos/csv_procesado')
+
     """Compara el archivo actual con el último backup"""
     
     # Buscar archivos
@@ -41,6 +44,8 @@ def comparar_cambios():
     
     # Cargar archivos
     try:
+        os.chdir('datos/csv_procesado')
+
         df_antes = pd.read_excel(archivo_backup)
         df_despues = pd.read_excel(archivo_actual)
     except Exception as e:

@@ -8,6 +8,8 @@ import os
 from datetime import datetime
 
 def crear_backup():
+    os.chdir('datos/csv_procesado')
+
     archivo_actual = 'agendas_consolidadas.xlsx'
     
     if not os.path.exists(archivo_actual):
