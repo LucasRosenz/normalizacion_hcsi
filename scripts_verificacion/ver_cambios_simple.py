@@ -96,30 +96,46 @@ def main():
                     'cambios': cambios_agenda
                 })
     
-    # Mostrar resultados
+    # Generar reporte en archivo txt
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    archivo_reporte = f"reporte_cambios_{timestamp}.txt"
+    
+    with open(archivo_reporte, 'w', encoding='utf-8') as f:
+        f.write("REPORTE DE CAMBIOS EN AGENDAS\n")
+        f.write("=" * 50 + "\n\n")
+        f.write(f"Fecha del reporte: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Archivo backup: {archivo_backup}\n")
+        f.write(f"Archivo actual: {archivo_actual}\n\n")
+        f.write(f"Registros antes: {len(df_antes)}\n")
+        f.write(f"Registros después: {len(df_despues)}\n\n")
+        
+        if cambios_encontrados:
+            f.write(f"RESUMEN: Se encontraron {len(cambios_encontrados)} agendas con cambios\n\n")
+            
+            # Resumen por tipo de cambio
+            cambios_doctor = sum(1 for c in cambios_encontrados if any('Doctor:' in cambio for cambio in c['cambios']))
+            cambios_area = sum(1 for c in cambios_encontrados if any('Área:' in cambio for cambio in c['cambios']))
+            cambios_tipo = sum(1 for c in cambios_encontrados if any('Tipo:' in cambio for cambio in c['cambios']))
+            
+            f.write("TIPOS DE CAMBIOS:\n")
+            f.write(f"• Doctor: {cambios_doctor} agendas\n")
+            f.write(f"• Área: {cambios_area} agendas\n") 
+            f.write(f"• Tipo de turno: {cambios_tipo} agendas\n\n")
+            
+            f.write("DETALLE DE CAMBIOS:\n")
+            f.write("-" * 30 + "\n\n")
+            
+            for i, cambio in enumerate(cambios_encontrados):
+                f.write(f"{i+1}. {cambio['agenda']}\n")
+                for detalle in cambio['cambios']:
+                    f.write(f"   └─ {detalle}\n")
+                f.write("\n")
+        else:
+            f.write("RESULTADO: No se detectaron cambios en las agendas\n")
+    
+    print(f"📄 Reporte generado: {archivo_reporte}")
     if cambios_encontrados:
-        print(f"🔄 Se encontraron {len(cambios_encontrados)} agendas con cambios:")
-        print()
-        
-        # Resumen por tipo de cambio
-        cambios_doctor = sum(1 for c in cambios_encontrados if any('Doctor:' in cambio for cambio in c['cambios']))
-        cambios_area = sum(1 for c in cambios_encontrados if any('Área:' in cambio for cambio in c['cambios']))
-        cambios_tipo = sum(1 for c in cambios_encontrados if any('Tipo:' in cambio for cambio in c['cambios']))
-        
-        print("📊 Resumen de cambios:")
-        print(f"   • Doctor: {cambios_doctor} agendas")
-        print(f"   • Área: {cambios_area} agendas") 
-        print(f"   • Tipo de turno: {cambios_tipo} agendas")
-        print()
-        
-        for i, cambio in enumerate(cambios_encontrados[:15]):  # Mostrar máximo 15
-            print(f"{i+1}. {cambio['agenda']}")
-            for detalle in cambio['cambios']:
-                print(f"   └─ {detalle}")
-            print()
-        
-        if len(cambios_encontrados) > 15:
-            print(f"   ... y {len(cambios_encontrados) - 15} más")
+        print(f"🔄 Se encontraron {len(cambios_encontrados)} agendas con cambios")
     else:
         print("✅ No se detectaron cambios en las agendas")
 
