@@ -173,6 +173,11 @@ class AgendaNormalizer:
                 tipo_turno = tipo_nombre
                 break
         
+        # Limpiar campo doctor - reglas de corrección manual
+        # Corrección #1: Los consultorios no son doctores, sino ubicaciones físicas
+        if doctor and re.search(r'CONSULTORIO\s+\d+', doctor, re.IGNORECASE):
+            doctor = ""
+        
         return {
             'doctor': doctor,
             'area': area,
@@ -400,6 +405,11 @@ class AgendaNormalizer:
         # Consolidar todos los archivos
         if archivos_procesados:
             df_consolidado = pd.concat(archivos_procesados, ignore_index=True)
+            
+            # Aplicar normalizaciones post-procesamiento
+            # Corrección #2: Normalizar días de la semana (corregir "Sáb" -> "Sábado")
+            df_consolidado['dia'] = df_consolidado['dia'].replace({'Sáb': 'Sábado'})
+            
             return df_consolidado
         
         return pd.DataFrame()
