@@ -148,7 +148,8 @@ class AgendaNormalizer:
                     'ADULTOS', 'ADULTO', 'INFANTIL', 'INFANTILES', 'NINOS', 'NIÑOS',
                     'ADOLESCENTES', 'DISCAPACIDAD', 'REHABILITACION', 'REHABILITACIÓN',
                     'PEDIATRICA', 'PEDIÁTRICA', 'CLINICA', 'CLÍNICA', 'EXTERNA',
-                    'CONSULTORIO', 'SALA', 'BOX', 'QUIROFANO', 'QUIRÓFANO'
+                    'CONSULTORIO', 'SALA', 'BOX', 'QUIROFANO', 'QUIRÓFANO',
+                    'ECG', 'EKG', 'RX', 'LAB', 'LABORATORIO', 'RADIOLOGIA', 'ECOGRAFIA', 'TAC', 'RMN'
                 ]
                 
                 # Verificar si es un consultorio/sala/ubicación con número o palabra identificativa
@@ -544,8 +545,17 @@ class AgendaNormalizer:
                     es_solo_numero = re.match(r'^\d+$', profesional.strip())
                     contiene_ubicacion = re.search(r'\b(?:CONSULTORIO|SALA|BOX|QUIROFANO|QUIRÓFANO|PISO|PLANTA)\b', profesional.upper())
                     
-                    # Solo procesar si no es una ubicación
-                    if not es_ubicacion and not es_solo_numero and not contiene_ubicacion:
+                    # Verificar si es un procedimiento médico y no un doctor real
+                    procedimientos_medicos = [
+                        'ECG', 'EKG', 'RX', 'LAB', 'LABORATORIO', 'RADIOLOGIA', 'ECOGRAFIA', 'TAC', 'RMN', 'PREOCUPACIONAL',
+                        'QUIROFANO', 'CURACIONES', 'PLASTICA', 'TORAX', 'ADULTOS', 'NIÑOS HSI', 'GENERAL DOS', 'GENERAL UNO',
+                        'CABEZA Y CUELLO DOS', 'CABEZA Y CUELLO UNO', 'COLOPROCTOLOGIA UNO', 'COLOPROCTOLOGIA DOS',
+                        '173 TECNICO', '200 TECNICO', '233 TECNICO', '122 TECNICO', 'CARDIO RESIDENTES', 'DIABETOLOGIA PRODIABA'
+                    ]
+                    es_procedimiento = any(proc.upper() == profesional.upper().strip() for proc in procedimientos_medicos)
+                    
+                    # Solo procesar si no es una ubicación ni un procedimiento médico
+                    if not es_ubicacion and not es_solo_numero and not contiene_ubicacion and not es_procedimiento:
                         if "," in profesional:
                             partes = profesional.split(",")
                             if len(partes) >= 2:
