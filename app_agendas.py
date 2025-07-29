@@ -1480,6 +1480,25 @@ with tab10:
             # Análisis detallado por ventanilla
             st.subheader("Análisis detallado por Ventanilla")
             
+            # Definir horarios laborales estándar para el análisis
+            hora_inicio_laboral = 8
+            hora_fin_laboral = 18
+            
+            # Función para verificar si un horario está fuera del horario laboral
+            def es_horario_no_laboral(hora_inicio_str, hora_fin_str):
+                try:
+                    if pd.isna(hora_inicio_str) or pd.isna(hora_fin_str):
+                        return False
+                    
+                    # Convertir horas a números
+                    inicio = pd.to_datetime(hora_inicio_str, format='%H:%M').hour + pd.to_datetime(hora_inicio_str, format='%H:%M').minute / 60
+                    fin = pd.to_datetime(hora_fin_str, format='%H:%M').hour + pd.to_datetime(hora_fin_str, format='%H:%M').minute / 60
+                    
+                    # Verificar si está fuera del horario laboral
+                    return inicio < hora_inicio_laboral or fin > hora_fin_laboral
+                except:
+                    return False
+            
             for ventanilla in sorted(df_con_ventanilla['ventanilla'].unique()):
                 st.markdown(f"### {ventanilla}")
                 
@@ -1524,8 +1543,109 @@ with tab10:
                         else:
                             st.write("• Sin información de horarios")
                 
+                # Análisis de horarios no laborales para esta ventanilla
+                st.markdown("#### Control de Horarios No Laborales")
+                
+                # Filtrar registros con horarios válidos
+                df_ventanilla_con_horarios = df_ventanilla[
+                    df_ventanilla['hora_inicio'].notna() & 
+                    df_ventanilla['hora_fin'].notna()
+                ]
+                
+                if not df_ventanilla_con_horarios.empty:
+                    # Aplicar función de verificación
+                    df_ventanilla_con_horarios = df_ventanilla_con_horarios.copy()
+                    df_ventanilla_con_horarios['horario_no_laboral'] = df_ventanilla_con_horarios.apply(
+                        lambda row: es_horario_no_laboral(row['hora_inicio'], row['hora_fin']), axis=1
+                    )
+                    
+                    # Filtrar agendas fuera de horario
+                    df_no_laborales_ventanilla = df_ventanilla_con_horarios[df_ventanilla_con_horarios['horario_no_laboral']]
+                    
+                    # Métricas de cumplimiento horario
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        total_con_horarios = len(df_ventanilla_con_horarios)
+                        st.metric(f"Con horarios definidos", total_con_horarios)
+                    
+                    with col2:
+                        total_no_laborales = len(df_no_laborales_ventanilla)
+                        porcentaje_no_laboral = (total_no_laborales/total_con_horarios*100) if total_con_horarios > 0 else 0
+                        st.metric(
+                            f"Fuera de horario laboral",
+                            total_no_laborales,
+                            delta=f"{porcentaje_no_laboral:.1f}%"
+                        )
+                    
+                    with col3:
+                        total_laborales = total_con_horarios - total_no_laborales
+                        porcentaje_laboral = (total_laborales/total_con_horarios*100) if total_con_horarios > 0 else 0
+                        st.metric(
+                            f"En horario laboral",
+                            total_laborales,
+                            delta=f"{porcentaje_laboral:.1f}%"
+                        )
+                    
+                    # Mostrar tabla de agendas fuera de horario si existen
+                    if not df_no_laborales_ventanilla.empty:
+                        st.warning(f"Se encontraron {total_no_laborales} agendas fuera del horario laboral estándar (8:00 - 18:00)")
+                        
+                        # Tabla detallada de agendas fuera de horario
+                        tabla_no_laborales = df_no_laborales_ventanilla.groupby('nombre_original_agenda').agg({
+                            'doctor': 'first',
+                            'dia': lambda x: ', '.join(sorted(x.unique())),
+                            'hora_inicio': lambda x: f"{x.min()}",
+                            'hora_fin': lambda x: f"{x.max()}",
+                            'tipo_turno': lambda x: ', '.join(x.dropna().unique()) if x.notna().any() else 'N/A',
+                            'efector': 'first'
+                        }).reset_index()
+                        
+                        tabla_no_laborales.columns = ['Agenda', 'Doctor', 'Días', 'Hora Inicio', 'Hora Fin', 'Tipos de Turno', 'Centro']
+                        tabla_no_laborales = tabla_no_laborales.sort_values('Hora Inicio')
+                        
+                        # Agregar columna de observaciones
+                        def generar_observacion(row):
+                            observaciones = []
+                            try:
+                                inicio = pd.to_datetime(row['Hora Inicio'], format='%H:%M').hour
+                                fin = pd.to_datetime(row['Hora Fin'], format='%H:%M').hour
+                                
+                                if inicio < hora_inicio_laboral:
+                                    observaciones.append(f"Inicia antes de {hora_inicio_laboral}:00")
+                                if fin > hora_fin_laboral:
+                                    observaciones.append(f"Termina después de {hora_fin_laboral}:00")
+                            except:
+                                observaciones.append("Error en formato horario")
+                            
+                            return " | ".join(observaciones)
+                        
+                        tabla_no_laborales['Observaciones'] = tabla_no_laborales.apply(generar_observacion, axis=1)
+                        
+                        st.dataframe(
+                            tabla_no_laborales,
+                            use_container_width=True,
+                            hide_index=True
+                        )
+                        
+                        # Opción de descarga específica para esta ventanilla
+                        csv_no_laborales = tabla_no_laborales.to_csv(index=False)
+                        st.download_button(
+                            label=f"Descargar horarios no laborales - {ventanilla}",
+                            data=csv_no_laborales,
+                            file_name=f"horarios_no_laborales_{ventanilla.replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                            mime="text/csv",
+                            key=f"download_no_laborales_{ventanilla}"
+                        )
+                        
+                    else:
+                        st.success(f"Todas las agendas de {ventanilla} están dentro del horario laboral estándar (8:00 - 18:00)")
+                
+                else:
+                    st.info("No hay registros con información de horarios para analizar el cumplimiento laboral")
+                
                 # Tabla detallada de agendas en esta ventanilla
-                with st.expander(f"Ver detalle de agendas en {ventanilla}"):
+                with st.expander(f"Ver todas las agendas de {ventanilla}"):
                     tabla_detalle = df_ventanilla.groupby('nombre_original_agenda').agg({
                         'doctor': 'first',
                         'dia': lambda x: ', '.join(sorted(x.unique())),
@@ -1582,151 +1702,6 @@ with tab10:
                 mime="text/csv"
             )
         
-        # Análisis de horarios fuera del horario laboral por ventanilla
-        st.markdown("---")
-        st.subheader("Análisis de Horarios No Laborales por Ventanilla")
-        
-        # Definir horarios laborales estándar (8:00 - 18:00)
-        hora_inicio_laboral = 8
-        hora_fin_laboral = 18
-        
-        # Función para verificar si un horario está fuera del horario laboral
-        def es_horario_no_laboral(hora_inicio_str, hora_fin_str):
-            try:
-                if pd.isna(hora_inicio_str) or pd.isna(hora_fin_str):
-                    return False
-                
-                # Convertir horas a números
-                inicio = pd.to_datetime(hora_inicio_str, format='%H:%M').hour + pd.to_datetime(hora_inicio_str, format='%H:%M').minute / 60
-                fin = pd.to_datetime(hora_fin_str, format='%H:%M').hour + pd.to_datetime(hora_fin_str, format='%H:%M').minute / 60
-                
-                # Verificar si está fuera del horario laboral
-                return inicio < hora_inicio_laboral or fin > hora_fin_laboral
-            except:
-                return False
-        
-        # Crear columna para identificar horarios no laborales
-        df_con_ventanilla['horario_no_laboral'] = df_con_ventanilla.apply(
-            lambda row: es_horario_no_laboral(row['hora_inicio'], row['hora_fin']), axis=1
-        )
-        
-        # Filtrar solo registros con información de horarios
-        df_con_horarios = df_con_ventanilla[
-            df_con_ventanilla['hora_inicio'].notna() & 
-            df_con_ventanilla['hora_fin'].notna()
-        ]
-        
-        if not df_con_horarios.empty:
-            st.info(f"📋 Horario laboral estándar considerado: {hora_inicio_laboral}:00 - {hora_fin_laboral}:00")
-            
-            # Resumen general de horarios no laborales
-            total_con_horarios = len(df_con_horarios)
-            total_no_laborales = len(df_con_horarios[df_con_horarios['horario_no_laboral']])
-            
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                st.metric(
-                    "Total con horarios",
-                    total_con_horarios
-                )
-            
-            with col2:
-                st.metric(
-                    "Horarios no laborales",
-                    total_no_laborales,
-                    delta=f"{(total_no_laborales/total_con_horarios*100):.1f}%" if total_con_horarios > 0 else "0%"
-                )
-            
-            with col3:
-                st.metric(
-                    "Horarios laborales",
-                    total_con_horarios - total_no_laborales,
-                    delta=f"{((total_con_horarios - total_no_laborales)/total_con_horarios*100):.1f}%" if total_con_horarios > 0 else "0%"
-                )
-            
-            # Análisis por ventanilla
-            for ventanilla in sorted(df_con_horarios['ventanilla'].unique()):
-                st.markdown(f"#### {ventanilla} - Horarios No Laborales")
-                
-                df_ventanilla_horarios = df_con_horarios[df_con_horarios['ventanilla'] == ventanilla]
-                df_no_laborales = df_ventanilla_horarios[df_ventanilla_horarios['horario_no_laboral']]
-                
-                if not df_no_laborales.empty:
-                    # Métricas de la ventanilla
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        total_ventanilla = len(df_ventanilla_horarios)
-                        no_laborales_ventanilla = len(df_no_laborales)
-                        st.metric(
-                            f"Agendas fuera de horario",
-                            no_laborales_ventanilla,
-                            delta=f"{(no_laborales_ventanilla/total_ventanilla*100):.1f}% del total de {ventanilla}" if total_ventanilla > 0 else "0%"
-                        )
-                    
-                    with col2:
-                        if no_laborales_ventanilla > 0:
-                            # Calcular horario más temprano y más tardío
-                            hora_mas_temprana = df_no_laborales['hora_inicio'].min()
-                            hora_mas_tardia = df_no_laborales['hora_fin'].max()
-                            st.metric(
-                                "Rango no laboral",
-                                f"{hora_mas_temprana} - {hora_mas_tardia}"
-                            )
-                    
-                    # Tabla detallada de agendas fuera de horario
-                    tabla_no_laborales = df_no_laborales.groupby('nombre_original_agenda').agg({
-                        'doctor': 'first',
-                        'dia': lambda x: ', '.join(sorted(x.unique())),
-                        'hora_inicio': lambda x: f"{x.min()}",
-                        'hora_fin': lambda x: f"{x.max()}",
-                        'tipo_turno': lambda x: ', '.join(x.dropna().unique()) if x.notna().any() else 'N/A'
-                    }).reset_index()
-                    
-                    tabla_no_laborales.columns = ['Agenda', 'Doctor', 'Días', 'Hora Inicio', 'Hora Fin', 'Tipos de Turno']
-                    tabla_no_laborales = tabla_no_laborales.sort_values('Hora Inicio')
-                    
-                    # Agregar columna de observaciones
-                    def generar_observacion(row):
-                        observaciones = []
-                        try:
-                            inicio = pd.to_datetime(row['Hora Inicio'], format='%H:%M').hour
-                            fin = pd.to_datetime(row['Hora Fin'], format='%H:%M').hour
-                            
-                            if inicio < hora_inicio_laboral:
-                                observaciones.append(f"Inicia antes de {hora_inicio_laboral}:00")
-                            if fin > hora_fin_laboral:
-                                observaciones.append(f"Termina después de {hora_fin_laboral}:00")
-                        except:
-                            observaciones.append("Error en formato horario")
-                        
-                        return " | ".join(observaciones)
-                    
-                    tabla_no_laborales['Observaciones'] = tabla_no_laborales.apply(generar_observacion, axis=1)
-                    
-                    st.dataframe(
-                        tabla_no_laborales,
-                        use_container_width=True,
-                        hide_index=True
-                    )
-                    
-                    # Opción de descarga para esta ventanilla
-                    csv_no_laborales = tabla_no_laborales.to_csv(index=False)
-                    st.download_button(
-                        label=f"Descargar horarios no laborales - {ventanilla}",
-                        data=csv_no_laborales,
-                        file_name=f"horarios_no_laborales_{ventanilla.replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                        mime="text/csv",
-                        key=f"download_{ventanilla}"
-                    )
-                else:
-                    st.success(f"✅ Todas las agendas de {ventanilla} están dentro del horario laboral estándar")
-                
-                st.markdown("---")
-        else:
-            st.warning("No hay registros con información de horarios para analizar")
-        
         # Resumen de cobertura
         st.markdown("---")
         st.subheader("Resumen de Cobertura del Sistema de Ventanillas")
@@ -1753,11 +1728,11 @@ with tab10:
         if total_registros > 0:
             cobertura_pct = (len(df_con_ventanilla) / total_registros) * 100
             if cobertura_pct >= 80:
-                st.success(f"✅ Excelente cobertura: {cobertura_pct:.1f}% de los registros tienen ventanilla asignada")
+                st.success(f"Excelente cobertura: {cobertura_pct:.1f}% de los registros tienen ventanilla asignada")
             elif cobertura_pct >= 60:
-                st.warning(f"⚠️ Cobertura moderada: {cobertura_pct:.1f}% de los registros tienen ventanilla asignada")
+                st.warning(f"Cobertura moderada: {cobertura_pct:.1f}% de los registros tienen ventanilla asignada")
             else:
-                st.error(f"❌ Cobertura baja: {cobertura_pct:.1f}% de los registros tienen ventanilla asignada")
+                st.error(f"Cobertura baja: {cobertura_pct:.1f}% de los registros tienen ventanilla asignada")
 
 # Footer
 st.markdown("---")
