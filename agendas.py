@@ -12,7 +12,7 @@ class AgendaNormalizer:
     def __init__(self):
         self.df_consolidado = pd.DataFrame(columns=[
             'agenda_id', 'nombre_original_agenda', 'doctor', 'area', 'tipo_turno', 
-            'dia', 'hora_inicio', 'hora_fin', 'efector'
+            'dia', 'hora_inicio', 'hora_fin', 'efector', 'ventanilla'
         ])
         
     def extraer_componentes_agenda(self, nombre_agenda: str) -> Dict[str, str]:
@@ -178,8 +178,13 @@ class AgendaNormalizer:
         if doctor and re.search(r'CONSULTORIO\s+\d+', doctor, re.IGNORECASE):
             doctor = ""
         
-        # Corrección #3: Procedimientos/siglas médicas no son doctores
-        procedimientos_medicos = ['ECG', 'EKG', 'RX', 'LAB', 'LABORATORIO', 'RADIOLOGIA', 'ECOGRAFIA', 'TAC', 'RMN', 'PREOCUPACIONAL']
+        # Corrección #3: Procedimientos/siglas médicas y términos técnicos no son doctores
+        procedimientos_medicos = [
+            'ECG', 'EKG', 'RX', 'LAB', 'LABORATORIO', 'RADIOLOGIA', 'ECOGRAFIA', 'TAC', 'RMN', 'PREOCUPACIONAL',
+            'QUIROFANO', 'CURACIONES', 'PLASTICA', 'TORAX', 'ADULTOS', 'NIÑOS HSI', 'GENERAL DOS', 'GENERAL UNO',
+            'CABEZA Y CUELLO DOS', 'CABEZA Y CUELLO UNO', 'COLOPROCTOLOGIA UNO', 'COLOPROCTOLOGIA DOS',
+            '173 TECNICO', '200 TECNICO', '233 TECNICO', '122 TECNICO', 'CARDIO RESIDENTES', 'DIABETOLOGIA PRODIABA'
+        ]
         if doctor and any(proc.upper() == doctor.upper().strip() for proc in procedimientos_medicos):
             doctor = ""
         
@@ -358,8 +363,13 @@ class AgendaNormalizer:
                     'dia': dia,
                     'hora_inicio': hora_inicio,
                     'hora_fin': hora_fin,
-                    'efector': efector
+                    'efector': efector,
+                    'ventanilla': ''  # Nueva variable Ventanilla (vacía por ahora)
                 }
+                
+                # Asignar ventanilla para Hospital Materno
+                if efector == 'Hospital Materno':
+                    registro['ventanilla'] = self.asignar_ventanilla_hospital_materno(componentes['area'])
                 
                 # Agregar agenda_id si se proporciona
                 if agenda_id:
@@ -512,12 +522,22 @@ class AgendaNormalizer:
                     'dia': dia,
                     'hora_inicio': hora_inicio,
                     'hora_fin': hora_fin,
-                    'efector': 'HCSI'
+                    'efector': 'HCSI',
+                    'ventanilla': ''  # Nueva variable Ventanilla (vacía por ahora)
                 }
                 
                 registros.append(registro)
             
-            return pd.DataFrame(registros)
+            # Crear DataFrame
+            df = pd.DataFrame(registros)
+            
+            # Asignar ventanillas para Hospital Materno (HCSI incluye Hospital Materno)
+            # Nota: En los datos CSV, algunos efectores pueden ser Hospital Materno
+            for idx, row in df.iterrows():
+                if 'MATERNO' in str(row.get('efector', '')).upper():
+                    df.at[idx, 'ventanilla'] = self.asignar_ventanilla_hospital_materno(row['area'])
+            
+            return df
             
         except Exception as e:
             print(f"Error procesando archivo HCSI CSV: {e}")
@@ -564,7 +584,53 @@ class AgendaNormalizer:
         
         return nombre_base
     
-    def exportar_consolidado(self, df: pd.DataFrame, archivo_salida: str):
+    def asignar_ventanilla_hospital_materno(self, area: str) -> str:
+        """
+        Asigna ventanilla según el área médica para Hospital Materno
+        Basado en el archivo ventanillas_materno.xlsx
+        """
+        if not area:
+            return ""
+        
+        area_upper = area.upper().strip()
+        
+        # Ventanilla PEDIATRIA
+        ventanilla_a = [
+            'PEDIATRIA', 'ADOLESCENCIA', 'ALERGIA', 'ALTO RIESGO', 'DEGLUCION',
+            'CARDIOLOGIA INFANTIL', 'ENDOCRINOLOGIA', 'ESPEIROMETRIA', 'FONOAUDIOLOGIA',
+            'GASTROENTEROLOGIA', 'HEPATOLOGIA', 'GENETICA INFANTIL', 'INFANTO JUVENIL',
+            'INFECTOLOGIA INFANTIL', 'MEDIANO RIESGO', 'NEFROLOGIA', 'NEUMOLOGIA',
+            'NEUROLOGIA', 'ELECTROENCEFALOGRAMA', 'NUTRICION', 'OAES- PEAT',
+            'OFTAMOLOGIA', 'RESIDENTES PEDIATRIA (POST ALTA)', 'RESIDENTES NIÑO SANO',
+            'PSICOLOGIA', 'PSIQUIATRIA', 'TBC (TUBERCULOSIS)'
+        ]
+        
+        # Ventanilla GUARDIA VIEJA
+        ventanilla_b = [
+            'GUARDIA VIEJA', 'TRAUMATOLOGIA', 'DERMATOLOGIA', 'CIRUGIA', 'UROLOGIA',
+            'CRANEO FACIAL', 'OTORRINO', 'AUDIOMETRIA', 'KINESIOLOGIA', 'CIRUGIA PLASTICA'
+        ]
+        
+        # Ventanilla OBSTETRICIA
+        ventanilla_c = [
+            'OBSTETRICIA', 'INFECTOLOGIA ADULTOS', 'TRACTO GENITAL (PAP)', 'CARDIOLOGIA',
+            'PUERPERIO', 'OBSTETRICIA ALTO RIESGO', 'OBSTETRICIA BAJO RIESGO',
+            'RESIDENTES 1º VEZ', 'GINECOLOGIA QUIRURGICA', 'GENETICA', 'INFANTO JUVENIL',
+            'ELECTROCARDIOGRAMA', 'PSICOLOGIA', 'ODONTOLOGIA', 'NUTRICION',
+            'DIABETOLOGIA', 'PLANIFICACION FAMILIAR', 'HEMOTERAPIA'
+        ]
+        
+        # Verificar asignación de ventanilla
+        if area_upper in ventanilla_a:
+            return "PEDIATRIA"
+        elif area_upper in ventanilla_b:
+            return "GUARDIA VIEJA"
+        elif area_upper in ventanilla_c:
+            return "OBSTETRICIA"
+        else:
+            return ""  # No asignada
+    
+    def exportar_consolidado(self, df: pd.DataFrame, archivo_salida: str = 'agendas_consolidadas.csv'):
         """Exporta el DataFrame consolidado solo a CSV"""
         try:
             # Exportar a CSV
@@ -736,8 +802,14 @@ class AgendaNormalizer:
                         'dia': dia,
                         'hora_inicio': hora_inicio,
                         'hora_fin': hora_fin,
-                        'efector': efector
+                        'efector': efector,
+                        'ventanilla': ''  # Nueva variable Ventanilla (vacía por ahora)
                     }
+                    
+                    # Asignar ventanilla para Hospital Materno
+                    if efector == 'Hospital Materno':
+                        registro['ventanilla'] = self.asignar_ventanilla_hospital_materno(componentes['area'])
+                    
                     registros.append(registro)
             
             i += 1

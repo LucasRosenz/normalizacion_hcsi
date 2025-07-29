@@ -35,11 +35,17 @@ df.loc[df['doctor'].str.contains(r'CONSULTORIO\s+\d+', case=False, na=False), 'd
    - **Ejemplo**: `"Sáb"` → `"Sábado"`
    - **Implementación**: `df['dia'].replace({'Sáb': 'Sábado'})` en `agendas.py`, método `procesar_directorio`
 
-3. **Procedimientos médicos como doctor**: Si el valor es exactamente una sigla de procedimiento médico → se asigna campo vacío `''`
-   - **Patrones detectados**: `ECG`, `EKG`, `RX`, `LAB`, `LABORATORIO`, `RADIOLOGIA`, `ECOGRAFIA`, `TAC`, `RMN`, `PREOCUPACIONAL`
-   - **Motivo**: Las siglas de procedimientos y tipos de exámenes no son nombres de doctores
-   - **Ejemplo**: `"ECG"` → `""`, `"PREOCUPACIONAL"` → `""`
-   - **Implementación**: Lista de procedimientos médicos con comparación exacta en `agendas.py`, método `extraer_componentes_agenda`
+3. **Procedimientos médicos como doctor**: Si el valor es exactamente una sigla de procedimiento médico, término técnico o descriptor de especialidad → se asigna campo vacío `''`
+   - **Patrones detectados**: 
+     - Procedimientos: `ECG`, `EKG`, `RX`, `LAB`, `LABORATORIO`, `RADIOLOGIA`, `ECOGRAFIA`, `TAC`, `RMN`, `PREOCUPACIONAL`
+     - Ubicaciones/Equipos: `QUIROFANO`, `CURACIONES`, `PLASTICA`, `TORAX`
+     - Categorías de pacientes: `ADULTOS`, `NIÑOS HSI`
+     - Descriptores de especialidades: `GENERAL DOS`, `GENERAL UNO`, `CABEZA Y CUELLO DOS`, `CABEZA Y CUELLO UNO`, `COLOPROCTOLOGIA UNO`, `COLOPROCTOLOGIA DOS`
+     - Códigos técnicos: `173 TECNICO`, `200 TECNICO`, `233 TECNICO`, `122 TECNICO`
+     - Términos médicos específicos: `CARDIO RESIDENTES`, `DIABETOLOGIA PRODIABA`
+   - **Motivo**: Estos términos no son nombres de doctores sino descriptores técnicos, procedimientos, ubicaciones o categorías
+   - **Ejemplo**: `"ECG"` → `""`, `"PREOCUPACIONAL"` → `""`, `"QUIROFANO"` → `""`, `"ADULTOS"` → `""`
+   - **Implementación**: Lista ampliada de términos técnicos con comparación exacta en `agendas.py`, método `extraer_componentes_agenda`
 
 ---
 
@@ -98,12 +104,66 @@ df['dia'] = df['dia'].replace({'Sáb': 'Sábado'})
 
 ---
 
+## 6. Variable: VENTANILLA
+
+### Descripción:
+Variable que asigna ventanilla de atención específica para Hospital Materno basada en especialidad médica.
+
+### Procesamiento Actual:
+```python
+# Solo para Hospital Materno
+if efector == 'Hospital Materno':
+    registro['ventanilla'] = self.asignar_ventanilla_hospital_materno(componentes['area'])
+else:
+    registro['ventanilla'] = ''  # Vacía para otros efectores
+```
+
+### Lógica de Transformación:
+- **Hospital Materno**: Se asigna ventanilla según especialidad médica (PEDIATRIA, GUARDIA VIEJA, OBSTETRICIA)
+- **Otros efectores**: Campo vacío
+- **Áreas no reconocidas**: Campo vacío
+
+### Reglas de Asignación (Hospital Materno):
+
+#### PEDIATRIA - 113 registros asignados
+**Especialidades pediátricas e infanto-juveniles:**
+- PEDIATRIA, ADOLESCENCIA, ALERGIA, ALTO RIESGO, DEGLUCION
+- CARDIOLOGIA INFANTIL, ENDOCRINOLOGIA, ESPEIROMETRIA, FONOAUDIOLOGIA
+- GASTROENTEROLOGIA, HEPATOLOGIA, GENETICA INFANTIL, INFANTO JUVENIL
+- INFECTOLOGIA INFANTIL, MEDIANO RIESGO, NEFROLOGIA, NEUMOLOGIA
+- NEUROLOGIA, ELECTROENCEFALOGRAMA, NUTRICION, OAES- PEAT
+- OFTAMOLOGIA, RESIDENTES PEDIATRIA (POST ALTA), RESIDENTES NIÑO SANO
+- PSICOLOGIA, PSIQUIATRIA, TBC (TUBERCULOSIS)
+
+#### GUARDIA VIEJA - 38 registros asignados
+**Especialidades quirúrgicas y servicios generales:**
+- GUARDIA VIEJA, TRAUMATOLOGIA, DERMATOLOGIA, CIRUGIA, UROLOGIA
+- CRANEO FACIAL, OTORRINO, AUDIOMETRIA, KINESIOLOGIA, CIRUGIA PLASTICA
+
+#### OBSTETRICIA - 49 registros asignados
+**Especialidades obstétricas y ginecológicas:**
+- OBSTETRICIA, INFECTOLOGIA ADULTOS, TRACTO GENITAL (PAP), CARDIOLOGIA
+- PUERPERIO, OBSTETRICIA ALTO RIESGO, OBSTETRICIA BAJO RIESGO
+- RESIDENTES 1º VEZ, GINECOLOGIA QUIRURGICA, GENETICA, INFANTO JUVENIL
+- ELECTROCARDIOGRAMA, PSICOLOGIA, ODONTOLOGIA, NUTRICION
+- DIABETOLOGIA, PLANIFICACION FAMILIAR, HEMOTERAPIA
+
+### Implementación Técnica:
+- **Método**: `asignar_ventanilla_hospital_materno()` en `agendas.py`
+- **Lógica**: Comparación exacta del área médica (normalizada a mayúsculas) con listas predefinidas
+- **Basado en**: Archivo oficial `ventanillas_materno.xlsx`
+- **Cobertura**: 200 de 290 registros Hospital Materno (69% asignados)
+
+---
+
 ## Historial de Cambios
 - **29/07/2025**: Creación inicial del documento
 - **29/07/2025**: Actualización para incluir sección "Reglas de Asignación" en lugar de solo valores únicos
 - **29/07/2025**: **Corrección #1** - Variable DOCTOR: Agregada regla para detectar y corregir "CONSULTORIO + número" como doctor incorrecta. Implementación en `agendas.py`, método `extraer_componentes_agenda`
 - **29/07/2025**: **Corrección #2** - Variable DIA: Agregada normalización de "Sáb" → "Sábado" para mantener consistencia. Movido de `app_agendas.py` a `agendas.py`, método `procesar_directorio`
 - **29/07/2025**: **Corrección #3** - Variable DOCTOR: Agregada regla para detectar procedimientos médicos (ECG, RX, LAB, etc.) que aparecen incorrectamente como doctores. Implementación en `agendas.py`, método `extraer_componentes_agenda`
+- **19/12/2024**: **Implementación VENTANILLA** - Nueva variable para asignación de ventanillas Hospital Materno. Sistema de tres ventanillas (PEDIATRIA, GUARDIA VIEJA, OBSTETRICIA) basado en especialidades médicas. Implementación en `agendas.py`, método `asignar_ventanilla_hospital_materno`. Integrado en todos los métodos de procesamiento (_extraer_datos_horarios, _procesar_archivo_hcsi_csv, _procesar_formato_odontologico)
+- **19/12/2024**: **Actualización Dashboard Ventanillas** - Solapa "Ventanillas" actualizada para usar la nueva variable `ventanilla` en lugar de lógica hardcodeada. Incluye análisis por ventanilla, métricas de cobertura, y visualización de áreas sin asignar. Implementación en `app_agendas.py`, tab10
 
 ---
 
