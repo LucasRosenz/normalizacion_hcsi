@@ -4,6 +4,13 @@ import re
 from typing import List, Dict, Tuple, Optional
 import numpy as np
 
+# Para exportar a Excel
+try:
+    import openpyxl
+except ImportError:
+    print("Advertencia: openpyxl no está instalado. La exportación a Excel no estará disponible.")
+    print("Instale openpyxl con: pip install openpyxl")
+
 class AgendaNormalizer:
     """
     Clase para normalizar y consolidar agendas médicas de múltiples centros de salud
@@ -102,10 +109,14 @@ class AgendaNormalizer:
         
         # Buscar doctor - patrones mejorados
         doctor_patterns = [
+            # Patrón específico para "ESPECIALIDAD - DRA/DR NOMBRE APELLIDO - TIPO" (DEBE IR PRIMERO)
+            r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS?|PEDIATRIA|INFANTIL)?\s*-\s*DRA?\.\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*-\s*(?:EVENTUAL\s+)?(?:ESPONTANEA|PROGRAMADA)',
             # Patrón para DRA/DR seguido del nombre - detener antes de palabras clave
-            r'\bDRA?\.\s*([A-ZÁÉÍÓÚÑ].+?)(?:\s*-\s*(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
+            r'\bDRA?\.\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
             # Patrón para DOCTOR/DOCTORA seguido del nombre
-            r'\bDOCTOR[A]?\s+([A-ZÁÉÍÓÚÑ].+?)(?:\s*-\s*(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
+            r'\bDOCTOR[A]?\s+([A-ZÁÉÍÓÚÑ].+?)(?:\s*-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
+            # Patrón específico para formato "APELLIDO ,NOMBRE" después de tipo de turno
+            r'-\s*(?:A\s+LA\s+BREVEDAD|URGENCIA|PROGRAMADA|ESPONTANEA|ESPONTÁNEA)\s*-\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+\s*,\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)',
             # Patrón específico para LIC. EN PSICOLOGIA - buscar el nombre después de PSICOLOGIA
             r'\bLIC\.\s*EN\s+PSICOLOGIA\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+)*)',
             # Patrón específico para LIC. EN TRABAJO SOCIAL - buscar al final, con patrón más flexible
@@ -118,10 +129,8 @@ class AgendaNormalizer:
             r'\bLIC\.\s*EN\s+NUTRICION\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+)*)',
             # Patrón general para LIC. seguido directamente del nombre (sin especialidad)
             r'\bLIC\.\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)',
-            # Patrón para nombres al final después de guión
-            r'[-\s]+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)$',
-            # Patrón específico para "ESPECIALIDAD - NOMBRE APELLIDO - TIPO"
-            r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS|PEDIATRIA|INFANTIL)?\s*-\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*-\s*(?:ESPONTANEA|PROGRAMADA)',
+            # Patrón para nombres al final después de guión - solo nombres de personas (DEBE IR AL FINAL)
+            r'[-\s]+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)$',
         ]
         
         for pattern in doctor_patterns:
@@ -138,10 +147,21 @@ class AgendaNormalizer:
                     'BIS', 'DIU', 'IMPLANTE', 'EXTRACCION', 'COLOCACION', 'REUNION EQUIPO',
                     'ADULTOS', 'ADULTO', 'INFANTIL', 'INFANTILES', 'NINOS', 'NIÑOS',
                     'ADOLESCENTES', 'DISCAPACIDAD', 'REHABILITACION', 'REHABILITACIÓN',
-                    'PEDIATRICA', 'PEDIÁTRICA', 'CLINICA', 'CLÍNICA', 'EXTERNA'
+                    'PEDIATRICA', 'PEDIÁTRICA', 'CLINICA', 'CLÍNICA', 'EXTERNA',
+                    'CONSULTORIO', 'SALA', 'BOX', 'QUIROFANO', 'QUIRÓFANO'
                 ]
-                # Solo excluir si el nombre candidato es exactamente una de estas palabras o si es muy corto
-                if nombre_candidato.strip() and len(nombre_candidato.strip()) > 2:
+                
+                # Verificar si es un consultorio/sala/ubicación con número o palabra identificativa
+                es_ubicacion = re.match(r'^(?:CONSULTORIO|SALA|BOX|QUIROFANO|QUIRÓFANO|PISO|PLANTA)\s*(?:\d+|[A-Z]|\w+)$', nombre_candidato.upper().strip())
+                
+                # Verificar si contiene solo números o palabras que indican ubicación
+                es_solo_numero = re.match(r'^\d+$', nombre_candidato.strip())
+                
+                # Verificar patrones de ubicación específicos
+                contiene_ubicacion = re.search(r'\b(?:CONSULTORIO|SALA|BOX|QUIROFANO|QUIRÓFANO|PISO|PLANTA)\b', nombre_candidato.upper())
+                
+                # Solo procesar si no es una ubicación
+                if nombre_candidato.strip() and len(nombre_candidato.strip()) > 2 and not es_ubicacion and not es_solo_numero and not contiene_ubicacion:
                     # Verificar que no contenga palabras clave (no solo coincidencias exactas)
                     es_palabra_clave = any(palabra in nombre_candidato.upper().strip() for palabra in palabras_excluir)
                     # Verificar que no sea exactamente una palabra clave
@@ -150,28 +170,43 @@ class AgendaNormalizer:
                     if not es_palabra_clave and not es_exactamente_palabra_clave:
                         # Limpiar palabras específicas del final del nombre
                         nombre_limpio = re.sub(r'\s*-\s*(DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)\s*$', '', nombre_candidato, flags=re.IGNORECASE)
-                        doctor = nombre_limpio.strip()
+                        
+                        # Procesar formato "APELLIDO ,NOMBRE" y convertir a "NOMBRE APELLIDO"
+                        if ',' in nombre_limpio:
+                            partes = nombre_limpio.split(',')
+                            if len(partes) == 2:
+                                apellido = partes[0].strip()
+                                nombre = partes[1].strip()
+                                doctor = f"{nombre} {apellido}"
+                            else:
+                                doctor = nombre_limpio.strip()
+                        else:
+                            doctor = nombre_limpio.strip()
                         break
         
-        # Buscar tipo de turno - patrones mejorados
-        tipo_patterns = {
-            'GUARDIA': r'\bGUARDIA\b|\bGUARDIA\s+MEDICA\b|\bGUARDIAS\b',
-            'CAI/Espontánea': r'\bESPONTANEA\b|\bESPONTÁNEA\b|\bESPONTÃ_x0081_NEA\b|\bCAI\b',
-            'PROGRAMADA': r'\bPROGRAMADA\b|\bTURNO\s+PROGRAMADO\b|\bPROGRAMADO\b',
-            'SOBRETURNO': r'\bSOBRETURNO\b|\bSOBRETURNOS\b',
-            'URGENCIA': r'\bURGENCIA\b|\bURGENTE\b',
-            'CONTROL': r'\bCONTROL\b',
-            'INTERCONSULTA': r'\bINTERCONSULTA\b',
-            'CONSULTA EXTERNA': r'\bCONSULTA\s+EXTERNA\b|\bEXTERNA\b',
-            'TRATAMIENTO': r'\bTRATAMIENTO\b',
-            'GENERAL': r'\bGENERAL\b',
-            'PAP': r'\bPAP\b'
-        }
-        
-        for tipo_nombre, pattern in tipo_patterns.items():
-            if re.search(pattern, texto_upper):
-                tipo_turno = tipo_nombre
-                break
+        # Buscar tipo de turno - patrones mejorados con orden de prioridad
+        # IMPORTANTE: Verificar primero patrones más específicos como "A LA BREVEDAD"
+        if re.search(r'\bA\s+LA\s+BREVEDAD\b', texto_upper):
+            tipo_turno = 'A LA BREVEDAD'
+        else:
+            tipo_patterns = {
+                'GUARDIA': r'\bGUARDIA\b|\bGUARDIA\s+MEDICA\b|\bGUARDIAS\b',
+                'CAI/Espontánea': r'\bESPONTANEA\b|\bESPONTÁNEA\b|\bESPONTÃ_x0081_NEA\b|\bCAI\b',
+                'URGENCIA': r'\bURGENCIA\b|\bURGENTE\b',
+                'PROGRAMADA': r'\bPROGRAMADA\b|\bTURNO\s+PROGRAMADO\b|\bPROGRAMADO\b',
+                'SOBRETURNO': r'\bSOBRETURNO\b|\bSOBRETURNOS\b',
+                'CONTROL': r'\bCONTROL\b',
+                'INTERCONSULTA': r'\bINTERCONSULTA\b',
+                'CONSULTA EXTERNA': r'\bCONSULTA\s+EXTERNA\b|\bEXTERNA\b',
+                'TRATAMIENTO': r'\bTRATAMIENTO\b',
+                'GENERAL': r'\bGENERAL\b',
+                'PAP': r'\bPAP\b'
+            }
+            
+            for tipo_nombre, pattern in tipo_patterns.items():
+                if re.search(pattern, texto_upper):
+                    tipo_turno = tipo_nombre
+                    break
         
         # Limpiar campo doctor - reglas de corrección manual
         # Corrección #1: Los consultorios no son doctores, sino ubicaciones físicas
@@ -490,27 +525,37 @@ class AgendaNormalizer:
                 agenda_id = f"HCSI_{agenda_id_counter:03d}_{especialidad}"
                 
                 # Normalizar tipo de turno
+                # PRIORIDAD: Si la subespecialidad es "A LA BREVEDAD", usar ese como tipo de turno
                 tipo_turno_normalizado = ""
-                if tipo_turno_raw.upper() == "PROGRAMADO":
+                if subespecialidad and subespecialidad.upper().strip() == "A LA BREVEDAD":
+                    tipo_turno_normalizado = "A LA BREVEDAD"
+                elif tipo_turno_raw.upper() == "PROGRAMADO":
                     tipo_turno_normalizado = "PROGRAMADA"
                 elif tipo_turno_raw.upper() in ["ESPONTANEO", "ESPONTÁNEO"]:
                     tipo_turno_normalizado = "CAI/Espontánea"
                 else:
                     tipo_turno_normalizado = tipo_turno_raw.upper()
                 
-                # Limpiar nombre del profesional (remover formato "APELLIDO ,NOMBRE")
+                # Limpiar nombre del profesional (remover formato "APELLIDO ,NOMBRE") y verificar si es válido
                 doctor_limpio = ""
                 if profesional:
-                    if "," in profesional:
-                        partes = profesional.split(",")
-                        if len(partes) >= 2:
-                            apellido = partes[0].strip()
-                            nombre = partes[1].strip()
-                            doctor_limpio = f"{nombre} {apellido}"
+                    # Verificar si es una ubicación/consultorio y no un doctor real
+                    es_ubicacion = re.match(r'^(?:CONSULTORIO|SALA|BOX|QUIROFANO|QUIRÓFANO|PISO|PLANTA)\s*(?:\d+|[A-Z]|\w+)$', profesional.upper().strip())
+                    es_solo_numero = re.match(r'^\d+$', profesional.strip())
+                    contiene_ubicacion = re.search(r'\b(?:CONSULTORIO|SALA|BOX|QUIROFANO|QUIRÓFANO|PISO|PLANTA)\b', profesional.upper())
+                    
+                    # Solo procesar si no es una ubicación
+                    if not es_ubicacion and not es_solo_numero and not contiene_ubicacion:
+                        if "," in profesional:
+                            partes = profesional.split(",")
+                            if len(partes) >= 2:
+                                apellido = partes[0].strip()
+                                nombre = partes[1].strip()
+                                doctor_limpio = f"{nombre} {apellido}"
+                            else:
+                                doctor_limpio = profesional
                         else:
                             doctor_limpio = profesional
-                    else:
-                        doctor_limpio = profesional
                 
                 # Crear registro
                 registro = {
@@ -631,16 +676,50 @@ class AgendaNormalizer:
             return ""  # No asignada
     
     def exportar_consolidado(self, df: pd.DataFrame, archivo_salida: str = 'agendas_consolidadas.csv'):
-        """Exporta el DataFrame consolidado solo a CSV"""
+        """Exporta el DataFrame consolidado a CSV y Excel (mismos datos en ambos formatos)"""
         try:
             # Exportar a CSV
             df.to_csv(archivo_salida, index=False, encoding='utf-8')
+            print(f"Archivo CSV exportado a: {archivo_salida}")
             
-            print(f"Archivo consolidado exportado a: {archivo_salida}")
+            # Exportar a Excel (mismos datos que CSV)
+            archivo_excel = archivo_salida.replace('.csv', '.xlsx')
+            
+            # Crear el archivo Excel simple con formato básico
+            with pd.ExcelWriter(archivo_excel, engine='openpyxl') as writer:
+                # Una sola hoja con los mismos datos del CSV
+                df.to_excel(writer, sheet_name='Agendas Consolidadas', index=False)
+                
+                # Obtener el worksheet para aplicar formato básico
+                worksheet = writer.sheets['Agendas Consolidadas']
+                
+                # Ajustar ancho de columnas automáticamente
+                for column in worksheet.columns:
+                    max_length = 0
+                    column_letter = column[0].column_letter
+                    
+                    for cell in column:
+                        try:
+                            if len(str(cell.value)) > max_length:
+                                max_length = len(str(cell.value))
+                        except:
+                            pass
+                    
+                    # Establecer un ancho máximo razonable
+                    adjusted_width = min(max_length + 2, 50)
+                    worksheet.column_dimensions[column_letter].width = adjusted_width
+            
+            print(f"Archivo Excel exportado a: {archivo_excel}")
             print(f"Total de registros: {len(df)}")
             
         except Exception as e:
-            print(f"Error exportando archivo: {e}")
+            print(f"Error exportando archivos: {e}")
+            # Intentar exportar solo CSV como fallback
+            try:
+                df.to_csv(archivo_salida, index=False, encoding='utf-8')
+                print(f"Exportación de CSV exitosa como fallback: {archivo_salida}")
+            except Exception as e2:
+                print(f"Error crítico en exportación: {e2}")
     
     def generar_reporte(self, df: pd.DataFrame):
         """Genera un reporte estadístico de los datos consolidados"""
