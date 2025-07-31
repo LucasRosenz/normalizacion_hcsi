@@ -525,12 +525,9 @@ class AgendaNormalizer:
                 # Generar ID único
                 agenda_id = f"HCSI_{agenda_id_counter:03d}_{especialidad}"
                 
-                # Normalizar tipo de turno
-                # PRIORIDAD: Si la subespecialidad es "A LA BREVEDAD", usar ese como tipo de turno
+                # Normalizar tipo de turno - USAR SIEMPRE el valor de la base de datos HCSI
                 tipo_turno_normalizado = ""
-                if subespecialidad and subespecialidad.upper().strip() == "A LA BREVEDAD":
-                    tipo_turno_normalizado = "A LA BREVEDAD"
-                elif tipo_turno_raw.upper() == "PROGRAMADO":
+                if tipo_turno_raw.upper() == "PROGRAMADO":
                     tipo_turno_normalizado = "PROGRAMADA"
                 elif tipo_turno_raw.upper() in ["ESPONTANEO", "ESPONTÁNEO"]:
                     tipo_turno_normalizado = "CAI/Espontánea"
