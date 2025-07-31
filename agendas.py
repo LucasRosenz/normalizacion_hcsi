@@ -110,11 +110,19 @@ class AgendaNormalizer:
         # Buscar doctor - patrones mejorados
         doctor_patterns = [
             # Patrón específico para "ESPECIALIDAD - DRA/DR NOMBRE APELLIDO - TIPO" (DEBE IR PRIMERO)
-            r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS?|PEDIATRIA|INFANTIL)?\s*-\s*DRA?\.\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*-\s*(?:EVENTUAL\s+)?(?:ESPONTANEA|PROGRAMADA)',
-            # Patrón para DRA/DR seguido del nombre - detener antes de palabras clave
-            r'\bDRA?\.\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
-            # Patrón para DOCTOR/DOCTORA seguido del nombre
-            r'\bDOCTOR[A]?\s+([A-ZÁÉÍÓÚÑ].+?)(?:\s*-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
+            r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS?|PEDIATRIA|INFANTIL)?\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*-\s*(?:EVENTUAL\s+)?(?:ESPONTANEA|PROGRAMADA)',
+            # Patrón para profesiones que incluyen DR/DRA en el medio - PROFESION - DRA/DR NOMBRE - ACTIVIDAD (opcional)
+            r'\b(?:PSICOLOG[OA]|NUTRICIONISTA|KINESIOLOGO|FONOAUDIOLOGO)\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*|DRA?\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)(?:\s*-\s*\w+.*)?',
+            # Patrón específico para ESTIMULACION TEMPRANA - DRA/DR NOMBRE (maneja caracteres corruptos)
+            r'\bESTIMULACION\s+TEMPRANA\s*-\s*(DRA?\.\s*[A-Z].+?\s+.+?)(?:\s*$|\s*-)',
+            # Patrón para profesiones seguido de nombre - NUTRICIONISTA/KINESIOLOGO/etc - NOMBRE - TIPO  
+            r'\b(?:NUTRICIONISTA|KINESIOLOGO|FONOAUDIOLOGO|TRABAJADOR[A]?\s+SOCIAL|TRABAJO\s+SOCIAL|PSICOLOG[OA])[\.\s]*[-\.\s]\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*(?:-\s*(?:GENERAL|TRATAMIENTO|PROGRAMADA|ESPONTANEA|ESPONTÁNEA|PAP|CAI|CONTROL|URGENCIA|SOBRETURNO|REUNION\s+DE\s+EQUIPO)|\s*$)',
+            # Patrón para DRA/DR seguido del nombre - detener antes de palabras clave (PRESERVAR DR/DRA con o sin punto)
+            r'\b(DRA?\.\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
+            # Patrón para DRA/DR SIN punto seguido del nombre (PRESERVAR DR/DRA sin punto)
+            r'\b(DRA?\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
+            # Patrón para DOCTOR/DOCTORA seguido del nombre (PRESERVAR DOCTOR/DOCTORA)
+            r'\b(DOCTOR[A]?\s+[A-ZÁÉÍÓÚÑ].+?)(?:\s*-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
             # Patrón específico para formato "APELLIDO ,NOMBRE" después de tipo de turno
             r'-\s*(?:A\s+LA\s+BREVEDAD|URGENCIA|PROGRAMADA|ESPONTANEA|ESPONTÁNEA)\s*-\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+\s*,\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)',
             # Patrón específico para LIC. EN PSICOLOGIA - buscar el nombre después de PSICOLOGIA
@@ -133,7 +141,7 @@ class AgendaNormalizer:
             r'[-\s]+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)$',
         ]
         
-        for pattern in doctor_patterns:
+        for i, pattern in enumerate(doctor_patterns):
             match = re.search(pattern, nombre_limpio)
             if match:
                 nombre_candidato = match.group(1).strip()
@@ -172,8 +180,11 @@ class AgendaNormalizer:
                         # Limpiar palabras específicas del final del nombre
                         nombre_limpio = re.sub(r'\s*-\s*(DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)\s*$', '', nombre_candidato, flags=re.IGNORECASE)
                         
+                        # Si ya contiene DR./DRA/DOCTOR/DOCTORA al inicio, preservarlo tal como está
+                        if re.match(r'^(DRA?\.\s*|DRA?\s+|DOCTOR[A]?\s+)', nombre_limpio, re.IGNORECASE):
+                            doctor = nombre_limpio.strip()
                         # Procesar formato "APELLIDO ,NOMBRE" y convertir a "NOMBRE APELLIDO"
-                        if ',' in nombre_limpio:
+                        elif ',' in nombre_limpio:
                             partes = nombre_limpio.split(',')
                             if len(partes) == 2:
                                 apellido = partes[0].strip()
@@ -201,7 +212,8 @@ class AgendaNormalizer:
                 'CONSULTA EXTERNA': r'\bCONSULTA\s+EXTERNA\b|\bEXTERNA\b',
                 'TRATAMIENTO': r'\bTRATAMIENTO\b',
                 'GENERAL': r'\bGENERAL\b',
-                'PAP': r'\bPAP\b'
+                'PAP': r'\bPAP\b',
+                'REUNION DE EQUIPO': r'\bREUNION\s+DE\s+EQUIPO\b|\bREUNIÓN\s+DE\s+EQUIPO\b'
             }
             
             for tipo_nombre, pattern in tipo_patterns.items():
@@ -391,9 +403,12 @@ class AgendaNormalizer:
             
             # Crear registro si tenemos información básica
             if dia and (hora_inicio or hora_fin):
+                # Para otros centros: preservar el formato original del doctor (sin limpiar)
+                doctor_original = componentes['doctor']  # Mantener formato original
+                
                 registro = {
                     'nombre_original_agenda': agenda_actual,  # SIN LIMPIAR - exactamente como está
-                    'doctor': self.limpiar_texto(componentes['doctor']),
+                    'doctor': doctor_original,  # SIN LIMPIAR - exactamente como está extraído
                     'area': self.limpiar_texto(componentes['area']),
                     'tipo_turno': self.limpiar_texto(componentes['tipo_turno']),
                     'dia': dia,
@@ -534,40 +549,11 @@ class AgendaNormalizer:
                 else:
                     tipo_turno_normalizado = tipo_turno_raw.upper()
                 
-                # Limpiar nombre del profesional (remover formato "APELLIDO ,NOMBRE") y verificar si es válido
+                # Limpiar nombre del profesional - Para HCSI: usar directamente sin normalizar
                 doctor_limpio = ""
                 if profesional:
-                    # Verificar si es una ubicación/consultorio y no un doctor real
-                    es_ubicacion = re.match(r'^(?:CONSULTORIO|SALA|BOX|QUIROFANO|QUIRÓFANO|PISO|PLANTA)\s*(?:\d+|[A-Z]|\w+)$', profesional.upper().strip())
-                    es_solo_numero = re.match(r'^\d+$', profesional.strip())
-                    contiene_ubicacion = re.search(r'\b(?:CONSULTORIO|SALA|BOX|QUIROFANO|QUIRÓFANO|PISO|PLANTA)\b', profesional.upper())
-                    
-                    # Verificar si es un procedimiento médico y no un doctor real
-                    procedimientos_medicos = [
-                        'ECG', 'EKG', 'RX', 'LAB', 'LABORATORIO', 'RADIOLOGIA', 'ECOGRAFIA', 'TAC', 'RMN', 'PREOCUPACIONAL',
-                        'QUIROFANO', 'CURACIONES', 'PLASTICA', 'TORAX', 'ADULTOS', 'NIÑOS HSI', 'GENERAL DOS', 'GENERAL UNO',
-                        'CABEZA Y CUELLO DOS', 'CABEZA Y CUELLO UNO', 'COLOPROCTOLOGIA UNO', 'COLOPROCTOLOGIA DOS',
-                        '173 TECNICO', '200 TECNICO', '233 TECNICO', '122 TECNICO', 'CARDIO RESIDENTES', 'DIABETOLOGIA PRODIABA'
-                    ]
-                    es_procedimiento = any(proc.upper() == profesional.upper().strip() for proc in procedimientos_medicos)
-                    
-                    # Solo procesar si no es una ubicación ni un procedimiento médico
-                    if not es_ubicacion and not es_solo_numero and not contiene_ubicacion and not es_procedimiento:
-                        if "," in profesional:
-                            partes = profesional.split(",")
-                            if len(partes) >= 2:
-                                apellido = partes[0].strip()
-                                nombre = partes[1].strip()
-                                doctor_candidato = f"{nombre} {apellido}"
-                                
-                                # VERIFICAR TAMBIÉN después del procesamiento del formato
-                                es_procedimiento_procesado = any(proc.upper() == doctor_candidato.upper().strip() for proc in procedimientos_medicos)
-                                if not es_procedimiento_procesado:
-                                    doctor_limpio = doctor_candidato
-                            else:
-                                doctor_limpio = profesional
-                        else:
-                            doctor_limpio = profesional
+                    # Para HCSI: Tomar el profesional exactamente como está en la base de datos
+                    doctor_limpio = profesional.strip()
                 
                 # Crear registro
                 registro = {
@@ -884,10 +870,13 @@ class AgendaNormalizer:
                     agenda_limpia_para_procesamiento = self.limpiar_texto(agenda_actual)
                     componentes = self.extraer_componentes_agenda(agenda_limpia_para_procesamiento)
                     
+                    # Para otros centros: preservar el formato original del doctor (sin limpiar)
+                    doctor_original = componentes['doctor']  # Mantener formato original
+                    
                     registro = {
                         'agenda_id': agenda_actual_id,
                         'nombre_original_agenda': agenda_actual,  # SIN LIMPIAR - exactamente como está
-                        'doctor': self.limpiar_texto(componentes['doctor']),
+                        'doctor': doctor_original,  # SIN LIMPIAR - exactamente como está extraído
                         'area': self.limpiar_texto(componentes['area']),
                         'tipo_turno': self.limpiar_texto(componentes['tipo_turno']),
                         'dia': dia,

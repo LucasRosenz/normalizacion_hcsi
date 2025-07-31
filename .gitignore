@@ -44,3 +44,14 @@ logs/
 *.temp
 exports/
 backups/
+
+# Scripts de verificación y archivos de backup del sistema de normalización
+scripts_verificacion/
+datos/backup/
+*.xlsx
+*_backup_*.xlsx
+reporte_cambios_*.txt
+
+# Archivos de debug temporales
+test_*.py
+debug_*.py
