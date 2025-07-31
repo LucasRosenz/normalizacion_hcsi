@@ -51,11 +51,14 @@ def main():
             return ''
         return str(valor).strip()
     
-    # Crear diccionarios de agendas para comparar - TODOS LOS CAMPOS (excepto agenda_id y nombre_original_agenda)
-    agendas_antes = {}
-    for _, row in df_antes.iterrows():
-        key = row['nombre_original_agenda']
-        agendas_antes[key] = {
+    # Crear diccionarios de registros para comparar FILA POR FILA - TODOS LOS CAMPOS
+    # Usar índice de fila como clave única para garantizar comparación fila por fila
+    registros_antes = {}
+    for idx, row in df_antes.iterrows():
+        # Usar siempre el índice de fila para identificar cada fila única
+        key = f'fila_{idx}'
+        registros_antes[key] = {
+            'nombre_original_agenda': normalizar_valor(row.get('nombre_original_agenda', '')),
             'doctor': normalizar_valor(row.get('doctor', '')),
             'area': normalizar_valor(row.get('area', '')),
             'tipo_turno': normalizar_valor(row.get('tipo_turno', '')),
@@ -66,10 +69,12 @@ def main():
             'ventanilla': normalizar_valor(row.get('ventanilla', ''))
         }
     
-    agendas_despues = {}
-    for _, row in df_despues.iterrows():
-        key = row['nombre_original_agenda']
-        agendas_despues[key] = {
+    registros_despues = {}
+    for idx, row in df_despues.iterrows():
+        # Usar siempre el índice de fila para identificar cada fila única
+        key = f'fila_{idx}'
+        registros_despues[key] = {
+            'nombre_original_agenda': normalizar_valor(row.get('nombre_original_agenda', '')),
             'doctor': normalizar_valor(row.get('doctor', '')),
             'area': normalizar_valor(row.get('area', '')),
             'tipo_turno': normalizar_valor(row.get('tipo_turno', '')),
@@ -80,16 +85,17 @@ def main():
             'ventanilla': normalizar_valor(row.get('ventanilla', ''))
         }
     
-    # Buscar cambios en TODOS LOS CAMPOS
+    # Buscar cambios en TODOS LOS CAMPOS comparando fila por fila
     cambios_encontrados = []
-    for agenda in agendas_antes:
-        if agenda in agendas_despues:
-            antes = agendas_antes[agenda]
-            despues = agendas_despues[agenda]
+    for fila_key in registros_antes:
+        if fila_key in registros_despues:
+            antes = registros_antes[fila_key]
+            despues = registros_despues[fila_key]
             
-            cambios_agenda = []
-            # Comparar todos los campos (excepto agenda_id y nombre_original_agenda)
+            cambios_fila = []
+            # Comparar todos los campos incluyendo nombre_original_agenda
             campos_a_comparar = [
+                ('nombre_original_agenda', 'Nombre agenda'),
                 ('doctor', 'Doctor'),
                 ('area', 'Área'),
                 ('tipo_turno', 'Tipo de turno'),
@@ -104,12 +110,13 @@ def main():
                 if antes[campo_key] != despues[campo_key]:
                     # Filtrar cambios triviales (nan ↔ '' o '' ↔ '')
                     if not (antes[campo_key] == '' and despues[campo_key] == ''):
-                        cambios_agenda.append(f"{campo_nombre}: '{antes[campo_key]}' → '{despues[campo_key]}'")
+                        cambios_fila.append(f"{campo_nombre}: '{antes[campo_key]}' → '{despues[campo_key]}'")
             
-            if cambios_agenda:
+            if cambios_fila:
                 cambios_encontrados.append({
-                    'agenda': agenda,
-                    'cambios': cambios_agenda
+                    'fila': fila_key,
+                    'agenda': despues['nombre_original_agenda'],  # Mostrar el nombre de la agenda
+                    'cambios': cambios_fila
                 })
     
     # Generar reporte en archivo txt en la carpeta backup
@@ -126,9 +133,10 @@ def main():
         f.write(f"Registros después: {len(df_despues)}\n\n")
         
         if cambios_encontrados:
-            f.write(f"RESUMEN: Se encontraron {len(cambios_encontrados)} agendas con cambios\n\n")
+            f.write(f"RESUMEN: Se encontraron {len(cambios_encontrados)} filas con cambios\n\n")
             
-            # Resumen por tipo de cambio - TODOS LOS CAMPOS
+            # Resumen por tipo de cambio - TODOS LOS CAMPOS incluye ahora nombre_original_agenda
+            cambios_nombre = sum(1 for c in cambios_encontrados if any('Nombre agenda:' in cambio for cambio in c['cambios']))
             cambios_doctor = sum(1 for c in cambios_encontrados if any('Doctor:' in cambio for cambio in c['cambios']))
             cambios_area = sum(1 for c in cambios_encontrados if any('Área:' in cambio for cambio in c['cambios']))
             cambios_tipo = sum(1 for c in cambios_encontrados if any('Tipo de turno:' in cambio for cambio in c['cambios']))
@@ -139,32 +147,33 @@ def main():
             cambios_ventanilla = sum(1 for c in cambios_encontrados if any('Ventanilla:' in cambio for cambio in c['cambios']))
             
             f.write("TIPOS DE CAMBIOS:\n")
-            f.write(f"• Doctor: {cambios_doctor} agendas\n")
-            f.write(f"• Área: {cambios_area} agendas\n") 
-            f.write(f"• Tipo de turno: {cambios_tipo} agendas\n")
-            f.write(f"• Día: {cambios_dia} agendas\n")
-            f.write(f"• Hora inicio: {cambios_hora_inicio} agendas\n")
-            f.write(f"• Hora fin: {cambios_hora_fin} agendas\n")
-            f.write(f"• Efector: {cambios_efector} agendas\n")
-            f.write(f"• Ventanilla: {cambios_ventanilla} agendas\n\n")
+            f.write(f"• Nombre agenda: {cambios_nombre} filas\n")
+            f.write(f"• Doctor: {cambios_doctor} filas\n")
+            f.write(f"• Área: {cambios_area} filas\n") 
+            f.write(f"• Tipo de turno: {cambios_tipo} filas\n")
+            f.write(f"• Día: {cambios_dia} filas\n")
+            f.write(f"• Hora inicio: {cambios_hora_inicio} filas\n")
+            f.write(f"• Hora fin: {cambios_hora_fin} filas\n")
+            f.write(f"• Efector: {cambios_efector} filas\n")
+            f.write(f"• Ventanilla: {cambios_ventanilla} filas\n\n")
             
             f.write("DETALLE DE CAMBIOS:\n")
             f.write("-" * 30 + "\n\n")
             
             for i, cambio in enumerate(cambios_encontrados):
-                f.write(f"{i+1}. {cambio['agenda']}\n")
+                f.write(f"{i+1}. {cambio['agenda']} ({cambio['fila']})\n")
                 for detalle in cambio['cambios']:
                     f.write(f"   └─ {detalle}\n")
                 f.write("\n")
         else:
-            f.write("RESULTADO: No se detectaron cambios en las agendas\n")
+            f.write("RESULTADO: No se detectaron cambios en las filas\n")
     
     print(f"📄 Reporte generado: {os.path.basename(archivo_reporte)}")
     print(f"📂 Ubicación: datos/backup/")
     if cambios_encontrados:
-        print(f"🔄 Se encontraron {len(cambios_encontrados)} agendas con cambios")
+        print(f"🔄 Se encontraron {len(cambios_encontrados)} filas con cambios")
     else:
-        print("✅ No se detectaron cambios en las agendas")
+        print("✅ No se detectaron cambios en las filas")
 
 if __name__ == "__main__":
     main()

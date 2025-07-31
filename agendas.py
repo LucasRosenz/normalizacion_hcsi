@@ -22,6 +22,65 @@ class AgendaNormalizer:
             'dia', 'hora_inicio', 'hora_fin', 'efector', 'ventanilla'
         ])
         
+    def decodificar_caracteres_especiales(self, texto: str) -> str:
+        """
+        Decodifica caracteres especiales corruptos comunes en la base de datos.
+        Esto corrige la codificación UTF-8 mal interpretada como Latin-1.
+        """
+        if not texto:
+            return texto
+            
+        # Mapeo de caracteres corruptos a caracteres correctos
+        # Basado en codificación UTF-8 mal interpretada como Latin-1
+        correcciones = {
+            # Casos más específicos PRIMERO - orden importante!
+            'MUÃ\u2019OZ': 'MUÑOZ',  # MUÑOZ completo con comilla curva derecha (8217)
+            'MUÃ\u2018OZ': 'MUÑOZ',  # MUÑOZ completo con comilla curva izquierda (8216)
+            'MUÁ\u2018OZ': 'MUÑOZ',  # MUÑOZ ya parcialmente convertido (Á + comilla izquierda)
+            'Á\u2018': 'Ñ',         # Á + comilla curva izquierda -> Ñ (para casos ya convertidos)
+            'Ã\u2019': 'Ñ',         # Ã + comilla curva derecha -> Ñ
+            'Ã\u2018': 'Ñ',         # Ã + comilla curva izquierda -> Ñ  
+            'Ã_x008d_': 'Í',        # Para NOEMÍ
+            'Ã"NICA': 'ÓNICA',      # Para VERÓNICA - patrón específico primero
+            'Ã"': 'Ó',              # Ó mayúscula - debe ir antes que el patrón general
+            'Í"': 'Ó',              # Corrección exacta: Í" -> Ó (ord 8220)
+            'Ã_x0081_': 'Á',        # Corrección exacta: Ã_x0081_ -> Á
+            
+            # Patrones comunes de UTF-8 mal interpretado
+            'Ã¡': 'á',   'Ã©': 'é',   'Ã­': 'í',   'Ã³': 'ó',   'Ãº': 'ú',    # Vocales con tilde minúsculas
+            'Ã‰': 'É',   'Ãš': 'Ú',                                            # Vocales con tilde mayúsculas
+            'Ã ': 'à',   'Ã¨': 'è',   'Ã¬': 'ì',   'Ã²': 'ò',   'Ã¹': 'ù',    # Vocales con acento grave
+            'Ã¤': 'ä',   'Ã«': 'ë',   'Ã¯': 'ï',   'Ã¶': 'ö',   'Ã¼': 'ü',    # Vocales con diéresis
+            'Ã¢': 'â',   'Ãª': 'ê',   'Ã®': 'î',   'Ã´': 'ô',   'Ã»': 'û',    # Vocales con circunflejo
+            'Ã§': 'ç',   'Ã‡': 'Ç',                                           # C cedilla
+            'Ã±': 'ñ',   'Ã\u00d1': 'Ñ',                                     # Eñe
+            'Ã': 'Á',               # Corrección general: Ã -> Á (SOLO cuando no hay patrones más específicos) - AL FINAL
+            'Ã¢': 'â',   'Ãª': 'ê',   'Ã®': 'î',   'Ã´': 'ô',   'Ã»': 'û',    # Vocales con circunflejo
+            'Ã§': 'ç',   'Ã‡': 'Ç',                                           # C cedilla
+            'Ã±': 'ñ',   'Ã\u00d1': 'Ñ',                                     # Eñe
+            
+            # Patrones específicos de codificación hexadecimal
+            '_x008d_': 'Í',         # Patrón hex para Í
+            '_x0081_': 'Á',         # Patrón hex para Á
+            
+            # Casos específicos completos para nombres comunes
+            'MUÃ_x0081_OZ': 'MUÑOZ',
+            'MUÃOZ': 'MUÑOZ',
+            'MUÃIÃ±OZ': 'MUÑOZ',    # Variante doble corrupción
+            'JIMÃ©NEZ': 'JIMÉNEZ',
+            'MÃ¡RQUEZ': 'MÁRQUEZ',
+            'GÃ³MEZ': 'GÓMEZ'
+        }
+        
+        texto_corregido = texto
+        # Aplicar correcciones en orden (más específicas primero)
+        # Ordenar por longitud descendente para que los patrones más largos se apliquen primero
+        for corrupto in sorted(correcciones.keys(), key=len, reverse=True):
+            if corrupto in texto_corregido:
+                texto_corregido = texto_corregido.replace(corrupto, correcciones[corrupto])
+            
+        return texto_corregido
+    
     def extraer_componentes_agenda(self, nombre_agenda: str) -> Dict[str, str]:
         """
         Extrae doctor, área y tipo de turno del nombre de la agenda
@@ -30,7 +89,8 @@ class AgendaNormalizer:
         if not nombre_agenda or pd.isna(nombre_agenda):
             return {'doctor': '', 'area': '', 'tipo_turno': ''}
             
-        nombre_limpio = str(nombre_agenda).strip()
+        # PASO 1: Decodificar caracteres especiales corruptos
+        nombre_limpio = self.decodificar_caracteres_especiales(str(nombre_agenda).strip())
         
         # Inicializar componentes
         doctor = ""
@@ -109,10 +169,12 @@ class AgendaNormalizer:
         
         # Buscar doctor - patrones mejorados
         doctor_patterns = [
-            # Patrón específico para "ESPECIALIDAD - DRA/DR NOMBRE APELLIDO - TIPO" (DEBE IR PRIMERO)
+            # Patrón específico para "ESPECIALIDAD - DRA/DR NOMBRE APELLIDO - EVENTUAL" (solo EVENTUAL)
+            r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS?|PEDIATRIA|INFANTIL)?\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*-\s*EVENTUAL\s*$',
+            # Patrón específico para "ESPECIALIDAD - DRA/DR NOMBRE APELLIDO - TIPO" con EVENTUAL ESPONTANEA
             r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS?|PEDIATRIA|INFANTIL)?\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*-\s*(?:EVENTUAL\s+)?(?:ESPONTANEA|PROGRAMADA)',
             # Patrón para profesiones que incluyen DR/DRA en el medio - PROFESION - DRA/DR NOMBRE - ACTIVIDAD (opcional)
-            r'\b(?:PSICOLOG[OA]|NUTRICIONISTA|KINESIOLOGO|FONOAUDIOLOGO)\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*|DRA?\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)(?:\s*-\s*\w+.*)?',
+            r'\b(?:PSICOLOG[OA]|NUTRICIONISTA|KINESIOLOGO|FONOAUDIOLOGO)\s*-\s*(DRA?\.\s*[A-Z].+?\s+.+?|DRA?\s+[A-Z].+?\s+.+?)(?:\s*-\s*\w+.*|\s*$)',
             # Patrón específico para ESTIMULACION TEMPRANA - DRA/DR NOMBRE (maneja caracteres corruptos)
             r'\bESTIMULACION\s+TEMPRANA\s*-\s*(DRA?\.\s*[A-Z].+?\s+.+?)(?:\s*$|\s*-)',
             # Patrón para profesiones seguido de nombre - NUTRICIONISTA/KINESIOLOGO/etc - NOMBRE - TIPO  
@@ -203,6 +265,8 @@ class AgendaNormalizer:
         else:
             tipo_patterns = {
                 'GUARDIA': r'\bGUARDIA\b|\bGUARDIA\s+MEDICA\b|\bGUARDIAS\b',
+                'EVENTUAL ESPONTANEA': r'\bEVENTUAL\s+ESPONTANEA\b|\bEVENTUAL\s+ESPONTÁNEA\b',
+                'EVENTUAL': r'\bEVENTUAL\b',
                 'CAI/Espontánea': r'\bESPONTANEA\b|\bESPONTÁNEA\b|\bESPONTÃ_x0081_NEA\b|\bCAI\b',
                 'URGENCIA': r'\bURGENCIA\b|\bURGENTE\b',
                 'PROGRAMADA': r'\bPROGRAMADA\b|\bTURNO\s+PROGRAMADO\b|\bPROGRAMADO\b',
@@ -269,8 +333,8 @@ class AgendaNormalizer:
                 
                 # Verificar si es una fila de agenda (contiene información del doctor/área)
                 if self._es_titulo_agenda(row):
-                    # Extraer el nombre de la agenda de la primera celda
-                    agenda_actual = str(row.iloc[0]).strip()
+                    # Extraer el nombre de la agenda de la primera celda y decodificar caracteres especiales
+                    agenda_actual = self.decodificar_caracteres_especiales(str(row.iloc[0]).strip())
                     agenda_id_counter += 1
                     # Generar ID único que incluye el efector y un contador secuencial
                     agenda_actual_id = f"{efector}_{agenda_id_counter:03d}_{agenda_actual}"
@@ -842,9 +906,9 @@ class AgendaNormalizer:
             
             # Si la columna B está vacía, probablemente sea una agenda/doctor
             if pd.isna(row.iloc[1]) or str(row.iloc[1]).strip() == "" or str(row.iloc[1]).strip() == "NaN":
-                agenda_actual = str(row.iloc[0]).strip()
+                agenda_actual = self.decodificar_caracteres_especiales(str(row.iloc[0]).strip())
                 agenda_id_counter += 1
-                # Generar ID único que incluye el efector y un contador secuencial
+                # Generar ID único que incluye el efector y un contador secuencial  
                 agenda_actual_id = f"{efector}_{agenda_id_counter:03d}_{agenda_actual}"
                 i += 1
                 continue
