@@ -176,37 +176,37 @@ class AgendaNormalizer:
         # Buscar doctor - patrones mejorados
         doctor_patterns = [
             # Patrón específico para "ESPECIALIDAD - DRA/DR NOMBRE APELLIDO - EVENTUAL" (solo EVENTUAL)
-            r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS?|PEDIATRIA|INFANTIL)?\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*-\s*EVENTUAL\s*$',
+            r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS?|PEDIATRIA|INFANTIL)?\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+)+)\s*-\s*EVENTUAL\s*$',
             # Patrón específico para "ESPECIALIDAD - DRA/DR NOMBRE APELLIDO - TIPO" con EVENTUAL ESPONTANEA
-            r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS?|PEDIATRIA|INFANTIL)?\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*-\s*(?:EVENTUAL\s+)?(?:ESPONTANEA|PROGRAMADA)',
+            r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS?|PEDIATRIA|INFANTIL)?\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+)+)\s*-\s*(?:EVENTUAL\s+)?(?:ESPONTANEA|PROGRAMADA)',
             # Patrón para profesiones que incluyen DR/DRA en el medio - PROFESION - DRA/DR NOMBRE - ACTIVIDAD (opcional)
-            r'\b(?:PSICOLOG[OA]|NUTRICIONISTA|KINESIOLOGO|FONOAUDIOLOGO)\s*-\s*(DRA?\.\s*[A-Z].+?\s+.+?|DRA?\s+[A-Z].+?\s+.+?)(?:\s*-\s*\w+.*|\s*$)',
+            r'\b(?:PSICOLOG[OA]|NUTRICIONISTA|KINESIOLOGO|FONOAUDIOLOGO)\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑÜ].+?\s+.+?|DRA?\s+[A-ZÁÉÍÓÚÑÜ].+?\s+.+?)(?:\s*-\s*\w+.*|\s*$)',
             # Patrón específico para ESTIMULACION TEMPRANA - DRA/DR NOMBRE (maneja caracteres corruptos)
-            r'\bESTIMULACION\s+TEMPRANA\s*-\s*(DRA?\.\s*[A-Z].+?\s+.+?)(?:\s*$|\s*-)',
+            r'\bESTIMULACION\s+TEMPRANA\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑÜ].+?\s+.+?)(?:\s*$|\s*-)',
             # Patrón para profesiones seguido de nombre - NUTRICIONISTA/KINESIOLOGO/etc - NOMBRE - TIPO  
-            r'\b(?:NUTRICIONISTA|KINESIOLOGO|FONOAUDIOLOGO|TRABAJADOR[A]?\s+SOCIAL|TRABAJO\s+SOCIAL|PSICOLOG[OA])[\.\s]*[-\.\s]\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)+)\s*(?:-\s*(?:GENERAL|TRATAMIENTO|PROGRAMADA|ESPONTANEA|ESPONTÁNEA|PAP|CAI|CONTROL|URGENCIA|SOBRETURNO|REUNION\s+DE\s+EQUIPO)|\s*$)',
+            r'\b(?:NUTRICIONISTA|KINESIOLOGO|FONOAUDIOLOGO|TRABAJADOR[A]?\s+SOCIAL|TRABAJO\s+SOCIAL|PSICOLOG[OA])[\.\s]*[-\.\s]\s*([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+)+)\s*(?:-\s*(?:GENERAL|TRATAMIENTO|PROGRAMADA|ESPONTANEA|ESPONTÁNEA|PAP|CAI|CONTROL|URGENCIA|SOBRETURNO|REUNION\s+DE\s+EQUIPO)|\s*$)',
             # Patrón para DRA/DR seguido del nombre - detener antes de palabras clave (PRESERVAR DR/DRA con o sin punto)
-            r'\b(DRA?\.\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
+            r'\b(DRA?\.\s*[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
             # Patrón para DRA/DR SIN punto seguido del nombre (PRESERVAR DR/DRA sin punto)
-            r'\b(DRA?\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
+            r'\b(DRA?\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
             # Patrón para DOCTOR/DOCTORA seguido del nombre (PRESERVAR DOCTOR/DOCTORA)
-            r'\b(DOCTOR[A]?\s+[A-ZÁÉÍÓÚÑ].+?)(?:\s*-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
+            r'\b(DOCTOR[A]?\s+[A-ZÁÉÍÓÚÑÜ].+?)(?:\s*-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)|\s*$)',
             # Patrón específico para formato "APELLIDO ,NOMBRE" después de tipo de turno
-            r'-\s*(?:A\s+LA\s+BREVEDAD|URGENCIA|PROGRAMADA|ESPONTANEA|ESPONTÁNEA)\s*-\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+\s*,\s*[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)',
+            r'-\s*(?:A\s+LA\s+BREVEDAD|URGENCIA|PROGRAMADA|ESPONTANEA|ESPONTÁNEA)\s*-\s*([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+\s*,\s*[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+)',
             # Patrón específico para LIC. EN PSICOLOGIA - buscar el nombre después de PSICOLOGIA
-            r'\bLIC\.\s*EN\s+PSICOLOGIA\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+)*)',
+            r'\bLIC\.\s*EN\s+PSICOLOGIA\s+([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+)*)',
             # Patrón específico para LIC. EN TRABAJO SOCIAL - buscar al final, con patrón más flexible
             r'\bLIC\.\s*EN\s+TRABAJO\s+SOCIAL\s+(.+)$',
             # Patrón específico para LIC.EN NUTRICION - buscar después del guión y TRATAMIENTO, con patrón más flexible
             r'\bLIC\.EN\s+NUTRICION\s*-\s*TRATAMIENTO\s*-\s*(.+)$',
             # Patrón específico para LIC. EN KINESIOLOGIA - buscar el nombre después de KINESIOLOGIA
-            r'\bLIC\.\s*EN\s+KINESIOLOGIA\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+)*)',
+            r'\bLIC\.\s*EN\s+KINESIOLOGIA\s+([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+)*)',
             # Patrón específico para LIC. EN NUTRICION - buscar el nombre después de NUTRICION
-            r'\bLIC\.\s*EN\s+NUTRICION\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ_x0-9]+)*)',
+            r'\bLIC\.\s*EN\s+NUTRICION\s+([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+)*)',
             # Patrón general para LIC. seguido directamente del nombre (sin especialidad)
-            r'\bLIC\.\s*([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-záéíóúñ]+)*)',
+            r'\bLIC\.\s*([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+)*)',
             # Patrón para nombres al final después de guión - solo nombres de personas (DEBE IR AL FINAL)
-            r'[-\s]+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)$',
+            r'[-\s]+([A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]+(?:\s+[A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]+)+)$',
         ]
         
         for i, pattern in enumerate(doctor_patterns):
