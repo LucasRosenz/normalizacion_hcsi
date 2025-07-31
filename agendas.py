@@ -42,6 +42,10 @@ class AgendaNormalizer:
             'Ã\u2018': 'Ñ',         # Ã + comilla curva izquierda -> Ñ  
             'Ã_x008d_': 'Í',        # Para NOEMÍ
             'Ã"NICA': 'ÓNICA',      # Para VERÓNICA - patrón específico primero
+            'Á\u201d': 'Ó',         # Á + comilla doble derecha (8221) -> Ó (para casos ya convertidos)
+            'Á\u201c': 'Ó',         # Á + comilla doble izquierda (8220) -> Ó (para casos ya convertidos)
+            'Ã\u201d': 'Ó',         # Ã + comilla doble derecha (8221) -> Ó
+            'Ã\u201c': 'Ó',         # Ã + comilla doble izquierda (8220) -> Ó
             'Ã"': 'Ó',              # Ó mayúscula - debe ir antes que el patrón general
             'Í"': 'Ó',              # Corrección exacta: Í" -> Ó (ord 8220)
             'Ã_x0081_': 'Á',        # Corrección exacta: Ã_x0081_ -> Á
@@ -54,7 +58,6 @@ class AgendaNormalizer:
             'Ã¢': 'â',   'Ãª': 'ê',   'Ã®': 'î',   'Ã´': 'ô',   'Ã»': 'û',    # Vocales con circunflejo
             'Ã§': 'ç',   'Ã‡': 'Ç',                                           # C cedilla
             'Ã±': 'ñ',   'Ã\u00d1': 'Ñ',                                     # Eñe
-            'Ã': 'Á',               # Corrección general: Ã -> Á (SOLO cuando no hay patrones más específicos) - AL FINAL
             'Ã¢': 'â',   'Ãª': 'ê',   'Ã®': 'î',   'Ã´': 'ô',   'Ã»': 'û',    # Vocales con circunflejo
             'Ã§': 'ç',   'Ã‡': 'Ç',                                           # C cedilla
             'Ã±': 'ñ',   'Ã\u00d1': 'Ñ',                                     # Eñe
@@ -69,7 +72,10 @@ class AgendaNormalizer:
             'MUÃIÃ±OZ': 'MUÑOZ',    # Variante doble corrupción
             'JIMÃ©NEZ': 'JIMÉNEZ',
             'MÃ¡RQUEZ': 'MÁRQUEZ',
-            'GÃ³MEZ': 'GÓMEZ'
+            'GÃ³MEZ': 'GÓMEZ',
+            
+            # Regla general AL FINAL - solo cuando no hay patrones más específicos
+            'Ã': 'Á'               # Corrección general: Ã -> Á (SOLO cuando no hay patrones más específicos)
         }
         
         texto_corregido = texto
