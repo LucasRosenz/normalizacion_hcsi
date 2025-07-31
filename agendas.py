@@ -738,19 +738,28 @@ class AgendaNormalizer:
             return ""  # No asignada
     
     def exportar_consolidado(self, df: pd.DataFrame, archivo_salida: str = 'agendas_consolidadas.csv'):
-        """Exporta el DataFrame consolidado a CSV y Excel (mismos datos en ambos formatos)"""
+        """Exporta el DataFrame consolidado a CSV y Excel con agenda_id al final en Excel"""
         try:
-            # Exportar a CSV
+            # Exportar a CSV (orden original)
             df.to_csv(archivo_salida, index=False, encoding='utf-8')
             print(f"Archivo CSV exportado a: {archivo_salida}")
             
-            # Exportar a Excel (mismos datos que CSV)
+            # Para Excel: reorganizar columnas con agenda_id al final
+            df_excel = df.copy()
+            if 'agenda_id' in df_excel.columns:
+                # Crear lista de columnas sin agenda_id
+                columnas_sin_agenda_id = [col for col in df_excel.columns if col != 'agenda_id']
+                # Agregar agenda_id al final
+                columnas_reordenadas = columnas_sin_agenda_id + ['agenda_id']
+                # Reordenar el DataFrame
+                df_excel = df_excel[columnas_reordenadas]
+            
             archivo_excel = archivo_salida.replace('.csv', '.xlsx')
             
             # Crear el archivo Excel simple con formato básico
             with pd.ExcelWriter(archivo_excel, engine='openpyxl') as writer:
-                # Una sola hoja con los mismos datos del CSV
-                df.to_excel(writer, sheet_name='Agendas Consolidadas', index=False)
+                # Una sola hoja con las columnas reordenadas
+                df_excel.to_excel(writer, sheet_name='Agendas Consolidadas', index=False)
                 
                 # Obtener el worksheet para aplicar formato básico
                 worksheet = writer.sheets['Agendas Consolidadas']
