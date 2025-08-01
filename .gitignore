@@ -46,7 +46,7 @@ exports/
 backups/
 
 # Scripts de verificación y archivos de backup del sistema de normalización
-scripts_verificacion/
+
 datos/backup/
 *.xlsx
 *_backup_*.xlsx
