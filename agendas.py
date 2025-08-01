@@ -229,7 +229,7 @@ class AgendaNormalizer:
             
             # Patrón para nombres al final después de guión - solo nombres de personas (DEBE IR AL FINAL) - ÍNDICE 20
             # EXCLUIR casos donde haya "LIC." justo antes del nombre para que los patrones específicos los manejen
-            r'[-\s]+(?!LIC\.?\s+)([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][a-záéíóúñü\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][a-záéíóúñü\u00C0-\u017F]+)+)$',
+            r'[-\s]+(?!LIC\.?\s+)([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F]+)+)$',
         ]
         
         for i, pattern in enumerate(doctor_patterns):
@@ -248,7 +248,11 @@ class AgendaNormalizer:
                     'ADOLESCENTES', 'DISCAPACIDAD', 'REHABILITACION', 'REHABILITACIÓN',
                     'PEDIATRICA', 'PEDIÁTRICA', 'CLINICA', 'CLÍNICA', 'EXTERNA',
                     'CONSULTORIO', 'SALA', 'BOX', 'QUIROFANO', 'QUIRÓFANO',
-                    'ECG', 'EKG', 'RX', 'LAB', 'LABORATORIO', 'RADIOLOGIA', 'ECOGRAFIA', 'TAC', 'RMN'
+                    'ECG', 'EKG', 'RX', 'LAB', 'LABORATORIO', 'RADIOLOGIA', 'ECOGRAFIA', 'TAC', 'RMN',
+                    # Nuevas exclusiones para casos administrativos/descriptivos
+                    'RECIEN NACIDOS', 'RECIÉN NACIDOS', 'DE FAMILIAS', 'UNICA USUARIA', 'ÚNICA USUARIA',
+                    'TRIAGE PEDIATRIA', 'TRIAGE', 'POST ALTA', 'GINECOLOGIA QUIRUGICA HMI', 'OBSTETRICIA HMI',
+                    'ESPIROMETRIA PEDIATRIA HMI', 'DE PSIQUIATRIA PEDIATRICO', 'DE PSIQUIATRÍA PEDIÁTRICO'
                 ]
                 
                 # Verificar si es un consultorio/sala/ubicación con número o palabra identificativa
