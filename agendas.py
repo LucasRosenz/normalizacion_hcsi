@@ -160,13 +160,14 @@ class AgendaNormalizer:
             'MEDICINA GENERAL': r'\bGENERALISTA\b|\bMEDICINA\s+GENERAL\b',
             'MEDICINA FAMILIAR': r'\bMEDICINA\s+FAMILIAR\b',
             'SALUD SEXUAL': r'\bSALUD\s+SEXUAL\b',
-            'MEDICINA PREVENTIVA': r'\bCHARLA\s+TABAQUISMO\b|\bRONDA\s+SANITARIA\b|\bMEDICINA\s+PREVENTIVA\b',
+            'MEDICINA PREVENTIVA': r'\bCHARLA\s+TABAQUISMO\b|\bMEDICINA\s+PREVENTIVA\b',
             'MUSICOTERAPIA': r'\bMUSICOTERAPIA\b',
             'FONOAUDIOLOGIA': r'\bFONOAUDIOLOGIA\b',
             'TERAPIA OCUPACIONAL': r'\bTERAPIA\s+OCUPACIONAL\b',
             'PSICOPEDAGOGIA': r'\bPSICOPEDAGOGIA\b',
             'ENFERMERIA': r'\bENFERMERIA\b|\bENFERMERÍA\b|\bLIC\.\s*EN\s+ENFERMERIA\b|\bLIC\.\s*EN\s+ENFERMERÍA\b|\bENFERMER[AO]\b',
-            'VACUNACION': r'\bVACUNACION\b|\bVACUNACIÓN\b|\bVACUNAS\b'
+            'VACUNACION': r'\bVACUNACION\b|\bVACUNACIÓN\b|\bVACUNAS\b',
+            'RONDA SANITARIA': r'\bRONDA\s+SANITARIA\b'
         }
         
         # Buscar área médica
