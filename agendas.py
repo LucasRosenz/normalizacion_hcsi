@@ -187,6 +187,8 @@ class AgendaNormalizer:
             r'\bESTIMULACION\s+TEMPRANA\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑÜ].+?\s+.+?)(?:\s*$|\s*-)',
             # Patrón para profesiones seguido de nombre - NUTRICIONISTA/KINESIOLOGO/etc - NOMBRE - TIPO  
             r'\b(?:NUTRICIONISTA|KINESIOLOGO|FONOAUDIOLOGO|TRABAJADOR[A]?\s+SOCIAL|TRABAJO\s+SOCIAL|PSICOLOG[OA])[\.\s]*[-\.\s]\s*([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+)+)\s*(?:-\s*(?:GENERAL|TRATAMIENTO|PROGRAMADA|ESPONTANEA|ESPONTÁNEA|PAP|CAI|CONTROL|URGENCIA|SOBRETURNO|REUNION\s+DE\s+EQUIPO)|\s*$)',
+            # Patrón específico para DRA/DR CON COMA - PEDIATRIA - DRA, NOMBRE APELLIDO (PRESERVAR formato completo)
+            r'(?:PEDIATRIA|ODONTOLOGIA|GINECOLOGIA|OBSTETRICIA|CARDIOLOGIA|TRAUMATOLOGIA|NEUROLOGIA|OFTALMOLOGIA|OTORRINOLARINGOLOGIA|UROLOGIA|DERMATOLOGIA|ENDOCRINOLOGIA|GASTROENTEROLOGIA|HEMATOLOGIA|INFECTOLOGIA|NEFROLOGIA|NEUMONOLOGIA|ONCOLOGIA|REUMATOLOGIA|PSIQUIATRIA)(?:\s*-\s*\w+)*\s*-\s*(DRA?,\s*[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F]+)+)(?:\s*$|\s*-)',
             # Patrón para DRA/DR seguido del nombre - detener antes de palabras clave (PRESERVAR DR/DRA con o sin punto)
             r'\b(DRA?\.\s*[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO|Copia|COPIA)|\s*$)',
             # Patrón para DRA/DR SIN punto seguido del nombre (PRESERVAR DR/DRA sin punto)
@@ -267,7 +269,7 @@ class AgendaNormalizer:
                         nombre_limpio = re.sub(r'\s*-\s*(DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO)\s*$', '', nombre_candidato, flags=re.IGNORECASE)
                         
                         # Si ya contiene DR./DRA/DOCTOR/DOCTORA al inicio, preservarlo tal como está
-                        if re.match(r'^(DRA?\.\s*|DRA?\s+|DOCTOR[A]?\s+)', nombre_limpio, re.IGNORECASE):
+                        if re.match(r'^(DRA?\.\s*|DRA?\s+|DRA?,\s*|DOCTOR[A]?\s+)', nombre_limpio, re.IGNORECASE):
                             doctor = nombre_limpio.strip()
                         # Si ya contiene LIC./LIC al inicio, preservarlo tal como está
                         elif re.match(r'^(LIC\.\s*|LIC\s+)', nombre_limpio, re.IGNORECASE):
