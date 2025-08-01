@@ -199,6 +199,8 @@ class AgendaNormalizer:
             r'\bLIC\.\s*EN\s+TRABAJO\s+SOCIAL\s+(.+)$',
             # Patrón específico para LIC.EN NUTRICION - buscar después del guión y TRATAMIENTO, con patrón más flexible
             r'\bLIC\.EN\s+NUTRICION\s*-\s*TRATAMIENTO\s*-\s*(.+)$',
+            # Patrón específico para LIC.EN NUTRICION - buscar después del guión y GENERAL, con patrón más flexible
+            r'\bLIC\.EN\s+NUTRICION\s*-\s*GENERAL\s*-\s*(.+)$',
             # Patrón específico para LIC. EN KINESIOLOGIA - buscar el nombre después de KINESIOLOGIA
             r'\bLIC\.\s*EN\s+KINESIOLOGIA\s+([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+)*)',
             # Patrón específico para LIC. EN NUTRICION - buscar el nombre después de NUTRICION
@@ -282,7 +284,6 @@ class AgendaNormalizer:
                 'CONSULTA EXTERNA': r'\bCONSULTA\s+EXTERNA\b|\bEXTERNA\b',
                 'TRATAMIENTO': r'\bTRATAMIENTO\b',
                 'GENERAL': r'\bGENERAL\b',
-                'PAP': r'\bPAP\b',
                 'REUNION DE EQUIPO': r'\bREUNION\s+DE\s+EQUIPO\b|\bREUNIÓN\s+DE\s+EQUIPO\b'
             }
             
