@@ -349,8 +349,11 @@ class AgendaNormalizer:
             
             # Solo detectar GENERAL como tipo de turno si está claramente separado por guiones
             if not tipo_turno and re.search(r'\bGENERAL\b', texto_upper):
-                # GENERAL es tipo de turno solo si está precedido por un guión
-                if re.search(r'-\s*GENERAL\b', texto_upper):
+                # Caso específico: GINECOLOGIA - DR. LEITES - GENERAL -> NO detectar GENERAL como tipo
+                if re.search(r'GINECOLOGIA\s*-\s*DR\.\s*LEITES\s*-\s*GENERAL', texto_upper):
+                    pass  # No hacer nada, dejar tipo_turno vacío
+                # GENERAL es tipo de turno solo si está precedido por un guión (otros casos)
+                elif re.search(r'-\s*GENERAL\b', texto_upper):
                     tipo_turno = 'GENERAL'
                 # Si no hay área detectada y empieza con "GENERAL", asignar como área
                 elif not area and re.search(r'^\s*GENERAL\b', texto_upper):
