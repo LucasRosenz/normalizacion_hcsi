@@ -147,6 +147,7 @@ class AgendaNormalizer:
             'ODONTOLOGIA': r'\bODONTOLOGIA\b|\bODONTOLOGÍA\b|\bODONTOLGIA\b',
             'ADOLESCENCIA': r'\bADOLESCENCIA\b',
             'RADIOLOGIA': r'\bRADIOLOGIA\b',
+            'RAYOS': r'\bRAYOS\b|\bRX\s+SIMPLE\b|\bAGENDA\s+RAYOS\b',
             'ENDODONCIA': r'\bENDODONCIA\b',
             'PROTESIS': r'\bPROTESIS\b',
             'ESTIMULACION TEMPRANA': r'\bESTIMULACION\s+TEMPRANA\b',
