@@ -192,9 +192,9 @@ class AgendaNormalizer:
             # Patrón específico para DRA/DR CON COMA - PEDIATRIA - DRA, NOMBRE APELLIDO (PRESERVAR formato completo)
             r'(?:PEDIATRIA|ODONTOLOGIA|GINECOLOGIA|OBSTETRICIA|CARDIOLOGIA|TRAUMATOLOGIA|NEUROLOGIA|OFTALMOLOGIA|OTORRINOLARINGOLOGIA|UROLOGIA|DERMATOLOGIA|ENDOCRINOLOGIA|GASTROENTEROLOGIA|HEMATOLOGIA|INFECTOLOGIA|NEFROLOGIA|NEUMONOLOGIA|ONCOLOGIA|REUMATOLOGIA|PSIQUIATRIA)(?:\s*-\s*\w+)*\s*-\s*(DRA?,\s*[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F]+)+)(?:\s*$|\s*-)',
             # Patrón para DRA/DR seguido del nombre - detener antes de palabras clave (PRESERVAR DR/DRA con o sin punto)
-            r'\b(DRA?\.\s*[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO|Copia|COPIA)|\s*$)',
+            r'\b(DRA?\.\s*[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+)*)(?=\s+(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO|Copia|COPIA))|(\bDRA?\.\s*[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO|Copia|COPIA)|\s*$)',
             # Patrón para DRA/DR SIN punto seguido del nombre (PRESERVAR DR/DRA sin punto)
-            r'\b(DRA?\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO|Copia|COPIA)|\s*$)',
+            r'\b(DRA?\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+)*)(?=\s+(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO|Copia|COPIA))|(\bDRA?\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜáéíóúñü\u00C0-\u017F][A-Za-záéíóúñüÁÉÍÓÚÑÜ\u00C0-\u017F]+)*)\s*(?:-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO|Copia|COPIA)|\s*$)',
             # Patrón para DOCTOR/DOCTORA seguido del nombre (PRESERVAR DOCTOR/DOCTORA)
             r'\b(DOCTOR[A]?\s+[A-ZÁÉÍÓÚÑÜ].+?)(?:\s*-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO|Copia|COPIA)|\s*$)',
             # Patrón específico para formato "APELLIDO ,NOMBRE" después de tipo de turno
@@ -237,7 +237,18 @@ class AgendaNormalizer:
         for i, pattern in enumerate(doctor_patterns):
             match = re.search(pattern, nombre_limpio)
             if match:
-                nombre_candidato = match.group(1).strip()
+                # Manejar patrones con múltiples grupos de captura (para patrones híbridos 6 y 7)
+                nombre_candidato = None
+                for group_idx in range(1, 3):  # Intentar grupos 1 y 2
+                    try:
+                        if match.group(group_idx):
+                            nombre_candidato = match.group(group_idx).strip()
+                            break
+                    except IndexError:
+                        continue
+                
+                if not nombre_candidato:
+                    continue
                 # Verificar que no sea una especialidad o palabra clave, pero permitir nombres largos
                 palabras_excluir = [
                     'PSICOLOGIA', 'NUTRICION', 'TRABAJO SOCIAL', 'KINESIOLOGIA', 
@@ -345,6 +356,7 @@ class AgendaNormalizer:
         ]
         if doctor and any(proc.upper() == doctor.upper().strip() for proc in procedimientos_medicos):
             doctor = ""
+        
         
         return {
             'doctor': doctor,
