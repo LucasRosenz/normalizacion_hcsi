@@ -41,6 +41,8 @@ class AgendaNormalizer:
             'Ã\u2019': 'Ñ',         # Ã + comilla curva derecha -> Ñ
             'Ã\u2018': 'Ñ',         # Ã + comilla curva izquierda -> Ñ  
             'Ã_x008d_': 'Í',        # Para NOEMÍ
+            'Ã\x8d': 'Í',           # Corrección para BUFELLI MARÍAA (0xC3 0x8D -> Í)
+            'MARÃA': 'MARÍA',       # Corrección específica para BUFELLI MARÍAA DE LOS MILAGROS
             'Ã"NICA': 'ÓNICA',      # Para VERÓNICA - patrón específico primero
             'Á\u201d': 'Ó',         # Á + comilla doble derecha (8221) -> Ó (para casos ya convertidos)
             'Á\u201c': 'Ó',         # Á + comilla doble izquierda (8220) -> Ó (para casos ya convertidos)
@@ -173,7 +175,7 @@ class AgendaNormalizer:
                 area = area_nombre
                 break
         
-        # Buscar doctor - patrones mejorados
+        # Buscar doctor - patrones mejorados (ORDEN IMPORTA: más específicos primero)
         doctor_patterns = [
             # Patrón específico para "ESPECIALIDAD - DRA/DR NOMBRE APELLIDO - EVENTUAL" (solo EVENTUAL)
             r'\b(?:ODONTOLOGIA|PEDIATRIA)\s+(?:ADULTOS?|PEDIATRIA|INFANTIL)?\s*-\s*(DRA?\.\s*[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+)+)\s*-\s*EVENTUAL\s*$',
@@ -193,22 +195,36 @@ class AgendaNormalizer:
             r'\b(DOCTOR[A]?\s+[A-ZÁÉÍÓÚÑÜ].+?)(?:\s*-\s*(?:EVENTUAL\s+)?(?:PROGRAMADA|ESPONTANEA|ESPONTÁNEA|GENERAL|TRATAMIENTO|PAP|CAI|RECITADOS|RECIEN\s+NACIDOS|EMBARAZADAS|CONTROL|URGENCIA|SOBRETURNO|DIU|IMPLANTE|EXTRACCION|COLOCACION|AGENDA\s+BIS|REUNION\s+EQUIPO|Copia|COPIA)|\s*$)',
             # Patrón específico para formato "APELLIDO ,NOMBRE" después de tipo de turno
             r'-\s*(?:A\s+LA\s+BREVEDAD|URGENCIA|PROGRAMADA|ESPONTANEA|ESPONTÁNEA)\s*-\s*([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+\s*,\s*[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+)',
-            # Patrón específico para LIC. EN PSICOLOGIA - buscar el nombre después de PSICOLOGIA
-            r'\bLIC\.\s*EN\s+PSICOLOGIA\s+([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+)*)',
-            # Patrón específico para LIC. EN TRABAJO SOCIAL - buscar al final, con patrón más flexible
-            r'\bLIC\.\s*EN\s+TRABAJO\s+SOCIAL\s+(.+)$',
-            # Patrón específico para LIC.EN NUTRICION - buscar después del guión y TRATAMIENTO, con patrón más flexible
-            r'\bLIC\.EN\s+NUTRICION\s*-\s*TRATAMIENTO\s*-\s*(.+)$',
-            # Patrón específico para LIC.EN NUTRICION - buscar después del guión y GENERAL, con patrón más flexible
-            r'\bLIC\.EN\s+NUTRICION\s*-\s*GENERAL\s*-\s*(.+)$',
-            # Patrón específico para LIC. EN KINESIOLOGIA - buscar el nombre después de KINESIOLOGIA
-            r'\bLIC\.\s*EN\s+KINESIOLOGIA\s+([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+)*)',
-            # Patrón específico para LIC. EN NUTRICION - buscar el nombre después de NUTRICION
-            r'\bLIC\.\s*EN\s+NUTRICION\s+([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü_x0-9]+)*)',
-            # Patrón general para LIC. seguido directamente del nombre (sin especialidad)
-            r'\bLIC\.\s*([A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+(?:\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+)*)',
-            # Patrón para nombres al final después de guión - solo nombres de personas (DEBE IR AL FINAL)
-            r'[-\s]+([A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]+(?:\s+[A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]+)+)$',
+            
+            # PATRONES DE LIC. - MÁS ESPECÍFICOS PRIMERO
+            # Patrón específico para LIC. EN PSICOLOGIA NOMBRE - extraer solo el nombre (SIN agregar LIC.) - ÍNDICE 9
+            r'\bLIC\.\s*EN\s+PSICOLOGIA\s+([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F_x0-9]+)*)',
+            # Patrón específico para LIC. EN TRABAJO SOCIAL NOMBRE - extraer solo el nombre (SIN agregar LIC.) - ÍNDICE 10
+            r'\bLIC\.\s*EN\s+TRABAJO\s+SOCIAL\s+([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F_x0-9]+)*)',
+            # Patrón específico para LIC.EN NUTRICION - TRATAMIENTO - NOMBRE - extraer solo el nombre (SIN agregar LIC.) - ÍNDICE 11
+            r'\bLIC\.EN\s+NUTRICION\s*-\s*TRATAMIENTO\s*-\s*([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F_x0-9]+)*)',
+            # Patrón específico para LIC.EN NUTRICION - GENERAL - NOMBRE - extraer solo el nombre (SIN agregar LIC.) - ÍNDICE 12
+            r'\bLIC\.EN\s+NUTRICION\s*-\s*GENERAL\s*-\s*([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F_x0-9]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F_x0-9]+)*)',
+            
+            # PATRONES ESPECÍFICOS ADICIONALES (SIN agregar LIC.)
+            # Patrón para NUTRICION - PRIMERA VEZ/RONDA SANITARIA - LIC. NOMBRE - extraer solo el nombre - ÍNDICE 13  
+            r'\bNUTRICION\s*-\s*(?:PRIMERA\s+VEZ|RONDA\s+SANITARIA)\s*-\s*LIC\.\s+([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F\s]+?)(?:\s*$|\s*-)',
+            # Patrón para TRABAJADORA SOCIAL - LIC. NOMBRE - extraer solo el nombre - ÍNDICE 14
+            r'\bTRABAJADOR[A]?\s+SOCIAL\s*-\s*LIC\.\s+([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F\s]+?)(?:\s*$|\s*-)',
+            # Patrón para PSICOLOGIA/PSICLOGIA (con errores tipográficos) - LIC. NOMBRE con puntos en nombres - ÍNDICE 15
+            r'\bPSIC(?:O)?LOG(?:I)?A(?:\s+INFANTIL)?\s*-?\s*LIC\.?\s*([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F\s\.]+?)(?:\s*$|\s*-)',
+            # Patrón para PSICO-ONCOLOGIA LIC. NOMBRE - extraer solo el nombre - ÍNDICE 16
+            r'\bPSICO-ONCOLOGIA\s+LIC\.\s+([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F\s]+?)(?:\s*$|\s*-)',
+            
+            # Patrón general para ESPECIALIDAD - LIC. NOMBRE (agregar "LIC." al resultado) - ÍNDICE 17
+            r'\b(?:PSICOLOGIA|NUTRICION|KINESIOLOGIA|FONOAUDIOLOGIA|TRABAJO\s+SOCIAL|MUSICOTERAPIA|TERAPIA\s+OCUPACIONAL|PSICOPEDAGOGIA|OBSTETRICIA|ESTIMULACION\s+TEMPRANA|PSICO-ONCOLOGIA|DEGLUCION|AUDIOMETRIA)(?:\s+(?:INFANTIL|GENERAL|TRATAMIENTO|ESPONTANEA|Y\s+FISIATRIA))*\s*-\s*LIC\.\s+([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F\s]+?)(?:\s*$|\s*-)',
+            # Patrón para LIC. que aparece JUSTO ANTES del nombre (agregar "LIC." al resultado) - ÍNDICE 18
+            r'[-\s]+LIC\.\s+([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][a-záéíóúñü\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][a-záéíóúñü\u00C0-\u017F]+)+)(?:\s*$|\s*-)',
+            # Patrón para LIC que aparece JUSTO ANTES del nombre (agregar "LIC." al resultado) - ÍNDICE 19
+            r'[-\s]+LIC\s+([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][a-záéíóúñü\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][a-záéíóúñü\u00C0-\u017F]+)+)(?:\s*$|\s*-)',
+            
+            # Patrón para nombres al final después de guión - solo nombres de personas (DEBE IR AL FINAL) - ÍNDICE 20
+            r'[-\s]+([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][a-záéíóúñü\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][a-záéíóúñü\u00C0-\u017F]+)+)$',
         ]
         
         for i, pattern in enumerate(doctor_patterns):
@@ -253,6 +269,18 @@ class AgendaNormalizer:
                         # Si ya contiene DR./DRA/DOCTOR/DOCTORA al inicio, preservarlo tal como está
                         if re.match(r'^(DRA?\.\s*|DRA?\s+|DOCTOR[A]?\s+)', nombre_limpio, re.IGNORECASE):
                             doctor = nombre_limpio.strip()
+                        # Si ya contiene LIC./LIC al inicio, preservarlo tal como está
+                        elif re.match(r'^(LIC\.\s*|LIC\s+)', nombre_limpio, re.IGNORECASE):
+                            doctor = nombre_limpio.strip()
+                        # Si viene de los patrones LIC. EN ESPECIALIDAD (índices 9-12), NO agregar "LIC." - solo el nombre
+                        elif i >= 9 and i <= 12:  # Patrones de LIC. EN PSICOLOGIA, TRABAJO SOCIAL, NUTRICION
+                            doctor = nombre_limpio.strip()  # Solo el nombre, sin LIC.
+                        # Si viene de los patrones específicos adicionales (índices 13-16), NO agregar "LIC." - solo el nombre
+                        elif i >= 13 and i <= 16:  # Patrones NUTRICION-PRIMERA VEZ, TRABAJADORA SOCIAL, PSICOLOGIA, PSICO-ONCOLOGIA
+                            doctor = nombre_limpio.strip()  # Solo el nombre, sin LIC.
+                        # Si viene de los patrones específicos de LIC. que aparece JUSTO ANTES del nombre (índices 17-19), agregar "LIC." al frente
+                        elif i >= 17 and i <= 19:  # Solo los patrones de LIC. que aparece antes del nombre
+                            doctor = f"LIC. {nombre_limpio.strip()}"
                         # Procesar formato "APELLIDO ,NOMBRE" y convertir a "NOMBRE APELLIDO"
                         elif ',' in nombre_limpio:
                             partes = nombre_limpio.split(',')
