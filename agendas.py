@@ -356,6 +356,10 @@ class AgendaNormalizer:
                 elif not area and re.search(r'^\s*GENERAL\b', texto_upper):
                     area = 'GENERAL'
         
+        # Solo detectar COMITE DE FAMILIAS como área si no hay ninguna otra área detectada
+        if not area and re.search(r'\bCOMITE\s+DE\s+FAMILIAS\b', texto_upper):
+            area = 'COMITE DE FAMILIAS'
+        
         # Limpiar campo doctor - reglas de corrección manual
         # Corrección #1: Los consultorios no son doctores, sino ubicaciones físicas
         if doctor and re.search(r'CONSULTORIO\s+\d+', doctor, re.IGNORECASE):
