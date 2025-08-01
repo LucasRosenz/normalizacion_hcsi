@@ -108,7 +108,7 @@ class AgendaNormalizer:
         # Patrones para identificar áreas médicas
         areas_patterns = {
             'PEDIATRIA': r'\bPEDIATRIA\b',
-            'CARDIOLOGIA': r'\bCARDIOLOGIA\b',
+            'CARDIOLOGIA': r'\bCARDIOLOGIA\b|\bELECTROCARDIOGRAMA\b',
             'NEUROLOGIA': r'\bNEUROLOGIA\b',
             'GINECOLOGIA': r'\bGINECOLOGIA\b',
             'UROLOGIA': r'\bUROLOGIA\b',
@@ -167,7 +167,7 @@ class AgendaNormalizer:
             'TERAPIA OCUPACIONAL': r'\bTERAPIA\s+OCUPACIONAL\b',
             'PSICOPEDAGOGIA': r'\bPSICOPEDAGOGIA\b',
             'ENFERMERIA': r'\bENFERMERIA\b|\bENFERMERÍA\b|\bLIC\.\s*EN\s+ENFERMERIA\b|\bLIC\.\s*EN\s+ENFERMERÍA\b|\bENFERMER[AO]\b',
-            'VACUNACION': r'\bVACUNACION\b|\bVACUNACIÓN\b|\bVACUNAS\b',
+            'VACUNACION': r'\bVACUNACION\b|\bVACUNACIÓN\b|\bVACUNAS\b|\bVACUNATORIO\b|\bAGENDA\s+VACUNATORIO\b',
             'RONDA SANITARIA': r'\bRONDA\s+SANITARIA\b'
         }
         
