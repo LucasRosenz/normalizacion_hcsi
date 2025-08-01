@@ -55,3 +55,5 @@ reporte_cambios_*.txt
 # Archivos de debug temporales
 test_*.py
 debug_*.py
+
+ultimo.txt

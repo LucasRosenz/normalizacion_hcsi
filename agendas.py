@@ -334,7 +334,6 @@ class AgendaNormalizer:
                 'INTERCONSULTA': r'\bINTERCONSULTA\b',
                 'CONSULTA EXTERNA': r'\bCONSULTA\s+EXTERNA\b|\bEXTERNA\b',
                 'TRATAMIENTO': r'\bTRATAMIENTO\b',
-                'GENERAL': r'\bGENERAL\b',
                 'REUNION DE EQUIPO': r'\bREUNION\s+DE\s+EQUIPO\b|\bREUNIÓN\s+DE\s+EQUIPO\b'
             }
             
@@ -342,6 +341,15 @@ class AgendaNormalizer:
                 if re.search(pattern, texto_upper):
                     tipo_turno = tipo_nombre
                     break
+            
+            # Solo detectar GENERAL como tipo de turno si está claramente separado por guiones
+            if not tipo_turno and re.search(r'\bGENERAL\b', texto_upper):
+                # GENERAL es tipo de turno solo si está precedido por un guión
+                if re.search(r'-\s*GENERAL\b', texto_upper):
+                    tipo_turno = 'GENERAL'
+                # Si no hay área detectada y empieza con "GENERAL", asignar como área
+                elif not area and re.search(r'^\s*GENERAL\b', texto_upper):
+                    area = 'GENERAL'
         
         # Limpiar campo doctor - reglas de corrección manual
         # Corrección #1: Los consultorios no son doctores, sino ubicaciones físicas
