@@ -331,6 +331,7 @@ class AgendaNormalizer:
                 'EVENTUAL ESPONTANEA': r'\bEVENTUAL\s+ESPONTANEA\b|\bEVENTUAL\s+ESPONTÁNEA\b',
                 'EVENTUAL': r'\bEVENTUAL\b',
                 'CAI/Espontánea': r'\bESPONTANEA\b|\bESPONTÁNEA\b|\bESPONTÃ_x0081_NEA\b|\bCAI\b',
+                'DEMANDA A DOMICILIO': r'\bDEMANDA\s+A\s+DOMICILIO\b',
                 'URGENCIA': r'\bURGENCIA\b|\bURGENTE\b',
                 'PROGRAMADA': r'\bPROGRAMADA\b|\bTURNO\s+PROGRAMADO\b|\bPROGRAMADO\b',
                 'SOBRETURNO': r'\bSOBRETURNO\b|\bSOBRETURNOS\b',
