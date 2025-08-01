@@ -233,6 +233,10 @@ class AgendaNormalizer:
             # Patrón para nombres al final después de guión - solo nombres de personas (DEBE IR AL FINAL) - ÍNDICE 20
             # EXCLUIR casos donde haya "LIC." justo antes del nombre para que los patrones específicos los manejen
             r'[-\s]+(?!LIC\.?\s+)([A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F]+(?:\s+[A-ZÁÉÍÓÚÑÜ\u00C0-\u017F][A-Za-záéíóúñü\u00C0-\u017F]+)+)$',
+            
+            # Patrón ESPECÍFICO para nombres conocidos al inicio - solo casos muy obvios - ÍNDICE 21
+            # Solo detectar apellidos típicos que claramente son nombres de doctores
+            r'^(DE\s+ACETIS|DE\s+ROSSI|VAN\s+DER\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+|DEL\s+[A-ZÁÉÍÓÚÑÜ][A-Za-záéíóúñü]+)\s+(?:ADULTO|PEDIATRICO|INFANTIL|GENERAL|PROGRAMADA|ESPONTANEA|ESPONTÁNEA|CONTROL|URGENCIA|TRATAMIENTO)',
         ]
         
         for i, pattern in enumerate(doctor_patterns):
