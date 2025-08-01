@@ -165,7 +165,8 @@ class AgendaNormalizer:
             'FONOAUDIOLOGIA': r'\bFONOAUDIOLOGIA\b',
             'TERAPIA OCUPACIONAL': r'\bTERAPIA\s+OCUPACIONAL\b',
             'PSICOPEDAGOGIA': r'\bPSICOPEDAGOGIA\b',
-            'ENFERMERIA': r'\bENFERMERIA\b|\bENFERMERÍA\b|\bLIC\.\s*EN\s+ENFERMERIA\b|\bLIC\.\s*EN\s+ENFERMERÍA\b|\bENFERMER[AO]\b'
+            'ENFERMERIA': r'\bENFERMERIA\b|\bENFERMERÍA\b|\bLIC\.\s*EN\s+ENFERMERIA\b|\bLIC\.\s*EN\s+ENFERMERÍA\b|\bENFERMER[AO]\b',
+            'VACUNACION': r'\bVACUNACION\b|\bVACUNACIÓN\b|\bVACUNAS\b'
         }
         
         # Buscar área médica
