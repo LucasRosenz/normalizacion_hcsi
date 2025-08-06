@@ -107,24 +107,32 @@ class AgendaNormalizer:
         
         # Patrones para identificar áreas médicas
         areas_patterns = {
-            'PEDIATRIA': r'\bPEDIATRIA\b',
-            'CARDIOLOGIA': r'\bCARDIOLOGIA\b|\bELECTROCARDIOGRAMA\b',
-            'NEUROLOGIA': r'\bNEUROLOGIA\b',
-            'GINECOLOGIA': r'\bGINECOLOGIA\b',
+            'ODONTOLOGIA': r'\bODONTOLOGIA\b|\bODONTOLOGÍA\b|\bODONTOLGIA\b|\bORTODONCIA\b|\bODONTOLOGIA\s+OBSTETRICIA\b',
+            'PSICOLOGIA INFANTIL': r'\bPSICOLOGIA\s+INFANTIL\b|\bPSICOLOGÍA\s+INFANTIL\b|\bPSCIOLOGIA\s+INFANTIL\b',
+            'PSICOLOGIA': r'\bPSICOLOG[AO]\b|\bLIC\.\s*EN\s+PSICOLOGIA\b|\bPSICOLOGIA\s*(?:-\s*(?:LIC|DR|DRA))?\b|\bADOLESCENCIA\b|\bPSICOLOGIA\s+OBSTETRICIA\b|\bPSCIOLOGIA\b',
+            'INFECTOLOGIA': r'\bINFECTOLOGIA\b|\bINFECTOLOGIA\s+ADULTO\b',
+            'OBSTETRICIA': r'\bOBSTETRICIA\b|\bOSBTETRICIA\b|\bPLANIFICACION\s+FAMILIAR\b|\bPLANIFICACIÓN\s+FAMILIAR\b|\bPUERPERIO\b',
+            'PEDIATRIA': r'\bPEDIATRIA\b|\bMEDIANO\s+RIESGO\b|\b(?<!OBSTETRICIA\s)(?<!OSBTETRICIA\s)ALTO\s+RIESGO\b|\bINFANTO\s+JUVENIL\b|\bRECIEN\s+NACIDO\b|\bRECIÉN\s+NACIDO\b|\bNIÑO\s+SANO\b|\bNINO\s+SANO\b',
+            'CARDIOLOGIA': r'\bCARDIOLOGIA\b|\bCARDIOLOGÍA\b|\bELECTROCARDIOGRAMA\b',
+            'NEUROLOGIA': r'\bNEUROLOGIA\b|\bEEG\b',
+            'NEUMONOLOGIA': r'\bNEUMONOLOGIA\b|\bTUBERCULOSIS\b',
+            'GINECOLOGIA': r'\bGINECOLOGIA\b|\bTRACTO\s+GENITAL\s+INFERIOR\b',
             'UROLOGIA': r'\bUROLOGIA\b',
             'DERMATOLOGIA': r'\bDERMATOLOGIA\b',
-            'OFTALMOLOGIA': r'\bOFTALMOLOGIA\b',
+            'OFTALMOLOGIA': r'\bOFTALMOLOGIA\b|\bOFTALMOLOGÍA\b',
+            'TRAUMATOLOGIA Y ORTOPEDIA': r'\bTRAUMATOLOGIA\s+Y\s+ORTOPEDIA\b|\bTRAUMATOLOGIA\s+INFANTIL\b',
             'TRAUMATOLOGIA': r'\bTRAUMATOLOGIA\b',
             'ENDOCRINOLOGIA': r'\bENDOCRINOLOGIA\b',
-            'GASTROENTEROLOGIA': r'\bGASTROENTEROLOGIA\b',
+            'GASTROENTEROLOGIA': r'\bGASTROENTEROLOGIA\b|\bGASTROENTEROLOGÍA\b',
             'NEUMOLOGIA': r'\bNEUMOLOGIA\b',
             'HEMATOLOGIA': r'\bHEMATOLOGIA\b',
             'ONCOLOGIA': r'\bONCOLOGIA\b',
             'REUMATOLOGIA': r'\bREUMATOLOGIA\b',
-            'INFECTOLOGIA': r'\bINFECTOLOGIA\b',
+            'NEFROLOGIA PEDIATRICA': r'\bNEFROLOGIA\s+INFANTIL\b',
             'NEFROLOGIA': r'\bNEFROLOGIA\b',
             'CLINICA MEDICA': r'\bCLINICA\s+MEDICA\b|\bMEDICO\s+CLINICO\b|\bMEDICA\s+CLINICA\b|\bMEDICO\s+CLINCO\b',
             'MEDICINA INTERNA': r'\bMEDICINA\s+INTERNA\b',
+            'CIRUGIA PEDIATRICA': r'\bCIRUGIA\s+PEDIATRICA\b|\bCIRUGIA\s+INFANTIL\b|\bCRANEO\s+FACIAL\b|\bCIRUGIA\s+PLASTICA\s+INFANTIL\b',
             'CIRUGIA': r'\bCIRUGIA\b',
             'ANESTESIOLOGIA': r'\bANESTESIOLOGIA\b',
             'PSIQUIATRIA': r'\bPSIQUIATRIA\b',
@@ -132,7 +140,8 @@ class AgendaNormalizer:
             'KINESIOLOGIA': r'\bKINESIOLOGIA\b',
             'LABORATORIO': r'\bLABORATORIO\b',
             'NUTRICION': r'\bNUTRICION\b|\bNUTRICIONISTA\b',
-            'NEUROCIRUGÍA': r'\bNEUROCIRUGIA\b',
+            'NEUROCIRUGIA PEDIATRICA': r'\bNEUROCIRUGIA\s+INFANTIL\b|\bNEUROCIRUGÍA\s+INFANTIL\b',
+            'NEUROCIRUGÍA': r'\bNEUROCIRUGIA\b|\bNEUROCIRUGÍA\b',
             'MEDICINA LABORAL': r'\bMEDICINA\s+LABORAL\b',
             'SERVICIO SOCIAL': r'\bSERVICIO\s+SOCIAL\b|\bLIC\.\s*EN\s+TRABAJO\s+SOCIAL\b|\bTRABAJO\s+SOCIAL\b|\bTRABAJADORA\s+SOCIAL\b',
             'DIABETOLOGIA': r'\bDIABETOLOGIA\b',
@@ -142,33 +151,30 @@ class AgendaNormalizer:
             'DIRECCION MEDICA': r'\bDIRECCION\s+MEDICA\b',
             'ANATOMIA PATOLOGICA': r'\bANATOMIA\s+PATOLOGICA\b|A\.\s*PATOLOGICA',
             'CIRUGIA VASCULAR': r'\bCIRUGIA\s+VASCULAR\b',
-            'OTORRINOLARINGOLOGIA': r'\bOTORRINOLARINGOLOGIA\b',
-            'NEUMONOLOGIA': r'\bNEUMONOLOGIA\b',
-            'ODONTOLOGIA': r'\bODONTOLOGIA\b|\bODONTOLOGÍA\b|\bODONTOLGIA\b',
-            'ADOLESCENCIA': r'\bADOLESCENCIA\b',
+            'OTORRINOLARINGOLOGIA': r'\bOTORRINOLARINGOLOGIA\b|\bAUDIOMETRIA\b|\bAUDIOMETRIA\s+INFANTIL\b|\bOTORRINO\b|\bOAES\b|\bPEAT\b|\bPOTENCIALES\s+EVOCADOS\b',
             'RADIOLOGIA': r'\bRADIOLOGIA\b',
             'RAYOS': r'\bRAYOS\b|\bRX\s+SIMPLE\b|\bAGENDA\s+RAYOS\b',
             'ENDODONCIA': r'\bENDODONCIA\b',
             'PROTESIS': r'\bPROTESIS\b',
             'ESTIMULACION TEMPRANA': r'\bESTIMULACION\s+TEMPRANA\b',
-            'PSICOLOGIA': r'\bPSICOLOG[AO]\b|\bLIC\.\s*EN\s+PSICOLOGIA\b|\bPSICOLOGIA\s+INFANTIL\b|\bPSICOLOGIA\s*(?:-\s*(?:LIC|DR|DRA))?\b',
-            'OBSTETRICIA': r'\bOBSTETRICIA\b',
-            'ECOGRAFIA': r'\bECOGRAFIAS?\b|\bDIAGNOSTICO\s+POR\s+IMAGENES\b',
+            'ECOGRAFIA': r'\bECOGRAFIAS?\b|\bDIAGNOSTICO\s+POR\s+IMAGENES\b|\bECOCARDIOGRAMA\b',
             'PSICOFISICO': r'\bPSICOFISICO\b',
             'DIRECCION MEDICA': r'\bDIRECTOR\s+MEDICO\b|\bDIRECCION\s+MEDICA\b',
             'GENETICA': r'\bGENETICA\b|\bGENÉTICA\b',
-            'TRACTO GENITAL INFERIOR': r'\bTRACTO\s+GENITAL\s+INFERIOR\b',
             'MEDICINA GENERAL': r'\bGENERALISTA\b|\bMEDICINA\s+GENERAL\b',
             'MEDICINA FAMILIAR': r'\bMEDICINA\s+FAMILIAR\b',
             'SALUD SEXUAL': r'\bSALUD\s+SEXUAL\b',
             'MEDICINA PREVENTIVA': r'\bCHARLA\s+TABAQUISMO\b|\bMEDICINA\s+PREVENTIVA\b',
             'MUSICOTERAPIA': r'\bMUSICOTERAPIA\b',
-            'FONOAUDIOLOGIA': r'\bFONOAUDIOLOGIA\b',
+            'FONOAUDIOLOGIA': r'\bFONOAUDIOLOGIA\b|\bDEGLUCION\s+INFANTIL\b|\bDEGLUCIÓN\s+INFANTIL\b',
             'TERAPIA OCUPACIONAL': r'\bTERAPIA\s+OCUPACIONAL\b',
             'PSICOPEDAGOGIA': r'\bPSICOPEDAGOGIA\b',
             'ENFERMERIA': r'\bENFERMERIA\b|\bENFERMERÍA\b|\bLIC\.\s*EN\s+ENFERMERIA\b|\bLIC\.\s*EN\s+ENFERMERÍA\b|\bENFERMER[AO]\b',
             'VACUNACION': r'\bVACUNACION\b|\bVACUNACIÓN\b|\bVACUNAS\b|\bVACUNATORIO\b|\bAGENDA\s+VACUNATORIO\b',
-            'RONDA SANITARIA': r'\bRONDA\s+SANITARIA\b'
+            'RONDA SANITARIA': r'\bRONDA\s+SANITARIA\b',
+            'ALERGOLOGIA PEDIATRICA': r'\bALERGIA\b',
+            'CUIDADOS PALIATIVOS': r'\bCUIDADOS\s+PALIATIVOS\b|\bCUIDADOS\s+PALEATIVOS\b',
+            'SERVICIO DE EMERGENCIAS': r'\bGUARDIA\s+PEDIATRICA\s+AMARILLO\b'
         }
         
         # Buscar área médica
@@ -340,7 +346,8 @@ class AgendaNormalizer:
                 'CONSULTA EXTERNA': r'\bCONSULTA\s+EXTERNA\b|\bEXTERNA\b',
                 'TRATAMIENTO': r'\bTRATAMIENTO\b',
                 'ADMISION': r'\bADMISION\b|\bADMISIÓN\b',
-                'REUNION DE EQUIPO': r'\bREUNION\s+DE\s+EQUIPO\b|\bREUNIÓN\s+DE\s+EQUIPO\b'
+                'REUNION DE EQUIPO': r'\bREUNION\s+DE\s+EQUIPO\b|\bREUNIÓN\s+DE\s+EQUIPO\b',
+                'MONITOREO': r'\bMONITOREO\b'
             }
             
             for tipo_nombre, pattern in tipo_patterns.items():
@@ -429,7 +436,13 @@ class AgendaNormalizer:
                         if registro:
                             registros.append(registro)
             
-            return pd.DataFrame(registros)
+            df_resultado = pd.DataFrame(registros)
+            
+            # Postprocesamiento específico para Hospital Materno
+            if efector == 'Hospital Materno' and not df_resultado.empty:
+                df_resultado = self._postprocesar_hospital_materno(df_resultado)
+            
+            return df_resultado
             
         except Exception as e:
             print(f"Error procesando {archivo_path}: {e}")
@@ -795,7 +808,8 @@ class AgendaNormalizer:
         # Ventanilla GUARDIA VIEJA
         ventanilla_b = [
             'GUARDIA VIEJA', 'TRAUMATOLOGIA', 'DERMATOLOGIA', 'CIRUGIA', 'UROLOGIA',
-            'CRANEO FACIAL', 'OTORRINO', 'AUDIOMETRIA', 'KINESIOLOGIA', 'CIRUGIA PLASTICA'
+            'CRANEO FACIAL', 'OTORRINO', 'AUDIOMETRIA', 'KINESIOLOGIA', 'CIRUGIA PLASTICA',
+            'OTORRINOLARINGOLOGIA'
         ]
         
         # Ventanilla OBSTETRICIA
@@ -1072,6 +1086,53 @@ class AgendaNormalizer:
             pass
         return ""
     
+    def _postprocesar_hospital_materno(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Postprocesamiento específico para Hospital Materno.
+        Limpia el área para agendas específicas que no deben tenerla.
+        """
+        # Lista de agendas de Hospital Materno que NO deben tener área
+        agendas_sin_area_materno = [
+            # Agendas de Recien Nacido
+            'Agenda 16 Recien Nacido',
+            'Agenda 17 Recien Nacido',
+            'Agenda 36 Recien Nacido',
+            'Agenda 43 Recien Nacido',
+            'Agenda 44 Recien Nacido',
+            'Agenda 45 Recien Nacido',
+            'Agenda 46 Recien Nacido',
+            'Agenda 47 Recien Nacido',
+            'Agenda 48 Recien Nacido',
+            'Agenda 49 Recien Nacido',
+            'Agenda 50 Recien Nacido',
+            'Agenda 51 Recien Nacido',
+            'Agenda 52 Recien Nacido',
+            'Agenda 53 Recien Nacido',
+            'Agenda 54 Recien Nacido',
+            'Agenda 55 Recien Nacido',
+            'Agenda 56 Recien Nacido',
+            'Agenda 57 Recien Nacido',
+            'Agenda 58 Recien Nacido',
+            'Agenda 59 Recien Nacido',
+            'Agenda 60 Recien Nacido',
+            'Agenda 61 Recien Nacido',
+            'Agenda 62 Recien Nacido',
+            'Agenda 63 Recien Nacido',
+            # Agendas de Guardia y Especialidades específicas
+            '01. GUARDIA OBSTETRICIA',
+            'HEMATO ONCOLOGIA- DRA MOUSTEN BARBARA',
+            '02. GUARDIA GINECOLOGIA',
+            '01. GUARDIA REINGRESO OBSTETRICIA',
+            'TRIAGE OBSTETRICIA'
+        ]
+        
+        # Aplicar la lógica: limpiar área para agendas específicas
+        df_resultado = df.copy()
+        mask = df_resultado['nombre_original_agenda'].isin(agendas_sin_area_materno)
+        df_resultado.loc[mask, 'area'] = ''
+        
+        return df_resultado
+
 # Función principal para uso fácil
 def main():
     """Función principal para ejecutar el procesamiento"""
